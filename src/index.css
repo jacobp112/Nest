@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-family: var(--font-family-sans, 'Inter', system-ui, sans-serif);
+    color: rgb(var(--color-text-primary, 15 23 42));
+    background-color: rgb(var(--color-background, 246 248 250));
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-text-primary));
+    font-family: var(--font-family-sans, 'Inter', system-ui, sans-serif);
+  }
+
+  [data-theme='default'] {
+    --color-background: 246 248 250;
+    --color-surface: 255 255 255;
+    --color-surface-muted: 241 245 249;
+    --color-surface-elevated: 255 255 255;
+    --color-border: 208 213 221;
+    --color-ring: 45 212 191;
+    --color-primary: 15 118 110;
+    --color-primary-soft: 59 183 168;
+    --color-primary-content: 255 255 255;
+    --color-accent: 79 70 229;
+    --color-accent-content: 255 255 255;
+    --color-text-primary: 15 23 42;
+    --color-text-secondary: 51 65 85;
+    --color-text-muted: 148 163 184;
+    --color-success: 34 197 94;
+    --color-warning: 251 191 36;
+    --color-danger: 239 68 68;
+    --font-family-sans: 'Inter', 'Inter var', 'Segoe UI', system-ui, -apple-system,
+      BlinkMacSystemFont, sans-serif;
+    --font-family-display: 'Clash Display', 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --border-radius-small: 0.5rem;
+    --border-radius-medium: 0.85rem;
+    --border-radius-large: 1.75rem;
+    --border-radius-pill: 999px;
+  }
+
+  [data-theme='elegant'] {
+    --color-background: 249 245 239;
+    --color-surface: 255 255 255;
+    --color-surface-muted: 244 238 230;
+    --color-surface-elevated: 253 248 241;
+    --color-border: 232 220 202;
+    --color-ring: 202 138 4;
+    --color-primary: 146 64 14;
+    --color-primary-soft: 217 119 6;
+    --color-primary-content: 255 255 255;
+    --color-accent: 202 138 4;
+    --color-accent-content: 41 37 36;
+    --color-text-primary: 41 37 36;
+    --color-text-secondary: 87 74 63;
+    --color-text-muted: 120 106 98;
+    --color-success: 34 197 94;
+    --color-warning: 202 138 4;
+    --color-danger: 190 18 60;
+    --font-family-sans: 'Space Grotesk', 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-family-display: 'Playfair Display', 'Space Grotesk', serif;
+    --border-radius-small: 0.65rem;
+    --border-radius-medium: 1rem;
+    --border-radius-large: 2.25rem;
+    --border-radius-pill: 999px;
+  }
+
+  [data-theme='techno'] {
+    --color-background: 5 6 31;
+    --color-surface: 13 17 48;
+    --color-surface-muted: 20 25 58;
+    --color-surface-elevated: 30 34 74;
+    --color-border: 51 65 85;
+    --color-ring: 59 130 246;
+    --color-primary: 14 165 233;
+    --color-primary-soft: 6 182 212;
+    --color-primary-content: 6 7 29;
+    --color-accent: 249 115 22;
+    --color-accent-content: 6 7 29;
+    --color-text-primary: 224 231 255;
+    --color-text-secondary: 148 163 184;
+    --color-text-muted: 100 116 139;
+    --color-success: 16 185 129;
+    --color-warning: 251 146 60;
+    --color-danger: 248 113 113;
+    --font-family-sans: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+    --font-family-display: 'Space Mono', 'Space Grotesk', system-ui, sans-serif;
+    --border-radius-small: 0.45rem;
+    --border-radius-medium: 0.75rem;
+    --border-radius-large: 1.35rem;
+    --border-radius-pill: 999px;
+  }
+
+  [data-theme='midnight'] {
+    --color-background: 2 6 23;
+    --color-surface: 8 12 31;
+    --color-surface-muted: 11 16 38;
+    --color-surface-elevated: 16 24 54;
+    --color-border: 30 41 59;
+    --color-ring: 99 102 241;
+    --color-primary: 99 102 241;
+    --color-primary-soft: 129 140 248;
+    --color-primary-content: 255 255 255;
+    --color-accent: 45 212 191;
+    --color-accent-content: 2 6 23;
+    --color-text-primary: 226 232 240;
+    --color-text-secondary: 148 163 184;
+    --color-text-muted: 100 116 139;
+    --color-success: 34 197 94;
+    --color-warning: 251 191 36;
+    --color-danger: 248 113 113;
+    --font-family-sans: 'Inter', 'Inter var', 'Segoe UI', system-ui, sans-serif;
+    --font-family-display: 'Sora', 'Inter', system-ui, sans-serif;
+    --border-radius-small: 0.55rem;
+    --border-radius-medium: 0.9rem;
+    --border-radius-large: 1.6rem;
+    --border-radius-pill: 999px;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(15px, -20px);
+  }
+  50% {
+    transform: translate(-10px, 10px);
+  }
+  75% {
+    transform: translate(20px, 15px);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
+}

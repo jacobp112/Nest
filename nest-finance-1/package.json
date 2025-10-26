@@ -1,0 +1,29 @@
+{
+  "name": "nest-finance",
+  "version": "1.0.0",
+  "description": "A financial dashboard application that provides a manual-entry interface for tracking finances.",
+  "main": "src/app.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "ts-node src/app.ts"
+  },
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "framer-motion": "^4.1.17"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.4",
+    "ts-node": "^10.4.0",
+    "@types/react": "^17.0.2",
+    "@types/react-dom": "^17.0.2"
+  },
+  "keywords": [
+    "finance",
+    "dashboard",
+    "manual-entry"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
