@@ -1,7 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 const defaultTheme = require('tailwindcss/defaultTheme');
 
-const withOpacity = (variable) => `rgb(var(${variable}) / <alpha-value>)`;
+const withOpacity = (variable) => ({ opacityValue }) => {
+  if (opacityValue === undefined) {
+    return `rgb(var(${variable}))`;
+  }
+
+  return `rgb(var(${variable}) / ${opacityValue})`;
+};
 
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
@@ -9,42 +15,42 @@ module.exports = {
     extend: {
       colors: {
         // Core semantic colors mapped to CSS variables (use rgb(var(--...) / <alpha-value>) for alpha support)
-        background: withOpacity('--color-background'),
+        background: withOpacity('--color-background-rgb'),
         surface: {
-          DEFAULT: withOpacity('--color-surface'),
-          muted: withOpacity('--color-surface-muted'),
-          elevated: withOpacity('--color-surface-elevated'),
+          DEFAULT: withOpacity('--color-surface-rgb'),
+          muted: withOpacity('--color-surface-muted-rgb'),
+          elevated: withOpacity('--color-surface-elevated-rgb'),
         },
         // border colors
-        border: withOpacity('--color-border'),
-        'border-default': withOpacity('--color-border-default'),
-        ring: withOpacity('--color-ring'),
+        border: withOpacity('--color-border-rgb'),
+        'border-default': withOpacity('--color-border-rgb'),
+        ring: withOpacity('--color-ring-rgb'),
 
         // Primary / Secondary / Accent
         primary: {
-          DEFAULT: withOpacity('--color-primary'),
-          soft: withOpacity('--color-primary-soft'),
+          DEFAULT: withOpacity('--color-primary-rgb'),
+          soft: withOpacity('--color-primary-soft-rgb'),
         },
-        'primary-content': withOpacity('--color-primary-content'),
-        secondary: withOpacity('--color-secondary'),
-        'secondary-content': withOpacity('--color-secondary-content'),
+        'primary-content': withOpacity('--color-primary-content-rgb'),
+        secondary: withOpacity('--color-secondary-rgb'),
+        'secondary-content': withOpacity('--color-secondary-content-rgb'),
         accent: {
-          DEFAULT: withOpacity('--color-accent'),
+          DEFAULT: withOpacity('--color-accent-rgb'),
         },
-        'accent-content': withOpacity('--color-accent-content'),
+        'accent-content': withOpacity('--color-accent-content-rgb'),
 
         // Text shades
         text: {
-          primary: withOpacity('--color-text-primary'),
-          secondary: withOpacity('--color-text-secondary'),
-          muted: withOpacity('--color-text-muted'),
+          primary: withOpacity('--color-text-primary-rgb'),
+          secondary: withOpacity('--color-text-secondary-rgb'),
+          muted: withOpacity('--color-text-muted-rgb'),
         },
 
         // Semantic statuses
-        success: withOpacity('--color-success'),
-        warning: withOpacity('--color-warning'),
-        destructive: withOpacity('--color-destructive'),
-        'destructive-content': withOpacity('--color-destructive-content'),
+        success: withOpacity('--color-success-rgb'),
+        warning: withOpacity('--color-warning-rgb'),
+        destructive: withOpacity('--color-destructive-rgb'),
+        'destructive-content': withOpacity('--color-destructive-content-rgb'),
       },
       fontFamily: {
         sans: ['var(--font-family-sans)', ...defaultTheme.fontFamily.sans],
@@ -56,7 +62,7 @@ module.exports = {
         soft: 'var(--border-radius-small)',
       },
       ringColor: {
-        DEFAULT: withOpacity('--color-ring'),
+        DEFAULT: withOpacity('--color-ring-rgb'),
       },
     },
   },

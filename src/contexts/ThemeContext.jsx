@@ -1,50 +1,54 @@
-import React, { createContext, useState, useMemo, useEffect } from 'react';
-import { themes } from '../theme/theme';
+import React, { createContext, useMemo, useState, useEffect } from 'react';
+import { themes } from '../theme/themes';
 
-const ThemeContext = createContext();
+const THEME_STORAGE_KEY = 'nest-finance-theme';
+
+const availableThemes = Object.keys(themes);
+
+const ThemeContext = createContext({
+  theme: themes.default,
+  themeName: 'default',
+  setThemeName: () => {},
+  availableThemes,
+  themes,
+});
+
+const resolveInitialTheme = () => {
+  if (typeof window === 'undefined') {
+    return 'default';
+  }
+
+  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+  const fallback = stored && themes[stored] ? stored : 'default';
+  window.document.documentElement.dataset.theme = fallback;
+  return fallback;
+};
 
 export const ThemeProvider = ({ children }) => {
-  const [themeName, setThemeName] = useState('default');
-
-  const theme = useMemo(() => themes[themeName] || themes.default, [themeName]);
+  const [themeName, setThemeName] = useState(resolveInitialTheme);
 
   useEffect(() => {
-    const root = window.document.documentElement;
+    if (typeof window === 'undefined') {
+      return;
+    }
 
-    const selectedTheme = themes[themeName] || themes.default;
-
-    // Apply colors
-    Object.entries(selectedTheme.colors).forEach(([key, value]) => {
-      const cssVarName = `--color-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-      root.style.setProperty(cssVarName, value);
-    });
-
-    // Apply typography
-    Object.entries(selectedTheme.typography).forEach(([key, value]) => {
-        const cssVarName = `--font-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-        root.style.setProperty(cssVarName, value);
-    });
-
-    // Apply UI properties
-    Object.entries(selectedTheme.ui).forEach(([key, value]) => {
-        const cssVarName = `--ui-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
-        root.style.setProperty(cssVarName, value);
-    });
-
+    window.document.documentElement.dataset.theme = themeName;
+    window.localStorage.setItem(THEME_STORAGE_KEY, themeName);
   }, [themeName]);
 
-  const value = {
-    theme,
-    themeName,
-    setThemeName,
-    availableThemes: Object.keys(themes),
-  };
+  const value = useMemo(() => {
+    const activeTheme = themes[themeName] || themes.default;
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
+    return {
+      theme: activeTheme,
+      themeName,
+      setThemeName,
+      availableThemes,
+      themes,
+    };
+  }, [themeName]);
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 
 export default ThemeContext;
