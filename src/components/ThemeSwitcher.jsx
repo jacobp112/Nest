@@ -1,75 +1,46 @@
-import { useMemo } from 'react';
-import { useTheme } from '../context/ThemeContext.jsx';
-
-const THEME_LABELS = {
-  default: 'Default',
-  elegant: 'Elegant',
-  techno: 'Techno',
-  midnight: 'Midnight',
-};
-
-const THEME_PREVIEW = {
-  default: {
-    surface: '255 255 255',
-    accent: '15 118 110',
-  },
-  elegant: {
-    surface: '253 248 241',
-    accent: '146 64 14',
-  },
-  techno: {
-    surface: '13 17 48',
-    accent: '14 165 233',
-  },
-  midnight: {
-    surface: '16 24 54',
-    accent: '99 102 241',
-  },
-};
+import React, { useContext } from 'react';
+import ThemeContext from '../contexts/ThemeContext';
+import { Sun, Moon, Cog, Bot } from 'lucide-react';
 
 const ThemeSwitcher = () => {
-  const { theme, setTheme, themes } = useTheme();
+  const { themeName, setThemeName, availableThemes } = useContext(ThemeContext);
 
-  const orderedThemes = useMemo(() => themes ?? Object.keys(THEME_LABELS), [themes]);
+  const handleThemeChange = (e) => {
+    setThemeName(e.target.value);
+  };
+
+  const ThemeIcon = () => {
+    switch (themeName) {
+      case 'elegant':
+        return <Bot size={16} className="text-text-secondary" />;
+      case 'techno':
+        return <Cog size={16} className="text-text-secondary" />;
+      case 'midnight':
+        return <Moon size={16} className="text-text-secondary" />;
+      default:
+        return <Sun size={16} className="text-text-secondary" />;
+    }
+  };
 
   return (
-    <div className="space-y-3">
-      <div>
-        <p className="text-sm font-semibold text-text-primary">Interface theme</p>
-        <p className="text-xs text-text-muted">Preview palettes instantly and persist your choice.</p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {orderedThemes.map((value) => {
-          const isActive = value === theme;
-          const preview = THEME_PREVIEW[value] || THEME_PREVIEW.default;
-
-          return (
-            <button
-              type="button"
-              key={value}
-              className={`flex flex-col items-start rounded-2xl border px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
-                isActive
-                  ? 'border-primary bg-primary/10 text-text-primary shadow-sm'
-                  : 'border-border bg-surface hover:border-primary/60 hover:text-text-primary'
-              }`}
-              onClick={() => setTheme(value)}
-              aria-pressed={isActive}
-            >
-              <span className="text-sm font-semibold">{THEME_LABELS[value] || value}</span>
-              <span className="text-xs text-text-muted capitalize">{value}</span>
-              <div className="mt-3 flex gap-1.5">
-                <span
-                  className="h-4 w-8 rounded-full border border-border/40"
-                  style={{ backgroundColor: `rgb(${preview.surface})` }}
-                />
-                <span
-                  className="h-4 w-4 rounded-full border border-border/40"
-                  style={{ backgroundColor: `rgb(${preview.accent})` }}
-                />
-              </div>
-            </button>
-          );
-        })}
+    <div className="flex w-full items-center justify-between">
+      <label htmlFor="theme-select" className="text-sm font-medium text-text-primary">
+        Theme
+      </label>
+      <div className="flex items-center space-x-2 rounded-lg border border-border bg-surface-muted px-3 py-1.5">
+        <ThemeIcon />
+        <select
+          id="theme-select"
+          value={themeName}
+          onChange={handleThemeChange}
+          className="w-full appearance-none border-none bg-transparent text-sm text-text-primary focus:outline-none focus:ring-0"
+        >
+          {availableThemes.map((themeKey) => (
+            <option key={themeKey} value={themeKey} className="text-text-primary bg-surface">
+              {themeKey.charAt(0).toUpperCase() + themeKey.slice(1)}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ export default function Header({ title, rightAction }) {
       <h1 className="m-0 text-xl font-semibold text-text-primary">{title}</h1>
       <div>
         {rightAction && (
-          <button onClick={rightAction.onPress} className="p-2 rounded-md hover:bg-surface/50" aria-label="header-action">
+          <button onClick={rightAction.onPress} className="btn-icon" aria-label="header-action">
             {rightAction.icon || '⚙️'}
           </button>
         )}
