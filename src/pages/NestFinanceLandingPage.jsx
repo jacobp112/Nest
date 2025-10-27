@@ -17,9 +17,7 @@ import {
 } from 'lucide-react';
 import FeatureCardVine from './FeatureCardVine';
 import AtmosphericLayer from './AtmosphericLayer';
-
-const buttonClasses =
-  'inline-flex items-center justify-center rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/30 transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2';
+import { btn, card } from '../theme/styles';
 
 // --- Centralized all variants for consistency ---
 const globalVariants = {
@@ -436,7 +434,7 @@ const Navbar = ({ onLoginClick, onGetStartedClick }) => {
     <>
       <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-lg">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <a href="#top" className="text-lg font-semibold text-emerald-600">
+          <a href="#top" className="text-lg font-semibold text-primary">
             Nest Finance
           </a>
           <nav className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
@@ -459,7 +457,7 @@ const Navbar = ({ onLoginClick, onGetStartedClick }) => {
             <button
               type="button"
               onClick={onGetStartedClick}
-              className={buttonClasses}
+              className={btn({ variant: 'primary', size: 'md', className: 'shadow-soft' })}
             >
               Get Started
             </button>
@@ -534,7 +532,7 @@ const Navbar = ({ onLoginClick, onGetStartedClick }) => {
                   onGetStartedClick();
                   toggleMobileMenu();
                 }}
-                className={`${buttonClasses} w-full`}
+                className={btn({ variant: 'primary', size: 'md', block: true, className: 'shadow-soft' })}
               >
                 Get Started
               </button>
@@ -565,10 +563,10 @@ const HeroSection = React.forwardRef(({ onGetStartedClick }, ref) => (
         <motion.p
           custom={0}
           variants={globalVariants.textStagger}
-          className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-emerald-600"
+          className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-primary"
         >
           Nest Finance
-          <span className="hidden h-1.5 w-1.5 rounded-full bg-emerald-500 sm:inline-block" />
+          <span className="hidden h-1.5 w-1.5 rounded-full bg-primary sm:inline-block" />
           Manual-first, insight-rich
         </motion.p>
 
@@ -598,7 +596,7 @@ const HeroSection = React.forwardRef(({ onGetStartedClick }, ref) => (
           <motion.button
             type="button"
             onClick={onGetStartedClick}
-            className={`${buttonClasses} px-8 py-4 text-base shadow-xl shadow-emerald-500/30`}
+            className={btn({ variant: 'primary', size: 'lg', className: 'shadow-glow-primary' })}
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 300, damping: 15 }}
@@ -1040,60 +1038,78 @@ const TestimonialsSection = React.forwardRef((_, ref) => {
 TestimonialsSection.displayName = 'TestimonialsSection';
 
 // --- FinalCTASection forwards ref for path calculations ---
-const FinalCTASection = React.forwardRef(({ onGetStartedClick }, ref) => (
-  <section
-    ref={ref}
-    className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-600 py-24 text-white"
-  >
-    <div className="absolute inset-0 -z-20 animate-pulse bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.25),_transparent_40%)]" />
-    <div className="absolute inset-0 -z-30 animate-pulse [animation-delay:-2s] bg-[radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.15),_transparent_50%)]" />
+const FinalCTASection = React.forwardRef(({ onGetStartedClick }, ref) => {
+  const finalCtaCardClassName = card({
+    variant: 'glass',
+    padding: 'lg',
+    className:
+      'relative isolate mx-auto max-w-4xl text-center text-text-on-dark shadow-glow-primary border border-primary/40',
+  });
 
-    <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-      <motion.h2
-        className="text-3xl font-semibold sm:text-4xl"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.5 }}
-        variants={globalVariants.fadeInUp}
-      >
-        Ready to build your nest?
-      </motion.h2>
-      <motion.p
-        className="mt-4 text-lg text-emerald-50"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.5 }}
-        variants={{
-          ...globalVariants.fadeInUp,
-          visible: { ...globalVariants.fadeInUp.visible, transition: { ...globalVariants.fadeInUp.visible.transition, delay: 0.1 } },
-        }}
-      >
-        Take the first step toward financial clarity. It&apos;s free to start.
-      </motion.p>
-      <motion.div
-        className="mt-8 flex justify-center"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.5 }}
-        variants={{
-          ...globalVariants.fadeInUp,
-          visible: { ...globalVariants.fadeInUp.visible, transition: { ...globalVariants.fadeInUp.visible.transition, delay: 0.2 } },
-        }}
-      >
-        <motion.button
-          type="button"
-          onClick={onGetStartedClick}
-          className={`${buttonClasses} bg-white text-emerald-700 shadow-xl shadow-white/20 hover:bg-emerald-50`}
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-        >
-          Get Started for Free
-        </motion.button>
-      </motion.div>
-    </div>
-  </section>
-));
+  return (
+    <section
+      ref={ref}
+      className="relative overflow-hidden py-24 text-text-on-dark"
+    >
+      <div className="absolute inset-0 -z-30 bg-[linear-gradient(140deg,_rgb(var(--color-primary-rgb)/0.75)_0%,_rgb(var(--color-primary-soft-rgb)/0.55)_45%,_rgb(var(--color-background-rgb)/0.75)_100%)]" />
+      <div className="absolute inset-0 -z-20 animate-pulse bg-[radial-gradient(circle_at_top,_rgb(var(--color-primary-rgb)/0.32),_transparent_60%)]" />
+      <div className="absolute inset-0 -z-10 animate-pulse [animation-delay:-2s] bg-[radial-gradient(circle_at_bottom_left,_rgb(var(--color-primary-soft-rgb)/0.24),_transparent_55%)]" />
+
+      <div className="relative z-10 px-4 sm:px-6 lg:px-8">
+        <div className={finalCtaCardClassName}>
+          <motion.h2
+            className="text-3xl font-semibold sm:text-4xl"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.5 }}
+            variants={globalVariants.fadeInUp}
+          >
+            Ready to build your nest?
+          </motion.h2>
+          <motion.p
+            className="mt-4 text-lg text-text-on-dark/80"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.5 }}
+            variants={{
+              ...globalVariants.fadeInUp,
+              visible: {
+                ...globalVariants.fadeInUp.visible,
+                transition: { ...globalVariants.fadeInUp.visible.transition, delay: 0.1 },
+              },
+            }}
+          >
+            Take the first step toward financial clarity. It&apos;s free to start.
+          </motion.p>
+          <motion.div
+            className="mt-8 flex justify-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.5 }}
+            variants={{
+              ...globalVariants.fadeInUp,
+              visible: {
+                ...globalVariants.fadeInUp.visible,
+                transition: { ...globalVariants.fadeInUp.visible.transition, delay: 0.2 },
+              },
+            }}
+          >
+            <motion.button
+              type="button"
+              onClick={onGetStartedClick}
+              className={btn({ variant: 'secondary', size: 'lg', className: 'shadow-glow-primary backdrop-blur-sm' })}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+            >
+              Get Started for Free
+            </motion.button>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+});
 FinalCTASection.displayName = 'FinalCTASection';
 
 // --- No changes to Footer ---

@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import ThemeContext from '../contexts/ThemeContext';
-import { Sun, Moon, Cog, Bot } from 'lucide-react';
+import { Sun, Moon, Cog, Bot, ChevronDown } from 'lucide-react';
+import { card, input } from '../theme/styles';
 
 const ThemeSwitcher = () => {
   const { themeName, setThemeName, availableThemes } = useContext(ThemeContext);
@@ -10,30 +11,45 @@ const ThemeSwitcher = () => {
   };
 
   const ThemeIcon = () => {
+    const iconClass = 'h-4 w-4 text-text-secondary';
     switch (themeName) {
       case 'elegant':
-        return <Bot size={16} className="text-text-secondary" />;
+        return <Bot className={iconClass} />;
       case 'techno':
-        return <Cog size={16} className="text-text-secondary" />;
+        return <Cog className={iconClass} />;
       case 'midnight':
-        return <Moon size={16} className="text-text-secondary" />;
+        return <Moon className={iconClass} />;
       default:
-        return <Sun size={16} className="text-text-secondary" />;
+        return <Sun className={iconClass} />;
     }
   };
 
+  const containerClassName = card({
+    variant: 'muted',
+    padding: 'sm',
+    className: 'flex w-full items-center justify-between gap-3',
+  });
+
+  const selectClassName = input({
+    size: 'sm',
+    className:
+      'pl-9 pr-9 appearance-none bg-transparent text-sm font-medium text-text-primary focus:ring-primary/30',
+  });
+
   return (
-    <div className="flex w-full items-center justify-between">
-      <label htmlFor="theme-select" className="text-sm font-medium text-text-primary">
+    <div className={containerClassName}>
+      <label htmlFor="theme-select" className="text-sm font-medium text-text-secondary">
         Theme
       </label>
-      <div className="flex items-center space-x-2 rounded-lg border border-border bg-surface-muted px-3 py-1.5">
-        <ThemeIcon />
+      <div className="relative flex flex-1 items-center">
+        <span className="pointer-events-none absolute left-3 flex h-4 w-4 items-center justify-center text-text-secondary" aria-hidden="true">
+          <ThemeIcon />
+        </span>
         <select
           id="theme-select"
           value={themeName}
           onChange={handleThemeChange}
-          className="w-full appearance-none border-none bg-transparent text-sm text-text-primary focus:outline-none focus:ring-0"
+          className={selectClassName}
         >
           {availableThemes.map((themeKey) => (
             <option key={themeKey} value={themeKey} className="text-text-primary bg-surface">
@@ -41,6 +57,7 @@ const ThemeSwitcher = () => {
             </option>
           ))}
         </select>
+        <ChevronDown className="pointer-events-none absolute right-3 h-4 w-4 text-text-secondary" aria-hidden="true" />
       </div>
     </div>
   );

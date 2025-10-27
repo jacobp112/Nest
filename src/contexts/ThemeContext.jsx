@@ -1,5 +1,9 @@
 import React, { createContext, useMemo, useState, useEffect } from 'react';
-import { themes } from '../theme/themes';
+
+// Using require to bridge the CommonJS export from the theme registry so both the
+// theme generator script and the React app consume the same source of truth.
+// eslint-disable-next-line global-require, import/no-commonjs
+const { themes } = require('../theme/themes');
 
 const THEME_STORAGE_KEY = 'nest-finance-theme';
 
