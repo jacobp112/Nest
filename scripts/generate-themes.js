@@ -87,6 +87,24 @@ const emitSection = (lines, theme) => {
       return;
     }
 
+    if (token.startsWith('fontSize')) {
+      const suffix = toKebab(token.slice('fontSize'.length));
+      appendToken('--font-size-', suffix, value);
+      return;
+    }
+
+    if (token.startsWith('lineHeight')) {
+      const suffix = toKebab(token.slice('lineHeight'.length));
+      appendToken('--line-height-', suffix, value);
+      return;
+    }
+
+    if (token.startsWith('letterSpacing')) {
+      const suffix = toKebab(token.slice('letterSpacing'.length));
+      appendToken('--letter-spacing-', suffix, value);
+      return;
+    }
+
     appendToken('--typography-', toKebab(token), value);
   });
 
@@ -97,7 +115,21 @@ const emitSection = (lines, theme) => {
       return;
     }
 
+    if (token.startsWith('borderWidth')) {
+      const suffix = toKebab(token.slice('borderWidth'.length));
+      appendToken('--border-width-', suffix, value);
+      return;
+    }
+
     appendToken('--ui-', toKebab(token), value);
+  });
+
+  Object.entries(theme.spacing || {}).forEach(([token, value]) => {
+    appendToken('--space-', toKebab(token), value);
+  });
+
+  Object.entries(theme.effects || {}).forEach(([token, value]) => {
+    appendToken('--effect-', toKebab(token), value);
   });
 };
 
