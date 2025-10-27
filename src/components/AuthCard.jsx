@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-
-const inputStyles =
-  'w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20';
-const buttonStyles =
-  'inline-flex items-center justify-center rounded-box bg-primary px-4 py-2 text-sm font-semibold text-primary-content shadow-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-surface hover:bg-primary/90';
-const cardStyles =
-  'rounded-3xl bg-surface-elevated/95 p-6 shadow-xl ring-1 ring-border/60 backdrop-blur';
+import { btn, card, input } from '../theme/styles';
 
 const AuthCard = () => {
   const [mode, setMode] = useState('login');
@@ -23,8 +17,12 @@ const AuthCard = () => {
     }
   };
 
+  const cardClassName = card({ variant: 'elevated', padding: 'lg', className: 'w-full max-w-md' });
+  const inputClassName = input({ size: 'lg' });
+  const submitButtonClassName = btn({ block: true, disabled: loading, loading });
+
   return (
-    <div className={`${cardStyles} w-full max-w-md`}>
+    <div className={cardClassName}>
       <div className="mb-6 flex items-center justify-between">
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-primary">Nest Finance</p>
@@ -56,47 +54,51 @@ const AuthCard = () => {
         </button>
       </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          {mode === 'register' && (
-            <div>
-              <label className="mb-2 block text-sm font-medium text-text-secondary">Full Name</label>
-              <input
-                type="text"
-                required
-              className={inputStyles}
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        {mode === 'register' && (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-text-secondary">Full Name</label>
+            <input
+              type="text"
+              required
+              className={inputClassName}
               value={form.displayName}
               onChange={(event) => setForm((prev) => ({ ...prev, displayName: event.target.value }))}
               placeholder="Alex Johnson"
             />
           </div>
-          )}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-text-secondary">Email address</label>
-            <input
-              type="email"
-              required
-            className={inputStyles}
+        )}
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-text-secondary">Email address</label>
+          <input
+            type="email"
+            required
+            className={inputClassName}
             value={form.email}
             onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
             placeholder="you@nestfinance.com"
           />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-text-secondary">Password</label>
-            <input
-              type="password"
-              required
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-text-secondary">Password</label>
+          <input
+            type="password"
+            required
             minLength={6}
-            className={inputStyles}
+            className={inputClassName}
             value={form.password}
             onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
             placeholder="••••••••"
-            />
-          </div>
-          {error && <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger">{error}</p>}
-          <button type="submit" className={`${buttonStyles} w-full`} disabled={loading}>
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
+          />
+        </div>
+
+        {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+
+        <button type="submit" className={submitButtonClassName} disabled={loading}>
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
               Please wait...
             </span>
