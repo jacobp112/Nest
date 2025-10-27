@@ -96,11 +96,8 @@ function NestFinanceApp() {
         setView('dashboard');
       }
     } else {
-      // If there was a user before (e.g. logged out), go to landing.
-      // If loading is finished and there's no user, stay on auth/landing.
-      if (view === 'dashboard') {
-        setView('landing');
-      }
+      // Loading finished with no authenticated user – return to landing unless already on auth.
+      setView((current) => (current === 'auth' ? 'auth' : 'landing'));
     }
   }, [isAuthenticated, authLoading, userDoc, view]);
 
