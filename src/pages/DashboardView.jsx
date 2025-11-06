@@ -49,11 +49,16 @@ import {
 import ThemeSwitcher from '../components/ThemeSwitcher';
 import { useTheme } from '../contexts/ThemeContext';
 import { card } from '../theme/styles';
+import D3SpendingByCategory from '../components/d3/D3SpendingByCategory.jsx';
+import { useDataSelector } from '../hooks/useDataSelector';
+import { StatSafeToSpend, StatNetWorthValue, StatBudgetProgress, StatBudgetSpentTotal } from '../components/dashboard/StatCards.jsx';
+const NetWorthBarsLazy = React.lazy(() => import('../components/three/NetWorthBars.jsx'));
+const ForceGraphLazy = React.lazy(() => import('../components/d3/ForceGraph.jsx'));
 
 const DashboardView = ({
     userDoc,
-    transactions,
-    goals,
+    transactions: pTransactions,
+    goals: pGoals,
     onAddTransaction,
     onAddGoal,
     onLogout,
@@ -64,10 +69,10 @@ const DashboardView = ({
     onUpdateTransaction,
     onDeleteTransaction,
     onUpdateProfile,
-    budgets,
+    budgets: pBudgets,
     onUpsertBudget,
     onContributeToGoal,
-    accounts,
+    accounts: pAccounts,
     onUpsertAccount,
     isInitialLink = false,
     isSyncingTransactions = false,
@@ -76,6 +81,12 @@ const DashboardView = ({
     onDateRangeChange = () => {},
     onNavChange = () => {},
   }) => {
+    // Select slices directly from external store to avoid unnecessary re-renders
+    const transactions = useDataSelector((s) => s.transactions);
+    const goals = useDataSelector((s) => s.goals);
+    const budgets = useDataSelector((s) => s.budgets);
+    const accounts = useDataSelector((s) => s.accounts);
+    const dataLoading = useDataSelector((s) => s.loading);
     const { themeColors } = useTheme();
     const [expenseForm, setExpenseForm] = useState({ description: '', amount: '', category: 'General', accountId: '' });
     const [incomeForm, setIncomeForm] = useState({ description: '', amount: '', accountId: '' });
@@ -136,6 +147,70 @@ const DashboardView = ({
       if (typeof value.toDate === 'function') return value.toDate();
       return new Date(value);
     };
+
+    // Spending by category (for current filtered date range)
+  const spendingByCategory = useMemo(() => {
+      if (!transactions || !Array.isArray(transactions)) return [];
+      const map = new Map();
+      for (const tx of transactions) {
+        if (!tx || tx.type !== 'expense') continue;
+        const name = tx.category || 'Uncategorized';
+        const amount = Number(tx.amount) || 0;
+        map.set(name, (map.get(name) || 0) + amount);
+      }
+      return Array.from(map.entries())
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
+  }, [transactions]);
+
+  // Build force graph data: Accounts -> Categories -> Merchants (if available)
+  const [showMerchants, setShowMerchants] = useState(true);
+
+  const forceGraphData = useMemo(() => {
+    const nodes = new Map();
+    const links = new Map(); // key `${source}|${target}` -> weight
+
+    const addNode = (id, label, r = 6) => {
+      if (!nodes.has(id)) nodes.set(id, { id, label, r });
+    };
+    const addLink = (source, target, inc = 1) => {
+      const key = `${source}|${target}`;
+      links.set(key, (links.get(key) || 0) + inc);
+    };
+
+    // Seed account nodes
+    (accounts || []).forEach((acc) => addNode(`acc:${acc.id || acc.name}`, acc.name || 'Account', 7));
+
+    (transactions || []).forEach((tx) => {
+      if (!tx || tx.type !== 'expense') return;
+      const category = tx.category || 'Uncategorized';
+      const accountId = tx.accountId || (tx.account && tx.account.id);
+      const accountKey = accountId ? `acc:${accountId}` : 'acc:unknown';
+      const categoryKey = `cat:${category}`;
+      const amount = Number(tx.amount) || 0;
+      addNode(accountKey, nodes.get(accountKey)?.label || 'Account', 7);
+      addNode(categoryKey, category, 6);
+      addLink(accountKey, categoryKey, amount);
+
+      // Optional merchant tier
+      const merchant = tx.merchant || tx.description;
+      if (merchant && showMerchants) {
+        const merchantKey = `mer:${merchant}`;
+        addNode(merchantKey, merchant, 5);
+        addLink(categoryKey, merchantKey, amount * 0.5);
+      }
+    });
+
+    const nodeArr = Array.from(nodes.values());
+    const linkArr = Array.from(links.entries()).map(([key, weight]) => {
+      const [source, target] = key.split('|');
+      // Map weight to link distance (heavier -> shorter)
+      const distance = 140 - Math.max(0, Math.min(120, weight / 10));
+      return { source, target, weight, distance, strength: 0.7 };
+    });
+
+    return { nodes: nodeArr, links: linkArr };
+  }, [transactions, accounts, showMerchants]);
 
     const applyPresetRange = (preset) => {
       const today = new Date();
@@ -1195,14 +1270,16 @@ const DashboardView = ({
                   className={card({ variant: 'muted', padding: 'md', className: 'space-y-3 shadow-none' })}
                 >
                   <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Safe to Spend</p>
-                  <p className="mt-3 text-3xl font-semibold text-text-primary">{safeToSpendDisplay}</p>
+                  <p className="mt-3 text-3xl font-semibold text-text-primary">
+                    <StatSafeToSpend userDoc={userDoc} dateRange={dateRange} />
+                  </p>
                   <p className="mt-1 text-xs text-text-muted">After upcoming bills & goals.</p>
                 </div>
                 <div className={card({ padding: 'md', className: 'space-y-3' })}>
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Net Worth</p>
-                      <p className="mt-3 text-3xl font-semibold text-text-primary">{netWorthDisplay}</p>
+                      <p className="mt-3 text-3xl font-semibold text-text-primary"><StatNetWorthValue /></p>
                     </div>
                     <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                       {netWorthChangeDisplay}
@@ -1215,7 +1292,7 @@ const DashboardView = ({
                 <div className={card({ padding: 'md', className: 'space-y-3' })}>
                   <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Monthly Budget</p>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <p className="text-3xl font-semibold text-text-primary">{budgetProgress}%</p>
+                    <p className="text-3xl font-semibold text-text-primary"><StatBudgetProgress dateRange={dateRange} /></p>
                     <span className="text-xs font-semibold uppercase tracking-wide text-primary">60% full</span>
                   </div>
                   <div className="mt-3 h-2 rounded-full bg-surface-muted">
@@ -1225,9 +1302,88 @@ const DashboardView = ({
                     />
                   </div>
                   <p className="mt-2 text-xs text-text-muted">
-                    {budgetSpentDisplay} / {budgetTotalDisplay} spent
+                    <StatBudgetSpentTotal dateRange={dateRange} />
                   </p>
                 </div>
+              </div>
+            </section>
+
+            {/* D3: Spending by Category (Alpha) */}
+            <section className={card({ padding: 'lg' })}>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-text-primary">Spending by Category (D3)</h2>
+                <p className="text-sm text-text-secondary">Theme-aware via CSS variables</p>
+              </div>
+              <div className="mt-4">
+                {spendingByCategory && spendingByCategory.length > 0 ? (
+                  <D3SpendingByCategory data={spendingByCategory} />
+                ) : (
+                  <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-border/60 bg-surface-muted p-6 text-center text-sm text-text-secondary">
+                    Not enough data to render categories yet.
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* 3D: Net Worth Bars (Alpha) */}
+            <section className={card({ padding: 'lg' })}>
+              <h2 className="text-lg font-semibold text-text-primary">Net Worth (3D)</h2>
+              <p className="text-sm text-text-secondary">GPU-accelerated bars; updates without full re-render</p>
+              <div className="mt-4">
+                <React.Suspense fallback={<div className="h-72" />}>
+                  {accounts ? <NetWorthBarsLazy accounts={accounts} /> : null}
+                </React.Suspense>
+              </div>
+            </section>
+
+            {/* D3 Force Graph (Workerised) */}
+            <section className={card({ padding: 'lg' })}>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-text-primary">Spending Relationships (D3 Force)</h2>
+                <p className="text-sm text-text-secondary">Simulation runs in a Web Worker</p>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <label className="flex items-center gap-2 text-sm text-text-secondary">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-border"
+                    checked={showMerchants}
+                    onChange={(e) => setShowMerchants(e.target.checked)}
+                  />
+                  Show merchants
+                </label>
+                <div className="flex items-center gap-4 text-xs text-text-muted">
+                  <span className="inline-flex items-center gap-1">
+                    <span className="inline-block h-2 w-2 rounded-full bg-primary" />
+                    Category
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="inline-block h-2 w-2 rounded-full bg-secondary" />
+                    Account
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="inline-block h-2 w-2 rounded-full bg-accent" />
+                    Merchant
+                  </span>
+                </div>
+              </div>
+              <div className="mt-2">
+                <React.Suspense fallback={<div className="h-80" />}>
+                  <ForceGraphLazy
+                    data={forceGraphData}
+                    onNodeSelect={(n) => {
+                      const id = n?.id || '';
+                      if (id.startsWith('cat:')) {
+                        const name = n.label || id.slice(4);
+                        handleCategoryDrilldown(name);
+                      } else if (id.startsWith('acc:')) {
+                        setDrilldown({ type: 'account', title: n.label || 'Account', node: n });
+                      } else if (id.startsWith('mer:')) {
+                        setDrilldown({ type: 'merchant', title: n.label || 'Merchant', node: n });
+                      }
+                    }}
+                  />
+                </React.Suspense>
               </div>
             </section>
 
@@ -2179,15 +2335,50 @@ const DashboardView = ({
                         )}
                       </div>
                     </div>
-                  ) : (
-                    <div className="space-y-3 text-sm text-text-secondary">
-                      {drilldown.insight?.caption ? (
-                        <p className="text-xs uppercase tracking-wide text-text-secondary">{drilldown.insight.caption}</p>
-                      ) : null}
-                      <p>{drilldown.insight?.body}</p>
-                      <p className="text-xs text-text-muted">Click another insight or bar to explore more detail.</p>
-                    </div>
-                  )}
+                   ) : drilldown.type === 'merchant' ? (
+                     <div className="space-y-4">
+                       <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
+                         {(() => {
+                           const items = (transactions || []).filter((tx) => {
+                             if (!tx || tx.type !== 'expense') return false;
+                             const merchant = tx.merchant || tx.description;
+                             return merchant && merchant === (drilldown.node?.label || drilldown.title);
+                           });
+                           return items.length > 0 ? (
+                             items.map((transaction) => {
+                               const txDate = getTransactionDate(transaction.date) || new Date();
+                               return (
+                                 <div
+                                   key={transaction.id || `${transaction.description}-${txDate.toISOString()}`}
+                                   className="flex items-center justify-between rounded-xl border border-border/60 bg-surface-muted px-4 py-3 text-sm text-text-secondary"
+                                 >
+                                   <div>
+                                     <p className="font-semibold text-text-primary">{transaction.description}</p>
+                                     <p className="text-xs text-text-muted">
+                                       {drilldownDateFormatter.format(txDate)} · {transaction.category || 'General'}
+                                     </p>
+                                   </div>
+                                   <span className="text-sm font-semibold text-text-primary">{formatCurrency(transaction.amount)}</span>
+                                 </div>
+                               );
+                             })
+                           ) : (
+                             <p className="rounded-xl border border-dashed border-border/60 bg-surface-muted p-4 text-center text-sm text-text-secondary">
+                               No transactions found for this merchant.
+                             </p>
+                           );
+                         })()}
+                       </div>
+                     </div>
+                   ) : (
+                     <div className="space-y-3 text-sm text-text-secondary">
+                       {drilldown.insight?.caption ? (
+                         <p className="text-xs uppercase tracking-wide text-text-secondary">{drilldown.insight.caption}</p>
+                       ) : null}
+                       <p>{drilldown.insight?.body}</p>
+                       <p className="text-xs text-text-muted">Click another insight or bar to explore more detail.</p>
+                     </div>
+                   )}
                 </motion.div>
               </motion.div>
             ) : null}
@@ -2507,3 +2698,4 @@ const DashboardView = ({
   };
 
   export default DashboardView;
+

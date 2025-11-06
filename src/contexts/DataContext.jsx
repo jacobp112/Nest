@@ -17,6 +17,29 @@ import {
 
 export const DataContext = createContext();
 
+// External store to enable selector-based subscriptions via useSyncExternalStore
+let snapshot = {
+  transactions: [],
+  goals: [],
+  budgets: [],
+  accounts: [],
+  loading: true,
+};
+const listeners = new Set();
+const notify = () => {
+  listeners.forEach((l) => {
+    try { l(); } catch (_) {}
+  });
+};
+
+export const dataStore = {
+  subscribe: (listener) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  },
+  getSnapshot: () => snapshot,
+};
+
 export const useData = () => useContext(DataContext);
 
 export const DataProvider = ({ children }) => {
@@ -30,13 +53,20 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       setLoading(true);
-      const unsubTransactions = subscribeToTransactions(user.uid, setTransactions);
-      const unsubGoals = subscribeToGoals(user.uid, setGoals);
-      const unsubBudgets = subscribeToBudgets(user.uid, setBudgets);
-      const unsubAccounts = subscribeToAccounts(user.uid, setAccounts);
+      const setTx = (v) => { setTransactions(v); snapshot = { ...snapshot, transactions: v }; notify(); };
+      const setGl = (v) => { setGoals(v); snapshot = { ...snapshot, goals: v }; notify(); };
+      const setBd = (v) => { setBudgets(v); snapshot = { ...snapshot, budgets: v }; notify(); };
+      const setAc = (v) => { setAccounts(v); snapshot = { ...snapshot, accounts: v }; notify(); };
+
+      const unsubTransactions = subscribeToTransactions(user.uid, setTx);
+      const unsubGoals = subscribeToGoals(user.uid, setGl);
+      const unsubBudgets = subscribeToBudgets(user.uid, setBd);
+      const unsubAccounts = subscribeToAccounts(user.uid, setAc);
 
       Promise.all([unsubTransactions, unsubGoals, unsubBudgets, unsubAccounts]).then(() => {
         setLoading(false);
+        snapshot = { ...snapshot, loading: false };
+        notify();
       });
 
       return () => {
@@ -51,6 +81,8 @@ export const DataProvider = ({ children }) => {
       setBudgets([]);
       setAccounts([]);
       setLoading(false);
+      snapshot = { transactions: [], goals: [], budgets: [], accounts: [], loading: false };
+      notify();
     }
   }, [user]);
 

@@ -5,8 +5,7 @@ import {
   useTransform,
   AnimatePresence,
 } from 'framer-motion';
-import { loadFull } from 'tsparticles';
-import Particles, { initParticlesEngine } from '@tsparticles/react';
+// Heavy visuals are lazy-loaded and intersection-gated
 import {
   ShieldCheck,
   Target,
@@ -18,7 +17,9 @@ import {
 import FeatureCardVine from './FeatureCardVine';
 import AtmosphericLayer from './AtmosphericLayer';
 import { btn, card } from '../theme/styles';
-import ThreeBackground from '../components/ThreeBackground.jsx';
+import LazyInView from '../components/LazyInView.jsx';
+const ThreeBackgroundLazy = React.lazy(() => import('../components/ThreeBackground.jsx'));
+const PointsBackgroundLazy = React.lazy(() => import('../components/PointsBackground.jsx'));
 
 // --- Centralized all variants for consistency ---
 const globalVariants = {
@@ -74,94 +75,7 @@ const mergeRefs =
     });
   };
 
-const HeroParticlesLayer = () => {
-  const [init, setInit] = useState(false);
-
-  // Initialize tsParticles engine only once
-  useEffect(() => {
-    console.log('Initializing particles engine...');
-    initParticlesEngine(async (engine) => {
-      // Load the full preset for all features
-      await loadFull(engine);
-    })
-      .then(() => {
-        console.log('Particles engine initialized!');
-        setInit(true); // Mark as initialized
-      })
-      .catch((error) => {
-        console.error('Particles engine failed to initialize:', error);
-      });
-  }, []); // Empty dependency array ensures this runs only once on mount
-
-  const particlesLoaded = (container) => {
-    // Optional: Callback function when particles are loaded
-    // console.log('Particles container loaded', container);
-  };
-
-  console.log('Particles init state:', init);
-  const particlesOptions = useMemo(
-    () => ({
-      fullScreen: { enable: false }, // Prevent particles from covering the whole page
-      detectRetina: true,
-      fpsLimit: 60,
-      background: { color: 'transparent' }, // Use parent's background
-      interactivity: {
-        detectsOn: 'window', // Detect mouse over the whole window area
-        events: {
-          onHover: { enable: true, mode: 'repulse' }, // Repulse particles on hover
-          resize: true, // Re-layout particles on window resize
-        },
-        modes: {
-          repulse: { distance: 100, duration: 0.4 }, // Repulsion effect settings
-        },
-      },
-      particles: {
-        number: { value: 80, density: { enable: true, area: 1000 } }, // Number of particles
-        color: { value: ['#0f766e', '#34d399', '#fbbf24'] }, // Theme colors
-        shape: { type: 'circle' },
-        opacity: {
-          value: { min: 0.2, max: 0.7 }, // Random opacity
-          animation: { enable: true, speed: 0.4, minimumValue: 0.2, sync: false }, // Fade in/out
-        },
-        size: {
-          value: { min: 1, max: 3 }, // Random size
-          animation: { enable: true, speed: 2, minimumValue: 1, sync: false }, // Pulsate size
-        },
-        move: {
-          enable: true,
-          speed: 0.5, // Slow movement speed
-          direction: 'none',
-          random: true, // Random initial direction
-          straight: false,
-          outModes: { default: 'out' }, // Particles disappear when leaving canvas
-          // Wobble effect for gentle drifting
-          wobble: { enable: true, distance: 5, speed: 0.2 },
-        },
-        links: { enable: false }, // No lines connecting particles
-      },
-    }),
-    []
-  );
-
-  // Only render Particles component after the engine is initialized
-  if (init) {
-    return (
-      // --- CORRECTED Z-INDEX ---
-      // Positioned above hero backgrounds but below foreground content
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <Particles
-          id="tsparticles"
-          particlesLoaded={particlesLoaded}
-          options={particlesOptions}
-          className="h-full w-full"
-          style={{ width: '100%', height: '100%' }}
-        />
-      </div>
-    );
-  }
-
-  return null; // Render nothing until initialized
-};
+// tsParticles layer removed in favor of an R3F Points background
 
 // --- Living growth spine that adapts to layout ---
 const PageGrowthSpine = ({ scrollRef, sectionRefs }) => {
@@ -549,10 +463,18 @@ const Navbar = ({ onLoginClick, onGetStartedClick }) => {
 const HeroSection = React.forwardRef(({ onGetStartedClick }, ref) => (
   // Added relative positioning context for absolute children
   <section ref={ref} className="relative min-h-screen overflow-hidden" id="top">
-    {/* Three.js decorative background layer (behind particles) */}
-    <ThreeBackground className="absolute inset-0 -z-10" />
-    {/* Particles layer: Renders conditionally after init */}
-    <HeroParticlesLayer />
+    {/* Three.js decorative background (gated) */}
+    <LazyInView className="absolute inset-0 -z-10">
+      <React.Suspense fallback={null}>
+        <ThreeBackgroundLazy className="absolute inset-0" />
+      </React.Suspense>
+    </LazyInView>
+    {/* R3F points background (gated) */}
+    <LazyInView className="absolute inset-0 -z-5">
+      <React.Suspense fallback={null}>
+        <PointsBackgroundLazy className="absolute inset-0" />
+      </React.Suspense>
+    </LazyInView>
 
     {/* Background Gradient: Kept behind particles */}
     <div className="absolute inset-0 -z-30 bg-gradient-to-br from-emerald-100/30 via-emerald-50/10 to-white" />
