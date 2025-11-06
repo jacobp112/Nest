@@ -50,30 +50,18 @@ import ThemeSwitcher from '../components/ThemeSwitcher';
 import { useTheme } from '../contexts/ThemeContext';
 import { card } from '../theme/styles';
 import D3SpendingByCategory from '../components/d3/D3SpendingByCategory.jsx';
-import { useDataSelector } from '../hooks/useDataSelector';
+import { useDataStore } from '../stores/useDataStore.js';
 import { StatSafeToSpend, StatNetWorthValue, StatBudgetProgress, StatBudgetSpentTotal } from '../components/dashboard/StatCards.jsx';
 const NetWorthBarsLazy = React.lazy(() => import('../components/three/NetWorthBars.jsx'));
 const ForceGraphLazy = React.lazy(() => import('../components/d3/ForceGraph.jsx'));
 
 const DashboardView = ({
     userDoc,
-    transactions: pTransactions,
-    goals: pGoals,
-    onAddTransaction,
-    onAddGoal,
     onLogout,
     selectedMonth,
     dateRange,
     onPrevMonth,
     onNextMonth,
-    onUpdateTransaction,
-    onDeleteTransaction,
-    onUpdateProfile,
-    budgets: pBudgets,
-    onUpsertBudget,
-    onContributeToGoal,
-    accounts: pAccounts,
-    onUpsertAccount,
     isInitialLink = false,
     isSyncingTransactions = false,
     accountsData = [],
@@ -81,12 +69,19 @@ const DashboardView = ({
     onDateRangeChange = () => {},
     onNavChange = () => {},
   }) => {
-    // Select slices directly from external store to avoid unnecessary re-renders
-    const transactions = useDataSelector((s) => s.transactions);
-    const goals = useDataSelector((s) => s.goals);
-    const budgets = useDataSelector((s) => s.budgets);
-    const accounts = useDataSelector((s) => s.accounts);
-    const dataLoading = useDataSelector((s) => s.loading);
+    // Select slices directly from the Zustand store to minimize re-renders
+    const transactions = useDataStore((s) => s.transactions);
+    const goals = useDataStore((s) => s.goals);
+    const budgets = useDataStore((s) => s.budgets);
+    const accounts = useDataStore((s) => s.accounts);
+    const addTransaction = useDataStore((s) => s.addTransaction);
+    const addGoal = useDataStore((s) => s.addGoal);
+    const updateTransaction = useDataStore((s) => s.updateTransaction);
+    const deleteTransaction = useDataStore((s) => s.deleteTransaction);
+    const updateProfile = useDataStore((s) => s.updateUserProfile);
+    const upsertBudget = useDataStore((s) => s.upsertBudget);
+    const contributeToGoal = useDataStore((s) => s.contributeToGoal);
+    const upsertAccount = useDataStore((s) => s.upsertAccount);
     const { themeColors } = useTheme();
     const [expenseForm, setExpenseForm] = useState({ description: '', amount: '', category: 'General', accountId: '' });
     const [incomeForm, setIncomeForm] = useState({ description: '', amount: '', accountId: '' });
@@ -846,7 +841,7 @@ const DashboardView = ({
     const handleExpenseSubmit = async (event) => {
       event.preventDefault();
       if (!expenseForm.description || !expenseForm.amount) return;
-      await onAddTransaction({
+      await addTransaction({
         type: 'expense',
         description: expenseForm.description,
         amount: Number(expenseForm.amount),
@@ -859,7 +854,7 @@ const DashboardView = ({
     const handleIncomeSubmit = async (event) => {
       event.preventDefault();
       if (!incomeForm.description || !incomeForm.amount) return;
-      await onAddTransaction({
+      await addTransaction({
         type: 'income',
         description: incomeForm.description,
         amount: Number(incomeForm.amount),
@@ -881,7 +876,7 @@ const DashboardView = ({
         payload.isDebt = true;
         payload.currentAmount = Number(goalForm.currentAmount) || 0;
       }
-      await onAddGoal(payload);
+      await addGoal(payload);
       setGoalForm({ name: '', type: 'savings', targetAmount: '', currentAmount: '' });
     };
 
@@ -1100,12 +1095,25 @@ const DashboardView = ({
       [handleCategoryDrilldown],
     );
 
-    const safeToSpendDisplay = '\u00A31,234';
-    const netWorthDisplay = '\u00A356,789';
     const netWorthChangeDisplay = '+1.2%';
-    const budgetProgress = 60;
-    const budgetSpentDisplay = '\u00A31500';
-    const budgetTotalDisplay = '\u00A32500';
+    const budgetProgress = useMemo(() => {
+      const totalBudget = (budgets || []).reduce(
+        (sum, b) => sum + (Number(b?.limit) || Number(b?.amount) || 0),
+        0,
+      );
+      if (totalBudget <= 0) return 0;
+      const start = dateRange?.start ? new Date(dateRange.start) : null;
+      const end = dateRange?.end ? new Date(dateRange.end) : null;
+      const spent = (transactions || []).reduce((sum, tx) => {
+        if (tx?.type !== 'expense') return sum;
+        const txDate = getTransactionDate(tx?.date);
+        if (!txDate) return sum;
+        if (start && txDate < start) return sum;
+        if (end && txDate > end) return sum;
+        return sum + (Number(tx?.amount) || 0);
+      }, 0);
+      return Math.min(100, Math.max(0, Math.round((spent / totalBudget) * 100)));
+    }, [budgets, transactions, dateRange]);
 
     return (
       <div className="min-h-screen bg-surface">
@@ -2229,7 +2237,7 @@ const DashboardView = ({
                           aria-label="Delete transaction"
                           onClick={() => {
                             if (window.confirm('Delete this transaction?')) {
-                              onDeleteTransaction(transaction.id);
+                              deleteTransaction(transaction.id);
                             }
                           }}
                           className="rounded-full p-2 text-text-muted transition hover:bg-red-50 hover:text-red-600"
@@ -2418,7 +2426,7 @@ const DashboardView = ({
                       onClick={async () => {
                         const amt = Number(contributeAmount) || 0;
                         if (amt <= 0) return;
-                        await onContributeToGoal(contributeGoal, amt);
+                        await contributeToGoal(contributeGoal, amt);
                         setContributeGoal(null);
                       }}
                         className="btn btn-primary"
@@ -2481,7 +2489,7 @@ const DashboardView = ({
                   <button
                       onClick={async () => {
                         const amt = Number(budgetForm.amount) || 0;
-                        await onUpsertBudget({ category: budgetForm.category, amount: amt });
+                        await upsertBudget({ category: budgetForm.category, amount: amt });
                         setBudgetForm({ category: budgetForm.category, amount: '' });
                         setBudgetsOpen(false);
                       }}
@@ -2537,7 +2545,7 @@ const DashboardView = ({
                       onClick={async () => {
                         const name = String(accountName || '').trim();
                         if (name) {
-                          await onUpsertAccount({ name });
+                          await upsertAccount({ name });
                           setAccountName('');
                         }
                         setAccountsOpen(false);
@@ -2610,7 +2618,7 @@ const DashboardView = ({
                   <button onClick={() => setEditTx(null)} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary transition hover:border-primary/60 hover:text-text-primary">Cancel</button>
                   <button
                       onClick={async () => {
-                        await onUpdateTransaction(editTx.id, {
+                        await updateTransaction(editTx.id, {
                           description: editTx.description,
                           amount: Number(editTx.amount) || 0,
                           ...(editTx.type === 'expense' ? { category: editTx.category || 'General' } : {}),
@@ -2678,7 +2686,7 @@ const DashboardView = ({
                   </button>
                   <button
                     onClick={async () => {
-                      await onUpdateProfile({
+                      await updateProfile({
                         recurringIncome: settingsForm.recurringIncome,
                         recurringExpenses: settingsForm.recurringExpenses,
                       });
@@ -2698,4 +2706,3 @@ const DashboardView = ({
   };
 
   export default DashboardView;
-

@@ -138,18 +138,20 @@ export default function ForceGraph({ data, width = 680, height = 320, className 
       }
     }
 
-    return () => {
-      while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
-    };
-    // Dim non-highlighted links
-    if (selectedId) {
+    const updateLinkOpacity = () => {
+      if (!selectedId) return;
       const lines = linkGroup.querySelectorAll('line');
       lines.forEach((ln) => {
         const s = ln.getAttribute('data-source');
         const t = ln.getAttribute('data-target');
         ln.setAttribute('stroke-opacity', isHighlightedLink(s, t) ? '0.8' : '0.2');
       });
-    }
+    };
+
+    updateLinkOpacity();
+    return () => {
+      while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+    };
 
   }, [JSON.stringify(merged), selectedId]);
 

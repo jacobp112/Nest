@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useDataSelector } from '../../hooks/useDataSelector';
+import { useDataStore } from '../../stores/useDataStore.js';
 import { formatCurrency } from '../../utils/helpers';
 
 const parseDate = (v) => {
@@ -16,7 +16,7 @@ const inRange = (d, start, end) => {
 };
 
 export function StatSafeToSpend({ userDoc, dateRange }) {
-  const transactions = useDataSelector((s) => s.transactions);
+  const transactions = useDataStore((s) => s.transactions);
   const { value } = useMemo(() => {
     const start = dateRange?.start ? new Date(dateRange.start) : null;
     const end = dateRange?.end ? new Date(dateRange.end) : null;
@@ -36,7 +36,7 @@ export function StatSafeToSpend({ userDoc, dateRange }) {
 }
 
 export function StatNetWorthValue() {
-  const accounts = useDataSelector((s) => s.accounts);
+  const accounts = useDataStore((s) => s.accounts);
   const net = useMemo(() => {
     return (accounts || []).reduce((sum, acc) => {
       const n = Number(acc?.balance) || 0;
@@ -47,8 +47,8 @@ export function StatNetWorthValue() {
 }
 
 export function StatBudgetProgress({ dateRange }) {
-  const budgets = useDataSelector((s) => s.budgets);
-  const transactions = useDataSelector((s) => s.transactions);
+  const budgets = useDataStore((s) => s.budgets);
+  const transactions = useDataStore((s) => s.transactions);
   const percent = useMemo(() => {
     const totalBudget = (budgets || []).reduce((sum, b) => sum + (Number(b?.limit) || Number(b?.amount) || 0), 0);
     const start = dateRange?.start ? new Date(dateRange.start) : null;
@@ -66,8 +66,8 @@ export function StatBudgetProgress({ dateRange }) {
 }
 
 export function StatBudgetSpentTotal({ dateRange }) {
-  const budgets = useDataSelector((s) => s.budgets);
-  const transactions = useDataSelector((s) => s.transactions);
+  const budgets = useDataStore((s) => s.budgets);
+  const transactions = useDataStore((s) => s.transactions);
   const { spentDisplay, totalDisplay } = useMemo(() => {
     const totalBudget = (budgets || []).reduce((sum, b) => sum + (Number(b?.limit) || Number(b?.amount) || 0), 0);
     const start = dateRange?.start ? new Date(dateRange.start) : null;
@@ -86,4 +86,3 @@ export function StatBudgetSpentTotal({ dateRange }) {
     </span>
   );
 }
-

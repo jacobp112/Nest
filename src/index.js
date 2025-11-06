@@ -6,16 +6,13 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
-import { DataProvider } from './contexts/DataContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <ThemeProvider>
       <AuthProvider>
-        <DataProvider>
-          <App />
-        </DataProvider>
+        <App />
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>

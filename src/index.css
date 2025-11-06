@@ -190,3 +190,15 @@ h6 {
     transform: translate(0px, 0px);
   }
 }
+
+/* Shiny text sweep used on Experience page */
+@keyframes shine {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Optional subtle glow utility */
+.glow-primary {
+  box-shadow: 0 0 24px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
