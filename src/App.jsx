@@ -1,14 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import NestFinanceLandingPage from './pages/NestFinanceLandingPage.jsx';
+import ExperienceRegistration from './pages/ExperienceRegistration.jsx';
 import DashboardView from './pages/DashboardView.jsx';
 import { useAuth } from './hooks/useAuth.js';
-import { useData } from './hooks/useData.js';
 import { formatMonthYear } from './utils/helpers';
 import LazyInView from './components/LazyInView.jsx';
-import AuthCard from './components/AuthCard.jsx';
+import { useDataStore } from './stores/useDataStore.js';
 
-const WorkerCanvasBackgroundLazy = React.lazy(() => import('./components/WorkerCanvasBackground.jsx'));
 const PointsBackgroundLazy = React.lazy(() => import('./components/PointsBackground.jsx'));
 
 const LoadingScreen = () => (
@@ -18,12 +16,12 @@ const LoadingScreen = () => (
 );
 
 export default function App() {
-  const { isAuthenticated, userDoc, loading: authLoading, error: authError, login, register, logout } = useAuth();
-  const data = useData();
+  const { isAuthenticated, user, userDoc, loading: authLoading, logout } = useAuth();
+  const connectData = useDataStore((state) => state.connect);
+  const disconnectData = useDataStore((state) => state.disconnect);
 
   const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [authOpen, setAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
+  // Prelaunch: no auth modal on landing; we show the Experience page
   const dateRange = useMemo(() => {
     const start = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
     const end = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
@@ -45,49 +43,23 @@ export default function App() {
     } catch (_) {}
   };
 
+  useEffect(() => {
+    if (isAuthenticated && user?.uid) {
+      connectData(user.uid);
+    } else {
+      disconnectData();
+    }
+    return () => {
+      disconnectData();
+    };
+  }, [connectData, disconnectData, isAuthenticated, user?.uid]);
+
   if (authLoading) return <LoadingScreen />;
 
   if (!isAuthenticated) {
     return (
       <div className="relative min-h-screen">
-        <React.Suspense fallback={null}>
-          <WorkerCanvasBackgroundLazy />
-        </React.Suspense>
-        <div className="relative z-10">
-          <NestFinanceLandingPage
-            onGetStartedClick={() => {
-              setAuthMode('register');
-              setAuthOpen(true);
-            }}
-            onLoginClick={() => {
-              setAuthMode('login');
-              setAuthOpen(true);
-            }}
-          />
-        </div>
-
-        {authOpen ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="relative w-full max-w-md">
-              <AuthCard
-                mode={authMode}
-                setMode={setAuthMode}
-                onLogin={login}
-                onRegister={register}
-                loading={authLoading}
-                error={authError}
-              />
-              <button
-                type="button"
-                aria-label="Close auth"
-                onClick={() => setAuthOpen(false)}
-                className="absolute right-2 top-2 rounded-full bg-surface px-2 py-1 text-xs text-text-secondary hover:bg-surface-muted"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        ) : null}
+        <ExperienceRegistration />
       </div>
     );
   }
@@ -102,23 +74,11 @@ export default function App() {
       <div className="relative z-10">
         <DashboardView
           userDoc={userDoc}
-          transactions={data.transactions}
-          goals={data.goals}
-          onAddTransaction={data.addTransaction}
-          onAddGoal={data.addGoal}
           onLogout={logout}
           selectedMonth={selectedMonth}
           dateRange={dateRange}
           onPrevMonth={handlePrevMonth}
           onNextMonth={handleNextMonth}
-          onUpdateTransaction={data.updateTransaction}
-          onDeleteTransaction={data.deleteTransaction}
-          onUpdateProfile={data.updateUserProfile}
-          budgets={data.budgets}
-          onUpsertBudget={data.upsertBudget}
-          onContributeToGoal={data.contributeToGoal}
-          accounts={data.accounts}
-          onUpsertAccount={data.upsertAccount}
           onDateRangeChange={handleDateRangeChange}
         />
       </div>
