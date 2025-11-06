@@ -15,6 +15,18 @@
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <script>
+      (function() {
+        try {
+          var KEY = 'nest-finance-theme';
+          var stored = localStorage.getItem(KEY);
+          var preferred = (stored === 'default' || stored === 'midnight' || stored === 'system') ? stored : 'system';
+          var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var themeToApply = preferred === 'system' ? (systemDark ? 'midnight' : 'default') : preferred;
+          document.documentElement.dataset.theme = themeToApply;
+        } catch (e) {}
+      })();
+    </script>
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.

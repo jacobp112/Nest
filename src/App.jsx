@@ -20,6 +20,7 @@ import { serverTimestamp } from 'firebase/firestore';
 import { useAuth } from './hooks/useAuth.js';
 import AuthCard from './components/AuthCard.jsx';
 import { useData } from './hooks/useData.js';
+import { useTheme } from './contexts/ThemeContext.jsx';
 import {
   startOfDay,
   calculateNetMonthlySavings,
@@ -58,6 +59,12 @@ function NestFinanceApp() {
     upsertAccount,
     updateUserProfile,
   } = useData();
+
+  const { resolvedThemeName } = useTheme();
+  const isMidnightTheme = resolvedThemeName === 'midnight';
+  const dashboardBackgroundClass = isMidnightTheme
+    ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950'
+    : 'bg-background';
 
   const [view, setView] = useState('landing');
   const [mode, setMode] = useState('login');
@@ -450,11 +457,8 @@ function NestFinanceApp() {
         <GrowingTreeBackground />
       ) : (
         <>
-          <div
-            className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
-            aria-hidden
-          />
-          {dashboardParticlesReady && (
+          <div className={`pointer-events-none absolute inset-0 -z-20 ${dashboardBackgroundClass}`} aria-hidden />
+          {dashboardParticlesReady && isMidnightTheme && (
             <div className="pointer-events-none absolute inset-0 -z-10">
               <Particles options={dashboardParticlesOptions} className="h-full w-full" />
             </div>
@@ -462,9 +466,7 @@ function NestFinanceApp() {
         </>
       )}
       <div
-        className={`relative z-10 min-h-screen ${
-          isAuthView ? '' : 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900'
-        }`}
+        className={`relative z-10 min-h-screen ${isAuthView ? '' : dashboardBackgroundClass}`}
       >
         {view !== 'dashboard' && (
           <div className="mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-4 py-12">
@@ -512,8 +514,8 @@ function NestFinanceApp() {
         )}
         {view === 'dashboard' && userDoc && (
           <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:py-10 lg:py-12">
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/60 px-4 py-3 shadow-lg shadow-slate-950/20">
-              <div className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-box border border-border/60 bg-surface/70 px-4 py-3 shadow-soft backdrop-blur-sm">
+              <div className="text-sm font-semibold uppercase tracking-wide text-text-muted">
                 Primary views
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -526,8 +528,8 @@ function NestFinanceApp() {
                       onClick={() => handleNavChange(item.key)}
                       className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition ${
                         isActive
-                          ? 'border-emerald-500/70 bg-emerald-500/20 text-emerald-200'
-                          : 'border-slate-700 bg-slate-900/80 text-slate-300 hover:border-emerald-500/40 hover:text-emerald-200'
+                          ? 'border-primary/50 bg-primary/15 text-primary'
+                          : 'border-border bg-surface-muted/70 text-text-secondary hover:border-primary/40 hover:text-primary'
                       }`}
                     >
                       {item.label}
