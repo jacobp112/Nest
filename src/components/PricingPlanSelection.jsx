@@ -220,9 +220,10 @@ const PricingPlanSelection = ({
       animate="visible"
       exit="exit"
     >
-      <div className="relative flex h-full w-full flex-col overflow-hidden bg-[rgb(var(--color-overlay-rgb)/0.9)]">
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgb(var(--color-surface-rgb)/0.25)_0%,_rgb(var(--color-surface-muted-rgb)/0.35)_45%,_rgb(var(--color-background-rgb)/0.4)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgb(var(--color-primary-rgb)/0.2),_transparent_65%)]" />
+      <div className="relative flex h-full flex-col overflow-hidden bg-[rgb(var(--color-overlay-rgb)/0.92)]">
+  <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgb(var(--color-overlay-rgb)/0.97)_0%,_rgb(var(--color-overlay-rgb)/0.85)_55%,_transparent_100%)]" />
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgb(var(--color-primary-rgb)/0.28),_transparent_65%)]" />
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgb(var(--color-accent-rgb)/0.18),_transparent_60%)]" />
         {particlesReady && (
           <div className="pointer-events-none absolute inset-0">
             <Particles options={particlesOptions} className="h-full w-full" />
@@ -230,18 +231,18 @@ const PricingPlanSelection = ({
         )}
 
         <div className="relative z-10 flex h-full flex-col text-text-on-dark">
-          <div className="flex items-center justify-between px-6 py-4 sm:px-8 sm:py-6">
-            <div className="flex flex-col gap-1">
-              <span className="text-[9px] font-semibold uppercase tracking-[0.35em] text-primary/80 sm:text-[10px]">
+          <div className="flex items-center justify-between px-6 py-4 sm:px-10 sm:py-8">
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.42em] text-primary/75 sm:text-xs">
                 Upgrade Your Nest
               </span>
               <h2
                 id="pricing-plan-title"
-                className="text-xl font-semibold text-text-on-dark sm:text-2xl"
+                className="text-2xl font-semibold text-text-on-dark sm:text-[2.1rem]"
               >
                 Choose the plan that grows with you
               </h2>
-              <p className="max-w-2xl text-[11px] text-text-on-dark/75 sm:text-xs">
+              <p className="max-w-2xl text-[12px] text-text-on-dark/85 sm:text-sm">
                 Unlock automated bank syncing, collaborative household tools,
                 and guided insights. Switch between monthly and annual billing
                 whenever you need.
@@ -259,13 +260,13 @@ const PricingPlanSelection = ({
             ) : null}
           </div>
 
-          <div className="flex flex-1 flex-col items-center justify-center px-6 pb-10 sm:px-10 lg:px-16">
-            <div className="flex items-center gap-2 text-[11px] text-text-on-dark/75 sm:text-xs">
+          <div className="flex flex-1 flex-col items-center justify-center px-6 pb-12 sm:px-10 lg:px-16">
+            <div className="flex items-center gap-4 text-[12px] text-text-on-dark/90 sm:text-sm">
               <span
                 className={`font-medium ${
                   billingCycle === "monthly"
-                    ? "text-primary/80"
-                    : "text-text-on-dark/60"
+                    ? "text-primary"
+                    : "text-text-on-dark/75"
                 }`}
               >
                 Monthly
@@ -277,13 +278,13 @@ const PricingPlanSelection = ({
                     prev === "monthly" ? "annual" : "monthly",
                   )
                 }
-                className="relative inline-flex h-9 w-16 items-center rounded-full bg-surface-muted/70 px-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="relative inline-flex h-11 w-24 items-center rounded-full bg-surface/70 px-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--color-overlay-rgb)/0.9)]"
                 aria-pressed={billingCycle === "annual"}
               >
                 <span
-                  className={`inline-block h-7 w-7 transform rounded-full bg-surface shadow-soft transition duration-300 ${
+                  className={`inline-block h-9 w-9 transform rounded-full bg-primary text-primary-content shadow-soft transition duration-300 ${
                     billingCycle === "annual"
-                      ? "translate-x-7"
+                      ? "translate-x-12"
                       : "translate-x-0"
                   }`}
                 />
@@ -291,30 +292,35 @@ const PricingPlanSelection = ({
               <span
                 className={`font-medium ${
                   billingCycle === "annual"
-                    ? "text-primary/80"
-                    : "text-text-on-dark/60"
+                    ? "text-primary"
+                    : "text-text-on-dark/75"
                 }`}
               >
                 Annual
               </span>
-              <span className="rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary/80 shadow-sm shadow-primary/20">
+              <span className="rounded-full border border-primary/50 bg-primary/20 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary/90 shadow-sm shadow-primary/25">
                 Save up to 17%
               </span>
             </div>
 
-            <div className="relative mt-6 w-full max-w-[32rem]">
+            <div className="relative mt-10 w-full max-w-6xl">
               <Swiper
                 modules={[Navigation, Pagination]}
-                slidesPerView={1.08}
+                slidesPerView="auto"
                 centeredSlides
-                spaceBetween={14}
-                pagination={{ clickable: true }}
+                centeredSlidesBounds
+                spaceBetween={24}
+                pagination={{
+                  clickable: true,
+                  bulletClass: 'swiper-pagination-bullet bg-text-on-dark/40 opacity-100',
+                  bulletActiveClass: 'swiper-pagination-bullet-active !bg-primary',
+                }}
                 onSwiper={setSwiperInstance}
                 onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
-                className="pricing-plan-swiper pb-12"
+                className="pricing-plan-swiper pb-16 !overflow-visible"
                 breakpoints={{
-                  640: { slidesPerView: 1.25 },
-                  1024: { slidesPerView: 1.45 },
+                  640: { spaceBetween: 28 },
+                  1024: { spaceBetween: 32 },
                 }}
                 initialSlide={
                   defaultPlanIndex >= 0 ? defaultPlanIndex : undefined
@@ -333,13 +339,13 @@ const PricingPlanSelection = ({
                         : null;
 
                   const planCardClassName = card({
-                    variant: isActive ? "glass" : "muted",
+                    variant: isActive ? "surface" : "muted",
                     padding: "lg",
-                    className: `group relative flex h-full flex-col gap-3 overflow-hidden text-text-on-dark transition-all duration-300 backdrop-blur-md ${
+                    className: `group relative flex h-full w-[18rem] flex-col gap-4 overflow-hidden text-text-on-dark transition-all duration-300 sm:w-[21rem] lg:w-[23rem] ${
                       plan.badge
-                        ? "ring-1 ring-primary/40 shadow-glow-primary"
-                        : "border-border/60"
-                    }`,
+                        ? "ring-1 ring-primary/35 shadow-strong"
+                        : "border-border/50"
+                    } ${isActive ? "shadow-strong" : "shadow-soft"} bg-surface/95`,
                   });
 
                   const currentPlanButtonClassName = btn({
@@ -364,12 +370,15 @@ const PricingPlanSelection = ({
                   });
 
                   return (
-                    <SwiperSlide key={plan.id} className="!h-auto !py-1.5">
+                    <SwiperSlide
+                      key={plan.id}
+                      className="!flex !h-auto !w-auto !items-stretch !justify-center !px-4 !py-1.5"
+                    >
                       <motion.article
                         className={planCardClassName}
                         animate={{
-                          scale: isActive ? 0.94 : 0.82,
-                          opacity: isActive ? 1 : 0.5,
+                          scale: isActive ? 1.02 : 0.98,
+                          opacity: isActive ? 1 : 0.72,
                         }}
                         transition={{ duration: 0.3 }}
                       >
@@ -387,32 +396,32 @@ const PricingPlanSelection = ({
                             <h3 className="text-sm font-semibold text-text-on-dark">
                               {plan.name}
                             </h3>
-                            <p className="text-[10px] text-text-on-dark/70">
+                            <p className="text-[12px] text-text-on-dark/85">
                               {plan.tagline}
                             </p>
                           </div>
                         </div>
 
-                        <div className="mt-4 space-y-1">
-                          <p className="text-lg font-semibold text-text-on-dark sm:text-[22px]">
+                        <div className="mt-4 space-y-1.5">
+                          <p className="text-xl font-semibold text-text-on-dark sm:text-[26px]">
                             {plan.displayPrice}
-                            <span className="text-xs font-medium text-text-on-dark/70">
+                            <span className="text-base font-medium text-text-on-dark/85">
                               {plan.suffix}
                             </span>
                           </p>
                           {billingCycle === "annual" && plan.annualSavings ? (
-                            <p className="text-[10px] font-semibold uppercase tracking-wide text-primary/75">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-primary/80">
                               Save {plan.annualSavings} with annual billing
                             </p>
                           ) : null}
                           {discountCopy && billingCycle === "monthly" ? (
-                            <p className="text-[10px] text-text-on-dark/65">
+                            <p className="text-[12px] text-text-on-dark/80">
                               {discountCopy}
                             </p>
                           ) : null}
                         </div>
 
-                        <ul className="mt-3 flex-1 space-y-1.5 text-[10px] text-text-on-dark/80">
+                        <ul className="mt-4 flex-1 space-y-2.5 text-[12px] text-text-on-dark/90">
                           {plan.features.map((feature) => (
                             <li
                               key={feature}
@@ -448,7 +457,7 @@ const PricingPlanSelection = ({
                             </button>
                           )}
                           {!isFree && billingCycle === "annual" ? (
-                            <p className="text-center text-[9px] text-text-on-dark/60">
+                            <p className="text-center text-[11px] text-text-on-dark/80">
                               £{plan.monthly.toFixed(2)}/mo equivalent when
                               billed annually
                             </p>
@@ -459,24 +468,28 @@ const PricingPlanSelection = ({
                   );
                 })}
               </Swiper>
-
-              <div className="pointer-events-auto absolute -bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-5">
-                <button
-                  type="button"
-                  onClick={() => swiperInstance?.slidePrev()}
-                  className={navButtonClassName}
-                  aria-label="View previous plan"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => swiperInstance?.slideNext()}
-                  className={navButtonClassName}
-                  aria-label="View next plan"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
+              <div className="pointer-events-auto mt-10 flex w-full flex-col items-center gap-4">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.35em] text-text-on-dark/60">
+                  Plan {activeIndex + 1} of {priceCopy.length}
+                </div>
+                <div className="flex items-center justify-center gap-5">
+                  <button
+                    type="button"
+                    onClick={() => swiperInstance?.slidePrev()}
+                    className={navButtonClassName}
+                    aria-label="View previous plan"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => swiperInstance?.slideNext()}
+                    className={navButtonClassName}
+                    aria-label="View next plan"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

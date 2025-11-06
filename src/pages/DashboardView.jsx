@@ -40,17 +40,15 @@ import {
 } from 'lucide-react';
 import { serverTimestamp } from 'firebase/firestore';
 import {
-    formatCurrency,
-    startOfDay,
-    endOfDay,
-    formatMonthYear,
-    calculateNetMonthlySavings,
-  } from '../utils/helpers';
-  import ThemeSwitcher from '../components/ThemeSwitcher';
-import {
-    brandColor,
-    expenseColor,
-  } from '../utils/constants';
+  formatCurrency,
+  startOfDay,
+  endOfDay,
+  formatMonthYear,
+  calculateNetMonthlySavings,
+} from '../utils/helpers';
+import ThemeSwitcher from '../components/ThemeSwitcher';
+import { useTheme } from '../contexts/ThemeContext';
+import { card } from '../theme/styles';
 
 const DashboardView = ({
     userDoc,
@@ -78,6 +76,7 @@ const DashboardView = ({
     onDateRangeChange = () => {},
     onNavChange = () => {},
   }) => {
+    const { themeColors } = useTheme();
     const [expenseForm, setExpenseForm] = useState({ description: '', amount: '', category: 'General', accountId: '' });
     const [incomeForm, setIncomeForm] = useState({ description: '', amount: '', accountId: '' });
     const [goalForm, setGoalForm] = useState({ name: '', type: 'savings', targetAmount: '', currentAmount: '' });
@@ -658,10 +657,10 @@ const DashboardView = ({
     const waterfallHasData = cashFlowWaterfallData.length > 0;
     const cashFlowWeekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const waterfallColorByType = {
-      income: '#0f766e',
-      expense: '#ef4444',
-      'net-positive': '#0d9488',
-      'net-negative': '#dc2626',
+      income: themeColors.primary,
+      expense: themeColors.destructive,
+      'net-positive': themeColors.success,
+      'net-negative': themeColors.destructive,
     };
     const cashFlowWaterfallChartData = useMemo(() => {
       if (!waterfallHasData) return [];
@@ -820,12 +819,31 @@ const DashboardView = ({
     const annualSavingsProjection = Math.max(monthlySavings * 12, 0);
     const savingsRate = totals.income > 0 ? Math.max((netMonthlySavings / totals.income) * 100, 0) : 0;
     const manualEntryCount = filteredTransactions.length;
-  const quickAddSectionClasses = `card ${
-      shouldShowFirstTransactionPrompt ? 'relative ring-2 ring-emerald-300 shadow-xl transition duration-300' : ''
-    }`;
-    const expenseFormCardClasses = `space-y-3 rounded-xl border border-slate-100 bg-slate-50 p-4 ${
-      shouldShowFirstTransactionPrompt ? 'border-emerald-200 shadow-md' : ''
-    }`;
+  const quickAddSectionClasses = card({
+    className: [
+      'lg:col-span-2',
+      shouldShowFirstTransactionPrompt &&
+        'relative ring-2 ring-emerald-300 shadow-xl transition duration-300',
+    ],
+  });
+  const expenseFormCardClasses = card({
+    variant: 'muted',
+    padding: 'sm',
+    className: [
+      'space-y-3',
+      shouldShowFirstTransactionPrompt && 'border-emerald-200 shadow-md',
+    ],
+  });
+  const incomeFormCardClasses = card({
+    variant: 'muted',
+    padding: 'sm',
+    className: 'space-y-3',
+  });
+  const goalFormCardClasses = card({
+    variant: 'muted',
+    padding: 'sm',
+    className: 'mt-4 space-y-3',
+  });
     const prioritizedGoal = useMemo(() => {
       const monthly = monthlySavings;
       if (!monthly || monthly <= 0) return null;
@@ -1015,24 +1033,30 @@ const DashboardView = ({
     const budgetTotalDisplay = '\u00A32500';
 
     return (
-      <div className="min-h-screen bg-slate-50">
-        <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
+      <div className="min-h-screen bg-surface">
+        <header
+          className={card({
+            variant: 'glass',
+            padding: 'none',
+            className: 'rounded-none border-x-0 border-t-0 border-b border-border/70 shadow-none backdrop-blur',
+          })}
+        >
           <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">Nest Finance</p>
-              <h1 className="text-2xl font-semibold text-slate-900">Secure Financial Command Center</h1>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Nest Finance</p>
+              <h1 className="text-2xl font-semibold text-text-primary">Secure Financial Command Center</h1>
             </div>
             <div className="flex items-center gap-3">
               {onShowPricingModal ? (
                 <button
                   type="button"
                   onClick={onShowPricingModal}
-                  className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-600 shadow-sm transition hover:border-emerald-400 hover:text-emerald-700"
+                  className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-surface px-4 py-2 text-sm font-semibold text-emerald-600 shadow-sm transition hover:border-emerald-400 hover:text-emerald-700"
                 >
                   Show Pricing Modal (Test)
                 </button>
               ) : null}
-              <button onClick={onLogout} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-emerald-500 hover:text-emerald-600">
+              <button onClick={onLogout} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary transition hover:border-primary/70 hover:text-primary">
                 <LogOut className="h-4 w-4" />
                 Logout
               </button>
@@ -1043,11 +1067,16 @@ const DashboardView = ({
         <main className="mx-auto max-w-6xl px-6 py-8">
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap items-center gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
+              <div
+                className={card({
+                  padding: 'none',
+                  className: 'inline-flex items-center gap-2 rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-text-secondary shadow-none',
+                })}
+              >
                 <button
                   aria-label="Previous month"
                   onClick={isMonthRange ? onPrevMonth : undefined}
-                  className={`rounded-full p-1 transition ${isMonthRange ? 'hover:bg-slate-100' : 'cursor-not-allowed opacity-40'}`}
+                  className={`rounded-full p-1 transition ${isMonthRange ? 'hover:bg-surface-muted/70' : 'cursor-not-allowed opacity-40'}`}
                   disabled={!isMonthRange}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -1056,14 +1085,14 @@ const DashboardView = ({
                 <button
                   aria-label="Next month"
                   onClick={isMonthRange ? onNextMonth : undefined}
-                  className={`rounded-full p-1 transition ${isMonthRange ? 'hover:bg-slate-100' : 'cursor-not-allowed opacity-40'}`}
+                  className={`rounded-full p-1 transition ${isMonthRange ? 'hover:bg-surface-muted/70' : 'cursor-not-allowed opacity-40'}`}
                   disabled={!isMonthRange}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
               <select
-                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-emerald-300"
+                className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text-secondary transition hover:border-primary/70 hover:text-text-primary"
                 value={datePreset}
                 onChange={handlePresetChange}
               >
@@ -1074,16 +1103,16 @@ const DashboardView = ({
                 <option value="custom">Custom range</option>
               </select>
               {datePreset === 'custom' ? (
-                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary">
                   <label className="sr-only" htmlFor="custom-range-start">Range start</label>
                   <input
                     id="custom-range-start"
                     type="date"
                     value={customDateDraft.start}
                     onChange={(event) => setCustomDateDraft((prev) => ({ ...prev, start: event.target.value }))}
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    className="rounded-lg border border-border bg-surface px-2 py-1 text-xs text-text-secondary focus:border-primary focus:ring-2 focus:ring-primary/40 focus:outline-none"
                   />
-                  <span className="text-slate-400">to</span>
+                  <span className="text-text-muted">to</span>
                   <label className="sr-only" htmlFor="custom-range-end">Range end</label>
                   <input
                     id="custom-range-end"
@@ -1091,7 +1120,7 @@ const DashboardView = ({
                     value={customDateDraft.end}
                     min={customDateDraft.start || undefined}
                     onChange={(event) => setCustomDateDraft((prev) => ({ ...prev, end: event.target.value }))}
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    className="rounded-lg border border-border bg-surface px-2 py-1 text-xs text-text-secondary focus:border-primary focus:ring-2 focus:ring-primary/40 focus:outline-none"
                   />
                   <button
                     type="button"
@@ -1100,7 +1129,7 @@ const DashboardView = ({
                     className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                       customDateDraft.start && customDateDraft.end
                         ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                        : 'cursor-not-allowed bg-slate-200 text-slate-500'
+                        : 'cursor-not-allowed bg-surface-muted text-text-muted'
                     }`}
                   >
                     Apply
@@ -1153,7 +1182,7 @@ const DashboardView = ({
           </div>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-            <section className="card lg:col-span-3">
+            <section className={card({ className: 'lg:col-span-3' })}>
               <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">At-a-Glance</p>
@@ -1162,12 +1191,14 @@ const DashboardView = ({
                 <p className="text-xs text-text-muted">Snapshot prototype - Placeholder values</p>
               </div>
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-xl border border-border bg-surface-muted p-5">
+                <div
+                  className={card({ variant: 'muted', padding: 'md', className: 'space-y-3 shadow-none' })}
+                >
                   <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Safe to Spend</p>
                   <p className="mt-3 text-3xl font-semibold text-text-primary">{safeToSpendDisplay}</p>
                   <p className="mt-1 text-xs text-text-muted">After upcoming bills & goals.</p>
                 </div>
-                <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+                <div className={card({ padding: 'md', className: 'space-y-3' })}>
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Net Worth</p>
@@ -1177,11 +1208,11 @@ const DashboardView = ({
                       {netWorthChangeDisplay}
                     </span>
                   </div>
-                  <div className="mt-4 flex h-16 items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 text-xs font-medium text-slate-400">
+                  <div className="mt-4 flex h-16 items-center justify-center rounded-lg border border-dashed border-border/60 bg-surface-muted text-xs font-medium text-text-muted">
                     [Sparkline]
                   </div>
                 </div>
-                <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+                <div className={card({ padding: 'md', className: 'space-y-3' })}>
                   <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Monthly Budget</p>
                   <div className="mt-3 flex items-baseline gap-2">
                     <p className="text-3xl font-semibold text-text-primary">{budgetProgress}%</p>
@@ -1204,12 +1235,12 @@ const DashboardView = ({
               className="relative overflow-hidden rounded-3xl border border-emerald-100/60 bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-700 p-8 text-emerald-50 shadow-2xl lg:col-span-2"
             >
             <div className="pointer-events-none absolute inset-0 opacity-80">
-              <div className="absolute -left-16 top-16 h-40 w-40 rounded-full bg-white/20 blur-3xl" />
+              <div className="absolute -left-16 top-16 h-40 w-40 rounded-full bg-surface opacity-20 blur-3xl" />
               <div className="absolute -right-12 bottom-0 h-48 w-48 rounded-full bg-emerald-300/30 blur-3xl" />
             </div>
             <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
               <div className="max-w-xl space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-100">
+                <div className="inline-flex items-center gap-2 rounded-full bg-surface bg-opacity-10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-100">
                   <Sparkles className="h-4 w-4" />
                   Personalized briefing
                 </div>
@@ -1277,14 +1308,14 @@ const DashboardView = ({
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-300">Next steps</p>
                     <h3 className="mt-2 text-xl font-semibold text-white">Make the most of your new data</h3>
-                    <p className="mt-2 text-sm text-slate-300">
+                    <p className="mt-2 text-sm text-text-muted">
                       Follow this quick checklist to settle in while we finish syncing your transactions.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowOnboardingChecklist(false)}
-                    className="self-end rounded-full p-2 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+                    className="self-end rounded-full p-2 text-text-muted transition hover:bg-surface-muted/60 hover:text-text-primary"
                     aria-label="Dismiss onboarding checklist"
                   >
                     <X className="h-5 w-5" />
@@ -1301,7 +1332,7 @@ const DashboardView = ({
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-white">{item.title}</p>
-                        <p className="mt-1 text-xs text-slate-400">{item.description}</p>
+                        <p className="mt-1 text-xs text-text-muted">{item.description}</p>
                       </div>
                     </li>
                   ))}
@@ -1321,7 +1352,7 @@ const DashboardView = ({
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-300">Live linked balances</p>
                   <h3 className="mt-2 text-2xl font-semibold text-white">{formatCurrency(totalLinkedBalance)}</h3>
-                  <p className="mt-2 text-sm text-slate-300">
+                  <p className="mt-2 text-sm text-text-muted">
                     These balances were imported directly from your connected bank.
                   </p>
                 </div>
@@ -1334,14 +1365,14 @@ const DashboardView = ({
                       <p className="text-sm font-semibold text-white">{account.name}</p>
                       <p className="mt-2 text-lg font-semibold text-emerald-400">{formatCurrency(account.balance)}</p>
                       {account.type ? (
-                        <p className="mt-1 text-xs text-slate-400">{account.type}</p>
+                        <p className="mt-1 text-xs text-text-muted">{account.type}</p>
                       ) : null}
                     </div>
                   ))}
                 </div>
               </div>
               {accountSummaries.length > 4 && (
-                <p className="mt-4 text-xs text-slate-500">
+                <p className="mt-4 text-xs text-text-secondary">
                   Showing your first four accounts. Open the accounts panel to view everything you linked.
                 </p>
               )}
@@ -1356,7 +1387,7 @@ const DashboardView = ({
               className="lg:col-span-3 flex flex-col gap-4 rounded-2xl border border-emerald-200/70 bg-emerald-50/80 p-6 text-emerald-900 shadow-lg sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex items-start gap-4">
-                <div className="rounded-full bg-white/90 p-3 text-emerald-500 shadow">
+                <div className="rounded-full bg-surface p-3 text-emerald-500 shadow">
                   <PlusCircle className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <div>
@@ -1370,7 +1401,7 @@ const DashboardView = ({
               <button
                 type="button"
                 onClick={() => setShowFirstTransactionPrompt(false)}
-                className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-white px-5 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-100"
+                className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-surface px-5 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-100"
               >
                 Okay, got it!
               </button>
@@ -1378,31 +1409,37 @@ const DashboardView = ({
           )}
 
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:col-span-3">
-            {insightCards.map((card) => (
+            {insightCards.map((insight) => (
               <button
-                key={card.title}
+                key={insight.title}
                 type="button"
-                onClick={() => handleHeadlineCardClick(card)}
-                className={`card relative overflow-hidden text-left transition ${card.accent ? 'bg-emerald-50/90 ring-emerald-200' : ''} hover:shadow-xl`}
+                onClick={() => handleHeadlineCardClick(insight)}
+                className={card({
+                  className: [
+                    'relative overflow-hidden text-left transition hover:shadow-xl',
+                    insight.accent && 'bg-emerald-50/90 ring-emerald-200',
+                  ],
+                  padding: 'md',
+                })}
               >
                 <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-emerald-200/30 blur-2xl" />
                 <div className="relative z-10 space-y-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600">{card.title}</p>
-                    <ArrowUpRight className={`h-4 w-4 ${card.accent ? 'text-emerald-500' : 'text-slate-300'}`} />
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600">{insight.title}</p>
+                    <ArrowUpRight className={`h-4 w-4 ${insight.accent ? 'text-emerald-500' : 'text-text-muted'}`} />
                   </div>
-                  <p className="text-2xl font-semibold text-slate-900">{card.value}</p>
-                  <p className="text-xs text-slate-500">{card.caption}</p>
+                  <p className="text-2xl font-semibold text-text-primary">{insight.value}</p>
+                  <p className="text-xs text-text-muted">{insight.caption}</p>
                 </div>
               </button>
             ))}
             </section>
 
-          <section className="card lg:col-span-2">
+          <section className={card({ className: 'lg:col-span-2' })}>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">Cash Flow Waterfall</h2>
-                <p className="text-sm text-slate-500">Follow how income funds top categories before landing in savings.</p>
+                <h2 className="text-lg font-semibold text-text-primary">Cash Flow Waterfall</h2>
+                <p className="text-sm text-text-secondary">Follow how income funds top categories before landing in savings.</p>
               </div>
               <div className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                 Net {formatCurrency(totals.net)}
@@ -1430,37 +1467,43 @@ const DashboardView = ({
                     <Bar dataKey="base" stackId="waterfall" fill="transparent" stroke="transparent" />
                     <Bar dataKey="deltaPositive" stackId="waterfall" radius={[6, 6, 0, 0]}>
                       {cashFlowWaterfallChartData.map((entry) => (
-                        <Cell key={`waterfall-positive-${entry.key}`} fill={waterfallColorByType[entry.type] || brandColor} />
+                        <Cell
+                          key={`waterfall-positive-${entry.key}`}
+                          fill={waterfallColorByType[entry.type] || themeColors.primary}
+                        />
                       ))}
                     </Bar>
                     <Bar dataKey="deltaNegative" stackId="waterfall" radius={[0, 0, 6, 6]}>
                       {cashFlowWaterfallChartData.map((entry) => (
-                        <Cell key={`waterfall-negative-${entry.key}`} fill={waterfallColorByType[entry.type] || expenseColor} />
+                        <Cell
+                          key={`waterfall-negative-${entry.key}`}
+                          fill={waterfallColorByType[entry.type] || themeColors.destructive}
+                        />
                       ))}
                     </Bar>
                     <Line type="monotone" dataKey="cumulative" stroke="#1e293b" strokeWidth={2} dot={{ r: 0 }} />
                   </ComposedChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
+                <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-border/60 bg-surface-muted p-6 text-center text-sm text-text-secondary">
                   Add income and expense activity to map your monthly flow.
                 </div>
               )}
             </div>
           </section>
 
-          <section className="card lg:col-span-1">
+          <section className={card({ className: 'lg:col-span-1' })}>
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">Cash Flow Calendar</h2>
-                <p className="text-sm text-slate-500">A high-level glance at expected inflows and bills this month.</p>
+                <h2 className="text-lg font-semibold text-text-primary">Cash Flow Calendar</h2>
+                <p className="text-sm text-text-secondary">A high-level glance at expected inflows and bills this month.</p>
               </div>
               <span className="rounded-full bg-emerald-50 p-2 text-emerald-600">
                 <CalendarDays className="h-5 w-5" />
               </span>
             </div>
             <div className="mt-4 space-y-2">
-              <div className="grid grid-cols-7 gap-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              <div className="grid grid-cols-7 gap-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
                 {cashFlowWeekdayLabels.map((label) => (
                   <span key={label} className="text-center">{label}</span>
                 ))}
@@ -1473,9 +1516,12 @@ const DashboardView = ({
                   return (
                     <div
                       key={cell.key}
-                      className="min-h-[2.75rem] rounded-lg border border-slate-200 bg-white p-1 text-[11px]"
+                      className={card({
+                        padding: 'none',
+                        className: 'min-h-[2.75rem] rounded-lg border border-border/70 p-1 text-[11px] shadow-none',
+                      })}
                     >
-                      <span className="block text-right text-[10px] font-semibold text-slate-500">{cell.day}</span>
+                      <span className="block text-right text-[10px] font-semibold text-text-secondary">{cell.day}</span>
                       <div className="mt-1 space-y-1">
                         {cell.markers.slice(0, 2).map((marker) => (
                           <div
@@ -1490,7 +1536,7 @@ const DashboardView = ({
                           </div>
                         ))}
                         {cell.markers.length > 2 ? (
-                          <p className="text-[10px] text-slate-400">+{cell.markers.length - 2} more</p>
+                          <p className="text-[10px] text-text-muted">+{cell.markers.length - 2} more</p>
                         ) : null}
                       </div>
                     </div>
@@ -1498,7 +1544,7 @@ const DashboardView = ({
                 })}
               </div>
             </div>
-            <div className="mt-4 space-y-1 text-xs text-slate-600">
+            <div className="mt-4 space-y-1 text-xs text-text-secondary">
               <p>
                 Next income:{' '}
                 {cashFlowCalendarData.nextIncome
@@ -1509,12 +1555,12 @@ const DashboardView = ({
             </div>
           </section>
 
-          <section className={`${quickAddSectionClasses} lg:col-span-2`}>
-            <h2 className="text-lg font-semibold text-slate-900">Quick add entries</h2>
-            <p className="mt-1 text-sm text-slate-500">Capture income and expenses instantly to keep your dashboard current.</p>
+          <section className={quickAddSectionClasses}>
+            <h2 className="text-lg font-semibold text-text-primary">Quick add entries</h2>
+            <p className="mt-1 text-sm text-text-secondary">Capture income and expenses instantly to keep your dashboard current.</p>
             <div className="mt-6 space-y-4">
               <form onSubmit={handleExpenseSubmit} className={expenseFormCardClasses}>
-                  <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <h3 className="flex items-center gap-2 text-sm font-semibold text-text-primary">
                       <PlusCircle className="h-4 w-4 text-red-500" />
                       Add expense
                   </h3>
@@ -1562,8 +1608,8 @@ const DashboardView = ({
                   <button type="submit" className="btn btn-primary w-full">Record expense</button>
                 </form>
 
-                <form onSubmit={handleIncomeSubmit} className="space-y-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
-                  <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <form onSubmit={handleIncomeSubmit} className={incomeFormCardClasses}>
+                  <h3 className="flex items-center gap-2 text-sm font-semibold text-text-primary">
                       <PlusCircle className="h-4 w-4 text-emerald-500" />
                       Add income
                   </h3>
@@ -1599,12 +1645,12 @@ const DashboardView = ({
               </div>
           </section>
 
-            <section className="card lg:col-span-1">
-              <h2 className="text-lg font-semibold text-slate-900">Savings goals</h2>
-              <p className="mt-1 text-sm text-slate-500">Align your monthly savings with meaningful milestones.</p>
-              <form onSubmit={handleGoalSubmit} className="mt-4 space-y-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <section className={card({ className: 'lg:col-span-1' })}>
+              <h2 className="text-lg font-semibold text-text-primary">Savings goals</h2>
+              <p className="mt-1 text-sm text-text-secondary">Align your monthly savings with meaningful milestones.</p>
+              <form onSubmit={handleGoalSubmit} className={goalFormCardClasses}>
                 <div>
-                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Goal name</label>
+                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">Goal name</label>
                   <input
                         className="input-base"
                       value={goalForm.name}
@@ -1613,7 +1659,7 @@ const DashboardView = ({
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Goal type</label>
+                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">Goal type</label>
                   <select
                         className="input-base"
                       value={goalForm.type}
@@ -1624,7 +1670,7 @@ const DashboardView = ({
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">{goalForm.type === 'debt' ? 'Initial debt amount' : 'Target amount'}</label>
+                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">{goalForm.type === 'debt' ? 'Initial debt amount' : 'Target amount'}</label>
                   <input
                         className="input-base"
                       type="number"
@@ -1637,7 +1683,7 @@ const DashboardView = ({
                 </div>
                 {goalForm.type === 'debt' && (
                   <div>
-                      <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Current balance</label>
+                      <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">Current balance</label>
                       <input
                         className="input-base"
                         type="number"
@@ -1653,7 +1699,7 @@ const DashboardView = ({
               </form>
               <div className="mt-6 space-y-4">
                 {goals.length === 0 && (
-                  <p className="text-sm text-slate-500">No goals yet. Start by creating your first savings target.</p>
+                  <p className="text-sm text-text-secondary">No goals yet. Start by creating your first savings target.</p>
                 )}
                 <AnimatePresence>
                   {goals.map((goal) => {
@@ -1678,9 +1724,12 @@ const DashboardView = ({
                         )
                       : null;
                     return (
-                      <div key={goal.id} className="rounded-xl border border-slate-100 bg-white p-4 shadow-inner">
+                      <div
+                        key={goal.id}
+                        className={card({ variant: 'muted', padding: 'sm', className: 'shadow-inner' })}
+                      >
                         <div className="flex items-center justify-between text-sm">
-                          <h3 className="font-semibold text-slate-800">{goal.name}</h3>
+                          <h3 className="font-semibold text-text-primary">{goal.name}</h3>
                           <span className="text-xs font-semibold text-emerald-600">{progress.toFixed(0)}%</span>
                         </div>
                         <div className="mt-3 h-2 rounded-full bg-slate-100">
@@ -1689,11 +1738,11 @@ const DashboardView = ({
                             style={{ width: `${Math.min(progress, 100)}%` }}
                           />
                         </div>
-                        <p className="mt-2 text-xs text-slate-500">
+                        <p className="mt-2 text-xs text-text-secondary">
                           {isDebt ? 'Initial:' : 'Target:'} {formatCurrency(target)} - {isDebt ? 'Balance:' : 'Saved:'}{' '}
                           {formatCurrency(currentAmount)}
                         </p>
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="mt-1 text-xs text-text-muted">
                           {monthlySavings > 0
                             ? monthsToGoal
                               ? `At ${formatCurrency(monthlySavings)} saved monthly, reach in ~${monthsToGoal} month${monthsToGoal === 1 ? '' : 's'}.`
@@ -1716,11 +1765,11 @@ const DashboardView = ({
               </div>
             </section>
 
-            <section className="card lg:col-span-2">
+            <section className={card({ className: 'lg:col-span-2' })}>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Spending Trends (This Month vs. Last Month)</h2>
-                  <p className="text-sm text-slate-500">Spot the categories with the biggest month-over-month shifts.</p>
+                  <h2 className="text-lg font-semibold text-text-primary">Spending Trends (This Month vs. Last Month)</h2>
+                  <p className="text-sm text-text-secondary">Spot the categories with the biggest month-over-month shifts.</p>
                 </div>
               </div>
               <div className="mt-6 h-72">
@@ -1746,7 +1795,7 @@ const DashboardView = ({
                       <Bar
                         dataKey="currentMonthSpending"
                         name="This Month"
-                        fill={expenseColor}
+                        fill={themeColors.destructive}
                         radius={[6, 6, 0, 0]}
                         cursor="pointer"
                         onClick={(data) => handleCategoryDrilldown(data?.payload?.category)}
@@ -1762,18 +1811,18 @@ const DashboardView = ({
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-500">
+                  <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-border/60 bg-surface-muted p-6 text-center text-sm text-text-secondary">
                     Not enough expense data to compare trends yet.
                   </div>
                 )}
               </div>
             </section>
 
-            <section className="card lg:col-span-1">
+            <section className={card({ className: 'lg:col-span-1' })}>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">AI Insights Engine</h2>
-                  <p className="text-sm text-slate-500">
+                  <h2 className="text-lg font-semibold text-text-primary">AI Insights Engine</h2>
+                  <p className="text-sm text-text-secondary">
                     {isPremium ? `Intelligent highlights for ${rangeLabel}.` : 'Unlock personalised guidance with Premium.'}
                   </p>
                 </div>
@@ -1794,14 +1843,19 @@ const DashboardView = ({
                             <button
                               type="button"
                               onClick={() => handleInsightSelect(insight)}
-                              className="group flex w-full items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-left transition hover:border-emerald-300 hover:bg-white"
+                              className={card({
+                                variant: 'muted',
+                                padding: 'sm',
+                                interactive: true,
+                                className: 'group flex w-full items-start gap-3 rounded-xl text-left hover:border-emerald-300',
+                              })}
                             >
                               <span className="mt-1 rounded-full bg-emerald-50 p-2 text-emerald-600 group-hover:bg-emerald-100">
                                 <Icon className="h-4 w-4" />
                               </span>
-                              <span className="space-y-1 text-sm text-slate-700">
-                                <span className="block font-semibold text-slate-900">{insight.title}</span>
-                                <span className="block text-xs text-slate-500">{insight.body}</span>
+                              <span className="space-y-1 text-sm text-text-secondary">
+                                <span className="block font-semibold text-text-primary">{insight.title}</span>
+                                <span className="block text-xs text-text-muted">{insight.body}</span>
                               </span>
                             </button>
                           </li>
@@ -1809,7 +1863,7 @@ const DashboardView = ({
                       })}
                     </ul>
                   ) : (
-                    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                    <div className="rounded-xl border border-dashed border-border/60 bg-surface-muted p-4 text-sm text-text-secondary">
                       Insights will appear here once we have enough activity for this range.
                     </div>
                   )
@@ -1831,16 +1885,16 @@ const DashboardView = ({
               </div>
             </section>
 
-            <section className="card lg:col-span-2">
+            <section className={card({ className: 'lg:col-span-2' })}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Investment projection</h2>
-                  <p className="text-sm text-slate-500">
+                  <h2 className="text-lg font-semibold text-text-primary">Investment projection</h2>
+                  <p className="text-sm text-text-secondary">
                     Model potential savings growth over the next {projectionHorizon} year{projectionHorizon === 1 ? '' : 's'}.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="inline-flex rounded-full border border-slate-200 bg-white p-1 text-xs font-semibold text-slate-600">
+                  <div className="inline-flex rounded-full border border-border bg-surface p-1 text-xs font-semibold text-text-secondary">
                     {[1, 5, 10].map((years) => {
                       const isActive = projectionHorizon === years;
                       return (
@@ -1856,7 +1910,7 @@ const DashboardView = ({
                     })}
                   </div>
                   <select
-                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-emerald-500 hover:text-emerald-600"
+                    className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary transition hover:border-primary/60 hover:text-text-primary"
                     value={rate}
                     onChange={(event) => setRate(Number(event.target.value))}
                   >
@@ -1873,7 +1927,13 @@ const DashboardView = ({
                     <XAxis dataKey="year" stroke="#94a3b8" />
                     <YAxis stroke="#94a3b8" tickFormatter={(value) => formatCurrency(value)} width={90} />
                     <Tooltip formatter={(value) => formatCurrency(value)} />
-                    <Line type="monotone" dataKey="savings" stroke={brandColor} strokeWidth={3} dot={{ r: 4 }} />
+                    <Line
+                      type="monotone"
+                      dataKey="savings"
+                      stroke={themeColors.primary}
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -1891,37 +1951,37 @@ const DashboardView = ({
                   ) : null}
                 </div>
               ) : (
-                <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
+                <div className="mt-4 rounded-xl border border-dashed border-border/60 bg-surface-muted p-4 text-xs text-text-secondary">
                   Goal overlay controls will appear here soon. Tell us which milestones you’d like to plot.
                 </div>
               )}
             </section>
 
-            <section className="card lg:col-span-1">
+            <section className={card({ className: 'lg:col-span-1' })}>
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Net Worth Trend</h2>
-                  <p className="text-sm text-slate-500">See how assets and liabilities stack up over time.</p>
+                  <h2 className="text-lg font-semibold text-text-primary">Net Worth Trend</h2>
+                  <p className="text-sm text-text-secondary">See how assets and liabilities stack up over time.</p>
                 </div>
                 {!isPremium ? (
-                  <span className="rounded-full bg-slate-100 p-2 text-slate-500">
+                  <span className="rounded-full bg-surface-muted p-2 text-text-muted">
                     <Lock className="h-4 w-4" />
                   </span>
                 ) : null}
               </div>
               {isPremium ? (
-                <div className="mt-6 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+                <div className="mt-6 rounded-xl border border-dashed border-border/60 bg-surface-muted p-5 text-sm text-text-secondary">
                   Net worth chart coming soon. Head to the Accounts & Net Worth hub for deeper breakdowns.
                 </div>
               ) : (
                 <div className="mt-6 space-y-4">
                   <div className="relative flex h-36 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-slate-200 bg-gradient-to-br from-slate-100 via-white to-slate-50">
                     <div className="absolute inset-x-10 bottom-6 h-20 rounded-full bg-emerald-100/50 blur-2xl" />
-                    <span className="relative text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    <span className="relative text-xs font-semibold uppercase tracking-wide text-text-muted">
                       Premium chart locked
                     </span>
                   </div>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-text-secondary">
                     Track your trajectory with interactive assets vs. liabilities timelines, only in Nest Premium.
                   </p>
                   {onShowPricingModal ? (
@@ -1938,14 +1998,14 @@ const DashboardView = ({
               )}
             </section>
 
-          <section className="card lg:col-span-3">
+          <section className={card({ className: 'lg:col-span-3' })}>
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-slate-900">Transactions - {rangeLabel}</h2>
+              <h2 className="text-lg font-semibold text-text-primary">Transactions - {rangeLabel}</h2>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleExportTransactions}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-emerald-400 hover:text-emerald-600"
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text-secondary transition hover:border-primary/60 hover:text-text-primary"
                 >
                   <Download className="h-4 w-4" />
                   Export CSV
@@ -1963,7 +2023,7 @@ const DashboardView = ({
                 </div>
               )}
               {!isSyncingTransactions && filteredTransactions.length === 0 && (
-                <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
+                <p className="rounded-xl border border-dashed border-border/60 bg-surface-muted p-6 text-center text-sm text-text-secondary">
                   You have no manual entries this month. Use the quick add forms to record income and expenses.
                 </p>
               )}
@@ -1979,11 +2039,14 @@ const DashboardView = ({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -6 }}
                       transition={{ duration: 0.25, ease: 'easeOut' }}
-                      className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
+                      className={card({
+                        padding: 'sm',
+                        className: 'flex items-center justify-between shadow-sm',
+                      })}
                     >
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">{transaction.description}</p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm font-semibold text-text-primary">{transaction.description}</p>
+                        <p className="text-xs text-text-secondary">
                           {isIncome ? 'Income' : transaction.category} - {date.toLocaleDateString()}
                         </p>
                       </div>
@@ -2002,7 +2065,7 @@ const DashboardView = ({
                               category: transaction.category || 'General',
                             })
                           }
-                          className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                          className="rounded-full p-2 text-text-muted transition hover:bg-surface-muted hover:text-text-primary"
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
@@ -2013,7 +2076,7 @@ const DashboardView = ({
                               onDeleteTransaction(transaction.id);
                             }
                           }}
-                          className="rounded-full p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                          className="rounded-full p-2 text-text-muted transition hover:bg-red-50 hover:text-red-600"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -2040,17 +2103,21 @@ const DashboardView = ({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 40 }}
                   transition={{ duration: 0.25 }}
-                  className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl"
+                  className={card({
+                    variant: 'elevated',
+                    padding: 'lg',
+                    className: 'w-full max-w-2xl rounded-2xl shadow-2xl',
+                  })}
                 >
                   <div className="mb-4 flex items-start justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900">{drilldown.title}</h3>
-                      <p className="text-xs uppercase tracking-wide text-slate-400">{rangeLabel}</p>
+                      <h3 className="text-lg font-semibold text-text-primary">{drilldown.title}</h3>
+                      <p className="text-xs uppercase tracking-wide text-text-muted">{rangeLabel}</p>
                     </div>
                     <button
                       type="button"
                       onClick={closeDrilldown}
-                      className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                      className="rounded-full p-2 text-text-muted transition hover:bg-surface-muted hover:text-text-primary"
                       aria-label="Close drilldown"
                     >
                       <X className="h-5 w-5" />
@@ -2060,15 +2127,15 @@ const DashboardView = ({
                     <div className="space-y-4">
                       {drilldown.metrics ? (
                         <div className="grid gap-3 sm:grid-cols-3">
-                          <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-                            <p className="text-xs uppercase tracking-wide text-slate-500">This month</p>
-                            <p className="mt-1 text-lg font-semibold text-slate-900">
+                          <div className="rounded-xl border border-border/60 bg-surface-muted p-3">
+                            <p className="text-xs uppercase tracking-wide text-text-secondary">This month</p>
+                            <p className="mt-1 text-lg font-semibold text-text-primary">
                               {formatCurrency(drilldown.metrics.current)}
                             </p>
                           </div>
-                          <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-                            <p className="text-xs uppercase tracking-wide text-slate-500">Last month</p>
-                            <p className="mt-1 text-lg font-semibold text-slate-900">
+                          <div className="rounded-xl border border-border/60 bg-surface-muted p-3">
+                            <p className="text-xs uppercase tracking-wide text-text-secondary">Last month</p>
+                            <p className="mt-1 text-lg font-semibold text-text-primary">
                               {formatCurrency(drilldown.metrics.previous)}
                             </p>
                           </div>
@@ -2091,34 +2158,34 @@ const DashboardView = ({
                             return (
                               <div
                                 key={transaction.id || `${transaction.description}-${txDate.toISOString()}`}
-                                className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+                                className="flex items-center justify-between rounded-xl border border-border/60 bg-surface-muted px-4 py-3 text-sm text-text-secondary"
                               >
                                 <div>
-                                  <p className="font-semibold text-slate-900">{transaction.description}</p>
-                                  <p className="text-xs text-slate-500">
+                                  <p className="font-semibold text-text-primary">{transaction.description}</p>
+                                  <p className="text-xs text-text-muted">
                                     {drilldownDateFormatter.format(txDate)} · {transaction.category || 'General'}
                                   </p>
                                 </div>
-                                <span className="text-sm font-semibold text-slate-900">
+                                <span className="text-sm font-semibold text-text-primary">
                                   {formatCurrency(transaction.amount)}
                                 </span>
                               </div>
                             );
                           })
                         ) : (
-                          <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-sm text-slate-500">
+                          <p className="rounded-xl border border-dashed border-border/60 bg-surface-muted p-4 text-center text-sm text-text-secondary">
                             No transactions in this category for the selected range.
                           </p>
                         )}
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-3 text-sm text-slate-700">
+                    <div className="space-y-3 text-sm text-text-secondary">
                       {drilldown.insight?.caption ? (
-                        <p className="text-xs uppercase tracking-wide text-slate-500">{drilldown.insight.caption}</p>
+                        <p className="text-xs uppercase tracking-wide text-text-secondary">{drilldown.insight.caption}</p>
                       ) : null}
                       <p>{drilldown.insight?.body}</p>
-                      <p className="text-xs text-slate-500">Click another insight or bar to explore more detail.</p>
+                      <p className="text-xs text-text-muted">Click another insight or bar to explore more detail.</p>
                     </div>
                   )}
                 </motion.div>
@@ -2128,16 +2195,22 @@ const DashboardView = ({
         </main>
         {contributeGoal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <div
+              className={card({
+                variant: 'elevated',
+                padding: 'lg',
+                className: 'w-full max-w-sm rounded-2xl shadow-2xl',
+              })}
+            >
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-slate-900">Contribute to {contributeGoal.name}</h3>
-                <button onClick={() => setContributeGoal(null)} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                <h3 className="text-lg font-semibold text-text-primary">Contribute to {contributeGoal.name}</h3>
+                <button onClick={() => setContributeGoal(null)} className="rounded-full p-2 text-text-muted hover:bg-surface-muted hover:text-text-primary">
                   <X className="h-5 w-5" />
                 </button>
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Amount</label>
+                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">Amount</label>
                   <input
                         className="input-base"
                       type="number"
@@ -2149,7 +2222,7 @@ const DashboardView = ({
                   />
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
-                  <button onClick={() => setContributeGoal(null)} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:border-slate-300">Cancel</button>
+                  <button onClick={() => setContributeGoal(null)} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary transition hover:border-primary/60 hover:text-text-primary">Cancel</button>
                   <button
                       onClick={async () => {
                         const amt = Number(contributeAmount) || 0;
@@ -2169,16 +2242,22 @@ const DashboardView = ({
 
         {budgetsOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div
+              className={card({
+                variant: 'elevated',
+                padding: 'lg',
+                className: 'w-full max-w-md rounded-2xl shadow-2xl',
+              })}
+            >
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-slate-900">Monthly budgets</h3>
-                <button onClick={() => setBudgetsOpen(false)} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                <h3 className="text-lg font-semibold text-text-primary">Monthly budgets</h3>
+                <button onClick={() => setBudgetsOpen(false)} className="rounded-full p-2 text-text-muted transition hover:bg-surface-muted hover:text-text-primary">
                   <X className="h-5 w-5" />
                 </button>
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Category</label>
+                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">Category</label>
                   <select
                         className="input-base"
                       value={budgetForm.category}
@@ -2195,7 +2274,7 @@ const DashboardView = ({
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Monthly limit</label>
+                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">Monthly limit</label>
                   <input
                         className="input-base"
                       type="number"
@@ -2207,7 +2286,7 @@ const DashboardView = ({
                   />
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
-                  <button onClick={() => setBudgetsOpen(false)} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:border-slate-300">Close</button>
+                  <button onClick={() => setBudgetsOpen(false)} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary transition hover:border-primary/60 hover:text-text-primary">Close</button>
                   <button
                       onClick={async () => {
                         const amt = Number(budgetForm.amount) || 0;
@@ -2221,12 +2300,12 @@ const DashboardView = ({
                   </button>
                 </div>
                 <div className="pt-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Existing budgets</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-secondary">Existing budgets</p>
                   <ul className="max-h-40 space-y-2 overflow-auto pr-1">
                       {(budgets || []).map((b) => (
-                        <li key={b.id} className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 p-2 text-sm">
-                          <span className="text-slate-700">{b.category}</span>
-                          <span className="font-semibold text-slate-900">{formatCurrency(b.amount)}</span>
+                        <li key={b.id} className="flex items-center justify-between rounded-lg border border-border/60 bg-surface-muted p-2 text-sm text-text-secondary">
+                          <span>{b.category}</span>
+                          <span className="font-semibold text-text-primary">{formatCurrency(b.amount)}</span>
                         </li>
                       ))}
                   </ul>
@@ -2238,16 +2317,22 @@ const DashboardView = ({
 
         {accountsOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div
+              className={card({
+                variant: 'elevated',
+                padding: 'lg',
+                className: 'w-full max-w-md rounded-2xl shadow-2xl',
+              })}
+            >
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-slate-900">Accounts</h3>
-                <button onClick={() => setAccountsOpen(false)} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                <h3 className="text-lg font-semibold text-text-primary">Accounts</h3>
+                <button onClick={() => setAccountsOpen(false)} className="rounded-full p-2 text-text-muted transition hover:bg-surface-muted hover:text-text-primary">
                   <X className="h-5 w-5" />
                 </button>
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Account name</label>
+                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">Account name</label>
                   <input
                         className="input-base"
                       value={accountName}
@@ -2256,7 +2341,7 @@ const DashboardView = ({
                   />
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
-                  <button onClick={() => setAccountsOpen(false)} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:border-slate-300">Close</button>
+                  <button onClick={() => setAccountsOpen(false)} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary transition hover:border-primary/60 hover:text-text-primary">Close</button>
                   <button
                       onClick={async () => {
                         const name = String(accountName || '').trim();
@@ -2272,11 +2357,11 @@ const DashboardView = ({
                   </button>
                 </div>
                 <div className="pt-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Existing accounts</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-secondary">Existing accounts</p>
                   <ul className="max-h-40 space-y-2 overflow-auto pr-1">
                       {(accounts || []).map((a) => (
-                        <li key={a.id} className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 p-2 text-sm">
-                          <span className="text-slate-700">{a.name}</span>
+                        <li key={a.id} className="flex items-center justify-between rounded-lg border border-border/60 bg-surface-muted p-2 text-sm text-text-secondary">
+                          <span>{a.name}</span>
                         </li>
                       ))}
                   </ul>
@@ -2287,16 +2372,22 @@ const DashboardView = ({
         )}
         {editTx && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div
+              className={card({
+                variant: 'elevated',
+                padding: 'lg',
+                className: 'w-full max-w-md rounded-2xl shadow-2xl',
+              })}
+            >
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-slate-900">Edit transaction</h3>
-                <button onClick={() => setEditTx(null)} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                <h3 className="text-lg font-semibold text-text-primary">Edit transaction</h3>
+                <button onClick={() => setEditTx(null)} className="rounded-full p-2 text-text-muted transition hover:bg-surface-muted hover:text-text-primary">
                   <X className="h-5 w-5" />
                 </button>
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Description</label>
+                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">Description</label>
                   <input
                         className="input-base"
                       value={editTx.description}
@@ -2304,7 +2395,7 @@ const DashboardView = ({
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Amount</label>
+                  <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">Amount</label>
                   <input
                         className="input-base"
                       type="number"
@@ -2316,7 +2407,7 @@ const DashboardView = ({
                 </div>
                 {editTx.type === 'expense' && (
                   <div>
-                      <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Category</label>
+                      <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-text-secondary">Category</label>
                       <input
                         className="input-base"
                         value={editTx.category || 'General'}
@@ -2325,7 +2416,7 @@ const DashboardView = ({
                   </div>
                 )}
                 <div className="mt-4 flex justify-end gap-2">
-                  <button onClick={() => setEditTx(null)} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:border-slate-300">Cancel</button>
+                  <button onClick={() => setEditTx(null)} className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary transition hover:border-primary/60 hover:text-text-primary">Cancel</button>
                   <button
                       onClick={async () => {
                         await onUpdateTransaction(editTx.id, {
@@ -2347,7 +2438,7 @@ const DashboardView = ({
 
         {settingsOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="card w-full max-w-md p-6">
+            <div className={card({ className: 'w-full max-w-md' })}>
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-text-primary">Workspace preferences</h3>
                 <button

@@ -18,6 +18,7 @@ import {
 import FeatureCardVine from './FeatureCardVine';
 import AtmosphericLayer from './AtmosphericLayer';
 import { btn, card } from '../theme/styles';
+import ThreeBackground from '../components/ThreeBackground.jsx';
 
 // --- Centralized all variants for consistency ---
 const globalVariants = {
@@ -548,6 +549,8 @@ const Navbar = ({ onLoginClick, onGetStartedClick }) => {
 const HeroSection = React.forwardRef(({ onGetStartedClick }, ref) => (
   // Added relative positioning context for absolute children
   <section ref={ref} className="relative min-h-screen overflow-hidden" id="top">
+    {/* Three.js decorative background layer (behind particles) */}
+    <ThreeBackground className="absolute inset-0 -z-10" />
     {/* Particles layer: Renders conditionally after init */}
     <HeroParticlesLayer />
 
