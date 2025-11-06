@@ -2,8 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
-import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadFull } from "tsparticles";
+const PointsBackgroundLazy = React.lazy(() => import('./PointsBackground.jsx'));
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -98,60 +97,7 @@ const PricingPlanSelection = ({
   const [activeIndex, setActiveIndex] = useState(
     defaultPlanIndex >= 0 ? defaultPlanIndex : 0,
   );
-  const [particlesReady, setParticlesReady] = useState(false);
-
-  useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadFull(engine);
-    })
-      .then(() => setParticlesReady(true))
-      .catch((error) => {
-        console.error("Failed to initialize pricing particles", error);
-      });
-  }, []);
-
-  const particlesOptions = useMemo(
-    () => ({
-      fullScreen: { enable: false },
-      detectRetina: true,
-      background: { color: "transparent" },
-      fpsLimit: 60,
-      interactivity: {
-        detectsOn: "window",
-        events: {
-          onHover: { enable: true, mode: "bubble" },
-          resize: true,
-        },
-        modes: {
-          bubble: { distance: 160, duration: 2, opacity: 0.4, size: 6 },
-        },
-      },
-      particles: {
-        number: { value: 80, density: { enable: true, area: 900 } },
-        color: { value: ["#34d399", "#38bdf8", "#a855f7"] },
-        shape: { type: "circle" },
-        opacity: {
-          value: { min: 0.2, max: 0.6 },
-          animation: { enable: true, speed: 0.6, minimumValue: 0.2 },
-        },
-        size: {
-          value: { min: 1, max: 3.5 },
-          animation: { enable: true, speed: 3, minimumValue: 1 },
-        },
-        move: {
-          enable: true,
-          speed: 0.6,
-          direction: "none",
-          random: true,
-          straight: false,
-          outModes: { default: "out" },
-          wobble: { enable: true, distance: 8, speed: 0.3 },
-        },
-        links: { enable: false },
-      },
-    }),
-    [],
-  );
+  // background handled by R3F Points, lazy-loaded when modal is open
 
   const priceCopy = useMemo(() => {
     return PLAN_METADATA.map((plan) => {
@@ -224,11 +170,9 @@ const PricingPlanSelection = ({
   <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgb(var(--color-overlay-rgb)/0.97)_0%,_rgb(var(--color-overlay-rgb)/0.85)_55%,_transparent_100%)]" />
   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgb(var(--color-primary-rgb)/0.28),_transparent_65%)]" />
   <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgb(var(--color-accent-rgb)/0.18),_transparent_60%)]" />
-        {particlesReady && (
-          <div className="pointer-events-none absolute inset-0">
-            <Particles options={particlesOptions} className="h-full w-full" />
-          </div>
-        )}
+        <React.Suspense fallback={null}>
+          <PointsBackgroundLazy className="absolute inset-0 pointer-events-none" />
+        </React.Suspense>
 
         <div className="relative z-10 flex h-full flex-col text-text-on-dark">
           <div className="flex items-center justify-between px-6 py-4 sm:px-10 sm:py-8">
