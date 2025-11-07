@@ -1,8 +1,9 @@
-import React, { Suspense, lazy, useMemo, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import React, { Suspense, lazy, useMemo, useRef, useState } from 'react';
+import { motion, useReducedMotion, useScroll, useMotionValueEvent } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
 const LazyNestCanvas = lazy(() => import('../components/experience/NestExperienceCanvas.jsx'));
+const IMMERSIVE_HEIGHT = 300; // vh
 
 const VALUE_PROPS = [
   {
@@ -22,9 +23,6 @@ const VALUE_PROPS = [
   },
 ];
 
-const NEST_POSTER =
-  'data:image/svg+xml;utf8,<svg width="900" height="600" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="a" cx="50%" cy="45%" r="65%"><stop stop-color="%230ea5e9" offset="0%"/><stop stop-color="%2301111c" offset="100%"/></radialGradient></defs><rect width="900" height="600" fill="%2301111c"/><circle cx="450" cy="300" r="230" fill="url(%23a)" opacity="0.55"/><path d="M200 300 Q450 120 700 300" stroke="%23fef3c7" stroke-width="6" fill="none" opacity="0.4"/><path d="M200 320 Q450 500 700 320" stroke="%236ee7b7" stroke-width="4" fill="none" opacity="0.35"/><text x="50%" y="70%" fill="%23e2e8f0" font-family="Segoe UI" font-size="36" text-anchor="middle">Nest Preview</text></svg>';
-
 const householdFocusOptions = ['Get on the same page weekly', 'Plan major purchases calmly', 'Pay off debt together', 'Grow generational wealth'];
 
 const motionFade = {
@@ -32,17 +30,45 @@ const motionFade = {
   animate: { opacity: 1, y: 0 },
 };
 
-function CanvasPoster() {
-  return (
-    <div className="flex h-screen items-center justify-center bg-slate-950">
-      <img src={NEST_POSTER} alt="Nest preview artwork" className="h-auto max-h-[80vh] w-[90vw] max-w-4xl rounded-3xl border border-white/10 shadow-2xl" />
+const fadeByProgress = (progress, start, end) => {
+  const padding = 0.08;
+  const paddedStart = Math.max(0, start - padding);
+  const paddedEnd = Math.min(1, end + padding);
+
+  if (progress <= paddedStart) {
+    return start === 0 ? 1 : 0;
+  }
+  if (progress >= paddedEnd) return 0;
+
+  const midpoint = (start + end) / 2;
+  if (progress <= midpoint) {
+    return (progress - paddedStart) / Math.max(0.0001, midpoint - paddedStart);
+  }
+  return (paddedEnd - progress) / Math.max(0.0001, paddedEnd - midpoint);
+};
+
+const PosterOrnament = () => (
+  <div className="absolute inset-0 overflow-hidden rounded-[36px] bg-[#020b16]">
+    <div className="absolute inset-[-40%] rounded-full bg-[radial-gradient(circle_at_center,#0f5f92_0%,rgba(2,11,22,0)_65%)] blur-3xl opacity-70" />
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#1e293b_0%,rgba(2,11,22,0)_55%)] opacity-90" />
+    <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.18),rgba(56,189,248,0.18))] mix-blend-screen" />
+  </div>
+);
+
+const CanvasPoster = () => (
+  <div className="relative flex h-full items-center justify-center bg-slate-950 px-6">
+    <PosterOrnament />
+    <div className="relative z-10 max-w-xl rounded-[32px] border border-white/10 bg-slate-900/60 p-10 text-center shadow-[0_40px_90px_rgba(8,47,73,0.35)] backdrop-blur-xl">
+      <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-300/70">Nest Preview</p>
+      <h3 className="mt-4 text-3xl font-semibold text-white">Scroll to morph chaos into a shared nest.</h3>
+      <p className="mt-4 text-base text-slate-200/85">Your motion settings disabled 3D, so here&apos;s a still look at the canvas.</p>
     </div>
-  );
-}
+  </div>
+);
 
 function ActOneHero() {
   return (
-    <section className="flex h-screen flex-col items-center justify-center gap-8 px-6 text-center md:px-12">
+    <section className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 text-center md:px-12">
       <motion.p className="text-xs font-semibold uppercase tracking-[0.45em] text-emerald-200/80" {...motionFade} transition={{ duration: 0.8 }}>
         Act I · The Problem
       </motion.p>
@@ -61,50 +87,51 @@ function ActOneHero() {
   );
 }
 
-function ActTwoValueProps({ mode = 'static', scrollProgress = 0 }) {
-  const opacities = useMemo(() => {
-    if (mode !== 'immersive') {
-      return VALUE_PROPS.map((_, idx) => 1 - idx * 0.15);
-    }
-    return VALUE_PROPS.map((_, idx) => {
-      const slice = 0.18 + idx * 0.15;
-      const start = slice;
-      const mid = slice + 0.08;
-      const end = slice + 0.16;
-      if (scrollProgress <= start || scrollProgress >= end) return 0;
-      if (scrollProgress <= mid) {
-        return (scrollProgress - start) / (mid - start + 1e-6);
-      }
-      return (end - scrollProgress) / (end - mid + 1e-6);
-    });
-  }, [mode, scrollProgress]);
-
+function ValuePropOverlay({ progress }) {
+  const slot = progress * VALUE_PROPS.length;
   return (
-    <section className="relative flex h-screen items-center justify-center overflow-hidden px-6 text-left">
-      <div className="pointer-events-none relative h-[60vh] w-full max-w-3xl">
-        {VALUE_PROPS.map((block, idx) => (
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+      {VALUE_PROPS.map((block, idx) => {
+        const start = idx / VALUE_PROPS.length;
+        const end = (idx + 1) / VALUE_PROPS.length;
+        const opacity = fadeByProgress(progress, start, end);
+        const relative = idx - slot;
+        const translateY = relative * 60;
+        const scale = 1 - Math.min(Math.abs(relative) * 0.06, 0.18);
+        const blur = Math.min(Math.abs(relative) * 6, 10);
+        const depth = 100 - Math.abs(relative) * 20;
+        return (
           <div
             key={block.id}
-            className="absolute inset-0 flex flex-col justify-center rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-[0_25px_80px_rgba(15,118,110,0.3)] backdrop-blur md:p-10"
+            className="absolute inset-x-0 flex justify-center"
             style={{
-              opacity: opacities[idx],
-              transform: `translateY(${(idx - 1) * 24}px)`,
-              zIndex: 10 - idx,
+              opacity,
+              transform: `translateY(${translateY}px) scale(${scale})`,
+              zIndex: depth,
             }}
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-200/70">Act II · Windows of clarity</p>
-            <h3 className="mt-4 text-2xl font-semibold text-white md:text-3xl">{block.title}</h3>
-            <p className="mt-3 text-base text-slate-200/80">{block.subtitle}</p>
+            <div
+              className="w-full max-w-xl rounded-[28px] border border-white/12 bg-slate-950/65 p-8 text-left shadow-[0_35px_80px_rgba(8,47,73,0.35)] backdrop-blur-xl transition-all duration-300"
+              style={{
+                filter: `blur(${blur}px)`,
+              }}
+            >
+              <p className="text-[0.58rem] font-semibold uppercase tracking-[0.55em] text-slate-200/70">Act II · Windows of clarity</p>
+              <h3 className="mt-4 text-3xl font-semibold text-white md:text-[2.6rem] leading-tight">
+                <span className="text-emerald-300">{block.title}</span>
+              </h3>
+              <p className="mt-4 text-base text-slate-200/90">{block.subtitle}</p>
+            </div>
           </div>
-        ))}
-      </div>
-    </section>
+        );
+      })}
+    </div>
   );
 }
 
 function ActThreeIntro() {
   return (
-    <section className="flex h-screen flex-col justify-center gap-6 px-6 md:px-16">
+    <section className="flex min-h-screen flex-col justify-center gap-6 px-6 md:px-16">
       <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-200/70">Act III · The Conversion</p>
       <h2 className="text-4xl font-semibold text-white sm:text-5xl">The nest is almost ready. Claim your branch.</h2>
       <p className="max-w-2xl text-lg text-slate-200/85">
@@ -318,55 +345,6 @@ function ThankYouPanel({ referralCopied, onCopy }) {
   );
 }
 
-function ScrollStory({
-  mode,
-  scrollProgress,
-  formStep,
-  loading,
-  error,
-  formData,
-  onFieldChange,
-  onStepOne,
-  onSubmit,
-  isSubmitted,
-  referralCopied,
-  onCopyReferral,
-}) {
-  return (
-    <div className="pointer-events-auto w-full text-slate-50">
-      <ActOneHero />
-      <ActTwoValueProps mode={mode} scrollProgress={scrollProgress} />
-      <ActThreeIntro />
-      <section className="min-h-screen bg-gradient-to-b from-slate-950/0 to-slate-950/80 px-6 py-24 md:px-16">
-        <CollaborativeSavingsCalculator />
-      </section>
-      <section className="min-h-screen bg-slate-950/90 px-6 py-24 md:px-16">
-        {isSubmitted ? (
-          <ThankYouPanel referralCopied={referralCopied} onCopy={onCopyReferral} />
-        ) : (
-          <RegisterInterestForm
-            formStep={formStep}
-            loading={loading}
-            error={error}
-            formData={formData}
-            onFieldChange={onFieldChange}
-            onStepOne={onStepOne}
-            onSubmit={onSubmit}
-          />
-        )}
-      </section>
-    </div>
-  );
-}
-
-function FallbackExperience(props) {
-  return (
-    <div className="bg-gradient-to-b from-slate-950 via-slate-950/80 to-black">
-      <ScrollStory {...props} mode="static" />
-    </div>
-  );
-}
-
 export default function ExperienceRegistration({ onRegister, loading = false, error }) {
   const [formStep, setFormStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -381,8 +359,18 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
 
   const prefersReducedMotion = useReducedMotion();
   const { ref, inView } = useInView({ triggerOnce: true, rootMargin: '200px' });
+  const pinnedSectionRef = useRef(null);
 
-  const shouldRenderCanvas = inView && !prefersReducedMotion;
+  const immersiveEnabled = inView && !prefersReducedMotion;
+
+  const { scrollYProgress } = useScroll({
+    target: pinnedSectionRef,
+    offset: ['start start', 'end end'],
+  });
+
+  useMotionValueEvent(scrollYProgress, 'change', (value) => {
+    setScrollProgress(value);
+  });
 
   const handleFieldChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -412,31 +400,46 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
     }
   };
 
-  const storyProps = {
-    scrollProgress,
-    formStep,
-    loading,
-    error,
-    formData,
-    onFieldChange: handleFieldChange,
-    onStepOne: handleStepOne,
-    onSubmit: handleSubmit,
-    isSubmitted,
-    referralCopied,
-    onCopyReferral: handleCopyReferral,
-  };
-
   return (
     <div ref={ref} className="relative min-h-screen bg-slate-950 text-slate-50">
-      {shouldRenderCanvas ? (
-        <Suspense fallback={<CanvasPoster />}>
-          <LazyNestCanvas pages={5.6} onScrollProgress={setScrollProgress}>
-            <ScrollStory mode="immersive" {...storyProps} />
-          </LazyNestCanvas>
-        </Suspense>
-      ) : (
-        <FallbackExperience {...storyProps} />
-      )}
+      <ActOneHero />
+      <motion.section
+        ref={pinnedSectionRef}
+        className="relative w-full"
+        style={{ height: `${IMMERSIVE_HEIGHT}vh` }}
+      >
+        <div className="sticky top-0 h-screen">
+          <div className="absolute inset-0">
+            {immersiveEnabled ? (
+              <Suspense fallback={<CanvasPoster />}>
+                <LazyNestCanvas progress={scrollProgress} />
+              </Suspense>
+            ) : (
+              <CanvasPoster />
+            )}
+          </div>
+          <ValuePropOverlay progress={scrollProgress} />
+        </div>
+      </motion.section>
+      <ActThreeIntro />
+      <section className="min-h-screen bg-gradient-to-b from-slate-950/0 to-slate-950/80 px-6 py-24 md:px-16">
+        <CollaborativeSavingsCalculator />
+      </section>
+      <section className="min-h-screen bg-slate-950/90 px-6 py-24 md:px-16">
+        {isSubmitted ? (
+          <ThankYouPanel referralCopied={referralCopied} onCopy={handleCopyReferral} />
+        ) : (
+          <RegisterInterestForm
+            formStep={formStep}
+            loading={loading}
+            error={error}
+            formData={formData}
+            onFieldChange={handleFieldChange}
+            onStepOne={handleStepOne}
+            onSubmit={handleSubmit}
+          />
+        )}
+      </section>
     </div>
   );
 }
