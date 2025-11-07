@@ -1,9 +1,11 @@
 import React, { Suspense, lazy, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion, useScroll, useMotionValueEvent } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import useThemeColor from '../hooks/useThemeColor';
 
 const LazyNestCanvas = lazy(() => import('../components/experience/NestExperienceCanvas.jsx'));
 const IMMERSIVE_HEIGHT = 300; // vh
+const POSTER_NOISE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAACoWZ8PAAAAF0lEQVQYV2NkYGD4z0AEYBxVSFUBAwBnGQHhX9nuSAAAAABJRU5ErkJggg==';
 
 const VALUE_PROPS = [
   {
@@ -47,42 +49,61 @@ const fadeByProgress = (progress, start, end) => {
   return (paddedEnd - progress) / Math.max(0.0001, paddedEnd - midpoint);
 };
 
-const PosterOrnament = () => (
-  <div className="absolute inset-0 overflow-hidden rounded-[36px] bg-[#020b16]">
-    <div className="absolute inset-[-40%] rounded-full bg-[radial-gradient(circle_at_center,#0f5f92_0%,rgba(2,11,22,0)_65%)] blur-3xl opacity-70" />
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#1e293b_0%,rgba(2,11,22,0)_55%)] opacity-90" />
-    <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(16,185,129,0.18),rgba(56,189,248,0.18))] mix-blend-screen" />
+const PosterOrnament = ({ surfaceHex, accentHex }) => (
+  <div
+    className="absolute inset-0 overflow-hidden rounded-[36px]"
+    style={{ background: surfaceHex }}
+  >
+    <div
+      className="absolute inset-[-30%] rounded-full blur-[140px] opacity-70"
+      style={{
+        background: `radial-gradient(circle, ${accentHex} 0%, rgba(2,11,22,0) 70%)`,
+      }}
+    />
+    <div className="absolute inset-0 opacity-60">
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(16,185,129,0.08))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(15,23,42,0.65),rgba(2,11,22,0))]" />
+    </div>
+    <div className="absolute inset-0 opacity-30">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.05),rgba(255,255,255,0))]" />
+    </div>
+    <div
+      className="absolute inset-0 opacity-[0.04]"
+      style={{ backgroundImage: `url(${POSTER_NOISE})`, backgroundRepeat: 'repeat' }}
+    />
   </div>
 );
 
-const CanvasPoster = () => (
-  <div className="relative flex h-full items-center justify-center bg-slate-950 px-6">
-    <PosterOrnament />
-    <div className="relative z-10 max-w-xl rounded-[32px] border border-white/10 bg-slate-900/60 p-10 text-center shadow-[0_40px_90px_rgba(8,47,73,0.35)] backdrop-blur-xl">
+const CanvasPoster = ({ surfaceHex, accentHex }) => (
+  <div className="relative flex h-full items-center justify-center bg-[#020b16] px-6">
+    <PosterOrnament surfaceHex={surfaceHex} accentHex={accentHex} />
+    <div className="relative z-10 max-w-xl rounded-[32px] border border-white/10 bg-slate-900/70 p-10 text-center shadow-[0_40px_90px_rgba(8,47,73,0.35)] backdrop-blur-xl">
       <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-300/70">Nest Preview</p>
       <h3 className="mt-4 text-3xl font-semibold text-white">Scroll to morph chaos into a shared nest.</h3>
-      <p className="mt-4 text-base text-slate-200/85">Your motion settings disabled 3D, so here&apos;s a still look at the canvas.</p>
+      <p className="mt-4 text-base text-slate-200/85">Motion is reduced, so here&apos;s a still look at the experience.</p>
     </div>
   </div>
 );
 
 function ActOneHero() {
   return (
-    <section className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 text-center md:px-12">
-      <motion.p className="text-xs font-semibold uppercase tracking-[0.45em] text-emerald-200/80" {...motionFade} transition={{ duration: 0.8 }}>
-        Act I · The Problem
-      </motion.p>
-      <motion.h1
-        className="text-4xl font-semibold leading-tight text-white sm:text-5xl md:text-6xl"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, delay: 0.1 }}
-      >
-        Your family&apos;s finances. It&apos;s... complicated.
-      </motion.h1>
-      <motion.p className="max-w-2xl text-base text-slate-200/80 sm:text-lg" {...motionFade} transition={{ duration: 0.9, delay: 0.2 }}>
-        Hidden subscriptions. Rogue cards. Spreadsheets that only one of you speaks. Nest steps in with calm choreography so the whole household can finally breathe.
-      </motion.p>
+    <section className="flex min-h-[100vh] items-center py-24 md:py-32">
+      <div className="mx-auto flex max-w-screen-xl flex-col items-center gap-8 px-4 text-center sm:px-6 lg:px-8">
+        <motion.p className="text-xs font-semibold uppercase tracking-[0.45em] text-emerald-200/80" {...motionFade} transition={{ duration: 0.8 }}>
+          Act I · The Problem
+        </motion.p>
+        <motion.h1
+          className="text-5xl font-semibold leading-tight text-white sm:text-5xl md:text-6xl"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.1 }}
+        >
+          Your family&apos;s finances. It&apos;s... complicated.
+        </motion.h1>
+        <motion.p className="max-w-3xl text-base text-slate-200/80 sm:text-lg" {...motionFade} transition={{ duration: 0.9, delay: 0.2 }}>
+          Hidden subscriptions. Rogue cards. Spreadsheets that only one of you speaks. Nest steps in with calm choreography so the whole household can finally breathe.
+        </motion.p>
+      </div>
     </section>
   );
 }
@@ -90,7 +111,7 @@ function ActOneHero() {
 function ValuePropOverlay({ progress }) {
   const slot = progress * VALUE_PROPS.length;
   return (
-    <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 sm:px-6">
       {VALUE_PROPS.map((block, idx) => {
         const start = idx / VALUE_PROPS.length;
         const end = (idx + 1) / VALUE_PROPS.length;
@@ -111,13 +132,14 @@ function ValuePropOverlay({ progress }) {
             }}
           >
             <div
-              className="w-full max-w-xl rounded-[28px] border border-white/12 bg-slate-950/65 p-8 text-left shadow-[0_35px_80px_rgba(8,47,73,0.35)] backdrop-blur-xl transition-all duration-300"
+              className="w-full max-w-xl rounded-[28px] border border-white/12 bg-slate-950/65 p-6 sm:p-8 text-left shadow-[0_40px_90px_rgba(8,47,73,0.35)] backdrop-blur-xl transition-all duration-300"
               style={{
                 filter: `blur(${blur}px)`,
+                willChange: 'transform, opacity',
               }}
             >
               <p className="text-[0.58rem] font-semibold uppercase tracking-[0.55em] text-slate-200/70">Act II · Windows of clarity</p>
-              <h3 className="mt-4 text-3xl font-semibold text-white md:text-[2.6rem] leading-tight">
+              <h3 className="mt-4 text-3xl font-semibold text-white md:text-4xl leading-tight">
                 <span className="text-emerald-300">{block.title}</span>
               </h3>
               <p className="mt-4 text-base text-slate-200/90">{block.subtitle}</p>
@@ -131,12 +153,14 @@ function ValuePropOverlay({ progress }) {
 
 function ActThreeIntro() {
   return (
-    <section className="flex min-h-screen flex-col justify-center gap-6 px-6 md:px-16">
-      <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-200/70">Act III · The Conversion</p>
-      <h2 className="text-4xl font-semibold text-white sm:text-5xl">The nest is almost ready. Claim your branch.</h2>
-      <p className="max-w-2xl text-lg text-slate-200/85">
-        Curated onboarding waves mean seats are scarce. Register your interest with one tap, then share a collaborative savings plan to prove you&apos;re serious about building wealth together.
-      </p>
+    <section className="flex min-h-[100vh] items-center py-24 md:py-32">
+      <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.4em] text-emerald-200/70">Act III · The Conversion</p>
+        <h2 className="mt-6 text-3xl font-semibold text-white sm:text-4xl md:text-5xl">The nest is almost ready. Claim your branch.</h2>
+        <p className="mt-6 max-w-2xl text-base text-slate-200/85 md:text-lg">
+          Curated onboarding waves mean seats are scarce. Register your interest with one tap, then share a collaborative savings plan to prove you&apos;re serious about building wealth together.
+        </p>
+      </div>
     </section>
   );
 }
@@ -256,7 +280,7 @@ function RegisterInterestForm({
             </label>
             <button
               type="submit"
-              className="rounded-2xl bg-emerald-400 px-6 py-3 text-base font-semibold text-emerald-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-emerald-700/40 disabled:text-emerald-100/60"
+              className="rounded-2xl bg-emerald-400 px-6 py-3 text-base font-semibold text-emerald-950 transition-transform duration-200 hover:scale-[1.02] hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-emerald-700/40 disabled:text-emerald-100/60"
               disabled={disableStepOne}
             >
               {loading ? 'Saving...' : 'Register'}
@@ -306,7 +330,7 @@ function RegisterInterestForm({
             <div className="md:col-span-2 flex flex-wrap items-center gap-4">
               <button
                 type="submit"
-                className="rounded-2xl bg-emerald-400 px-6 py-3 text-base font-semibold text-emerald-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-emerald-700/40 disabled:text-emerald-100/60"
+                className="rounded-2xl bg-emerald-400 px-6 py-3 text-base font-semibold text-emerald-950 transition-transform duration-200 hover:scale-[1.02] hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-emerald-700/40 disabled:text-emerald-100/60"
                 disabled={disableFinal}
               >
                 {loading ? 'Submitting...' : 'Send my profile'}
@@ -335,7 +359,7 @@ function ThankYouPanel({ referralCopied, onCopy }) {
         <button
           type="button"
           onClick={onCopy}
-          className="rounded-2xl bg-white px-6 py-3 text-base font-semibold text-emerald-900 transition hover:bg-emerald-100"
+          className="rounded-2xl bg-white px-6 py-3 text-base font-semibold text-emerald-900 transition-transform duration-200 hover:scale-[1.02] hover:bg-emerald-50"
         >
           {referralCopied ? 'Link copied!' : 'Copy referral link'}
         </button>
@@ -356,6 +380,11 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [referralCopied, setReferralCopied] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+
+  const surfaceColor = useThemeColor('--color-surface');
+  const accentColor = useThemeColor('--color-accent');
+  const surfaceHex = surfaceColor.getStyle();
+  const accentHex = accentColor.getStyle();
 
   const prefersReducedMotion = useReducedMotion();
   const { ref, inView } = useInView({ triggerOnce: true, rootMargin: '200px' });
@@ -401,45 +430,61 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
   };
 
   return (
-    <div ref={ref} className="relative min-h-screen bg-slate-950 text-slate-50">
+    <div ref={ref} className="relative min-h-screen bg-[#020b16] text-slate-50">
       <ActOneHero />
       <motion.section
         ref={pinnedSectionRef}
         className="relative w-full"
-        style={{ height: `${IMMERSIVE_HEIGHT}vh` }}
+        style={{ height: `${IMMERSIVE_HEIGHT}vh`, minHeight: '220vh' }}
       >
         <div className="sticky top-0 h-screen">
           <div className="absolute inset-0">
             {immersiveEnabled ? (
-              <Suspense fallback={<CanvasPoster />}>
+              <Suspense fallback={<CanvasPoster surfaceHex={surfaceHex} accentHex={accentHex} />}>
                 <LazyNestCanvas progress={scrollProgress} />
               </Suspense>
             ) : (
-              <CanvasPoster />
+              <CanvasPoster surfaceHex={surfaceHex} accentHex={accentHex} />
             )}
           </div>
           <ValuePropOverlay progress={scrollProgress} />
         </div>
       </motion.section>
       <ActThreeIntro />
-      <section className="min-h-screen bg-gradient-to-b from-slate-950/0 to-slate-950/80 px-6 py-24 md:px-16">
-        <CollaborativeSavingsCalculator />
-      </section>
-      <section className="min-h-screen bg-slate-950/90 px-6 py-24 md:px-16">
-        {isSubmitted ? (
-          <ThankYouPanel referralCopied={referralCopied} onCopy={handleCopyReferral} />
-        ) : (
-          <RegisterInterestForm
-            formStep={formStep}
-            loading={loading}
-            error={error}
-            formData={formData}
-            onFieldChange={handleFieldChange}
-            onStepOne={handleStepOne}
-            onSubmit={handleSubmit}
-          />
-        )}
-      </section>
+      <motion.section
+        className="min-h-[100vh] bg-gradient-to-b from-transparent to-slate-950/80 py-24 md:py-32"
+        initial={{ opacity: 0, y: 60 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        viewport={{ once: true, amount: 0.4 }}
+      >
+        <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+          <CollaborativeSavingsCalculator />
+        </div>
+      </motion.section>
+      <motion.section
+        className="min-h-[100vh] bg-slate-950/90 py-24 md:py-32"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
+        viewport={{ once: true, amount: 0.4 }}
+      >
+        <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+          {isSubmitted ? (
+            <ThankYouPanel referralCopied={referralCopied} onCopy={handleCopyReferral} />
+          ) : (
+            <RegisterInterestForm
+              formStep={formStep}
+              loading={loading}
+              error={error}
+              formData={formData}
+              onFieldChange={handleFieldChange}
+              onStepOne={handleStepOne}
+              onSubmit={handleSubmit}
+            />
+          )}
+        </div>
+      </motion.section>
     </div>
   );
 }

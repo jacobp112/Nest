@@ -7,6 +7,8 @@ import R3fForceGraph from 'r3f-forcegraph';
 import useThemeColor from '../../hooks/useThemeColor';
 import { useDataStore } from '../../stores/useDataStore';
 
+const NOISE_TEXTURE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAACoWZ8PAAAAF0lEQVQYV2NkYGD4z0AEYBxVSFUBAwBnGQHhX9nuSAAAAABJRU5ErkJggg==';
+
 const CHAOS_VERTEX = `
   uniform float uProgress;
   uniform float uTime;
@@ -34,7 +36,7 @@ const CHAOS_FRAGMENT = `
   }
 `;
 
-const ChaosToNestParticles = forwardRef(function ChaosToNestParticles({ color }, ref) {
+const ChaosToNestParticles = forwardRef(function ChaosToNestParticles({ colorLinear }, ref) {
   const geometry = useMemo(() => {
     const count = 2600;
     const startPositions = new Float32Array(count * 3);
@@ -70,18 +72,18 @@ const ChaosToNestParticles = forwardRef(function ChaosToNestParticles({ color },
     () => ({
       uProgress: { value: 0 },
       uTime: { value: 0 },
-      uColor: { value: color.clone() },
+      uColor: { value: colorLinear.clone() },
     }),
-    [color],
+    [colorLinear],
   );
 
   const materialRef = useRef();
 
   useEffect(() => {
     if (materialRef.current) {
-      materialRef.current.uniforms.uColor.value = color.clone();
+      materialRef.current.uniforms.uColor.value = colorLinear.clone();
     }
-  }, [color]);
+  }, [colorLinear]);
 
   useFrame((_, delta) => {
     if (materialRef.current) {
@@ -213,20 +215,20 @@ const buildGraphData = (state, primaryColor) => {
   return { nodes, links };
 };
 
-function NestForceGraph({ color }) {
+function NestForceGraph({ colorLinear, colorSrgb, accentHex }) {
   const fgRef = useRef();
   const initialState = useRef(useDataStore.getState());
-  const graphDataRef = useRef(buildGraphData(initialState.current, color));
+  const graphDataRef = useRef(buildGraphData(initialState.current, colorSrgb));
   const lastRevisionRef = useRef(signatureFromState(initialState.current));
 
   const rebuildGraph = useCallback(
     (state) => {
-      graphDataRef.current = buildGraphData(state, color);
+      graphDataRef.current = buildGraphData(state, colorSrgb);
       if (fgRef.current) {
         fgRef.current.graphData(graphDataRef.current);
       }
     },
-    [color],
+    [colorSrgb],
   );
 
   useEffect(() => {
@@ -243,13 +245,11 @@ function NestForceGraph({ color }) {
     fgRef.current?.tickFrame();
   });
 
-  const baseColor = useMemo(() => color.getStyle(), [color]);
-
   const nodeThreeObject = useCallback(
     (node) => {
       const material = new THREE.MeshStandardMaterial({
-        color: node.color || baseColor,
-        emissive: color.clone().multiplyScalar(0.35),
+        color: node.color ? node.color : colorLinear.clone(),
+        emissive: colorLinear.clone().multiplyScalar(0.35),
         emissiveIntensity: 0.7,
         roughness: 0.35,
         metalness: 0.2,
@@ -259,7 +259,7 @@ function NestForceGraph({ color }) {
       const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.12 + node.size * 0.015, 16, 16), material);
       return mesh;
     },
-    [baseColor, color],
+    [colorLinear],
   );
 
   return (
@@ -270,7 +270,7 @@ function NestForceGraph({ color }) {
       nodeThreeObjectExtend
       nodeRelSize={4}
       linkOpacity={0.35}
-      linkColor={() => '#0ea5e9'}
+      linkColor={() => accentHex}
       linkWidth={(link) => clampValue(link?.value || 0.6, 0.4, 3)}
       linkDirectionalParticles={0}
       warmupTicks={60}
@@ -282,6 +282,9 @@ function NestForceGraph({ color }) {
 function Scene({ progress }) {
   const primary = useThemeColor('--color-primary');
   const accent = useThemeColor('--color-accent');
+  const primaryLinear = useMemo(() => primary.clone().convertSRGBToLinear(), [primary]);
+  const primaryHex = useMemo(() => primary.getStyle(), [primary]);
+  const accentHex = useMemo(() => accent.getStyle(), [accent]);
   const morphRef = useRef();
   const graphGroupRef = useRef();
   const sparklesRef = useRef();
@@ -317,8 +320,8 @@ function Scene({ progress }) {
     <>
       <PerspectiveCamera makeDefault position={[0, 2.4, 8.5]} fov={48} />
       <ambientLight intensity={0.3} />
-      <directionalLight position={[5, 6, 4]} intensity={1.1} color={accent.getStyle()} />
-      <directionalLight position={[-4, 3, -5]} intensity={0.8} color={primary.getStyle()} />
+      <directionalLight position={[5, 6, 4]} intensity={1.1} color={accentHex} />
+      <directionalLight position={[-4, 3, -5]} intensity={0.8} color={primaryHex} />
       <Sparkles
         ref={sparklesRef}
         count={160}
@@ -326,23 +329,52 @@ function Scene({ progress }) {
         speed={0.12}
         noise={2}
         scale={[20, 10, 20]}
-        color={accent.getStyle()}
+        color={accentHex}
       />
-      <ChaosToNestParticles ref={morphRef} color={primary} />
+      <ChaosToNestParticles ref={morphRef} colorLinear={primaryLinear} />
       <group ref={graphGroupRef} position={[0, -0.2, 0]} visible={false}>
-        <NestForceGraph color={primary} />
+        <NestForceGraph colorLinear={primaryLinear} colorSrgb={primary} accentHex={accentHex} />
       </group>
     </>
   );
 }
 
 export default function NestExperienceCanvas({ progress = 0 }) {
+  const surface = useThemeColor('--color-surface');
+  const surfaceHex = surface.getStyle();
   return (
-    <Canvas frameloop="demand" dpr={[1, 1.5]} gl={{ antialias: true, alpha: true }}>
-      <color attach="background" args={['#020617']} />
-      <Suspense fallback={null}>
-        <Scene progress={progress} />
-      </Suspense>
-    </Canvas>
+    <div className="relative h-full w-full overflow-hidden" style={{ background: surfaceHex }}>
+      <div
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          background: 'radial-gradient(circle at 50% 32%, rgba(255,255,255,0.07), rgba(2,11,22,0) 65%)',
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-60"
+        style={{
+          background: 'radial-gradient(circle at 40% 80%, rgba(2,6,23,0.9), rgba(2,11,22,0) 70%)',
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.03]"
+        style={{ backgroundImage: `url(${NOISE_TEXTURE})`, backgroundRepeat: 'repeat' }}
+      />
+      <Canvas
+        frameloop="demand"
+        dpr={[1, 1.5]}
+        gl={{ antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: 'high-performance' }}
+        onCreated={({ gl }) => {
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1;
+          gl.setClearAlpha(0);
+        }}
+      >
+        <Suspense fallback={null}>
+          <Scene progress={progress} />
+        </Suspense>
+      </Canvas>
+    </div>
   );
 }
