@@ -19,6 +19,7 @@ const emptyState = () => ({
   goals: [],
   budgets: [],
   accounts: [],
+  revision: 0,
   _disconnect: null,
 });
 
@@ -73,7 +74,10 @@ export const useDataStore = create((set, get) => ({
     unsubscribers.push(
       onSnapshot(txQuery, (snapshot) => {
         const transactions = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-        set({ transactions });
+        set((state) => ({
+          transactions,
+          revision: state.revision + 1,
+        }));
         markReady('transactions');
       }),
     );
@@ -81,7 +85,10 @@ export const useDataStore = create((set, get) => ({
     unsubscribers.push(
       onSnapshot(collection(db, 'users', userId, 'goals'), (snapshot) => {
         const goals = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-        set({ goals });
+        set((state) => ({
+          goals,
+          revision: state.revision + 1,
+        }));
         markReady('goals');
       }),
     );
@@ -89,7 +96,10 @@ export const useDataStore = create((set, get) => ({
     unsubscribers.push(
       onSnapshot(collection(db, 'users', userId, 'budgets'), (snapshot) => {
         const budgets = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-        set({ budgets });
+        set((state) => ({
+          budgets,
+          revision: state.revision + 1,
+        }));
         markReady('budgets');
       }),
     );
@@ -97,7 +107,10 @@ export const useDataStore = create((set, get) => ({
     unsubscribers.push(
       onSnapshot(collection(db, 'users', userId, 'accounts'), (snapshot) => {
         const accounts = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-        set({ accounts });
+        set((state) => ({
+          accounts,
+          revision: state.revision + 1,
+        }));
         markReady('accounts');
       }),
     );

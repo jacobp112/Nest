@@ -1,10 +1,11 @@
-import React, { Suspense, forwardRef, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { PerspectiveCamera, Scroll, ScrollControls, Sparkles, useScroll } from '@react-three/drei';
+import React, { forwardRef, Suspense, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { PerspectiveCamera, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
 import R3fForceGraph from 'r3f-forcegraph';
 import useThemeColor from '../../hooks/useThemeColor';
+import { useDataStore } from '../../stores/useDataStore';
 
 const CHAOS_VERTEX = `
   uniform float uProgress;
@@ -111,38 +112,134 @@ const ChaosToNestParticles = forwardRef(function ChaosToNestParticles({ color },
   );
 });
 
-function createGraphData() {
-  const nodes = [
-    { id: 'nest', label: 'Shared Nest', color: '#fde68a', size: 12 },
-    { id: 'data', label: 'Data Aggregation', color: '#38bdf8', size: 9 },
-    { id: 'ai', label: 'AI Insights', color: '#a5b4fc', size: 8 },
-    { id: 'collab', label: 'Collaboration', color: '#f472b6', size: 8 },
-    { id: 'partner', label: 'Partner', color: '#34d399', size: 7 },
-    { id: 'advisor', label: 'Advisor', color: '#f97316', size: 7 },
-    { id: 'goals', label: 'Goals', color: '#c4b5fd', size: 6 },
-    { id: 'cash', label: 'Accounts', color: '#4ade80', size: 6 },
-  ];
+const signatureFromState = (state) => Number(state?.revision || 0);
 
-  const links = [
-    { source: 'nest', target: 'data', value: 2 },
-    { source: 'nest', target: 'ai', value: 2 },
-    { source: 'nest', target: 'collab', value: 2 },
-    { source: 'collab', target: 'partner', value: 1.2 },
-    { source: 'collab', target: 'advisor', value: 1.2 },
-    { source: 'ai', target: 'goals', value: 1 },
-    { source: 'data', target: 'cash', value: 1 },
-    { source: 'partner', target: 'goals', value: 0.8 },
-    { source: 'advisor', target: 'cash', value: 0.8 },
-  ];
+const clampValue = (value, min = 0.4, max = 4) => Math.min(max, Math.max(min, value));
+
+const buildGraphData = (state, primaryColor) => {
+  const nodes = [];
+  const links = [];
+  const nodeMap = new Map();
+  const addNode = (id, data) => {
+    if (nodeMap.has(id)) return nodeMap.get(id);
+    const node = { id, ...data };
+    nodeMap.set(id, node);
+    nodes.push(node);
+    return node;
+  };
+
+  const centerColor = primaryColor.getStyle();
+  addNode('nest', { label: 'Shared Nest', color: centerColor, size: 14 });
+
+  const accounts = state?.accounts || [];
+  accounts.slice(0, 12).forEach((account, index) => {
+    const balance = Number(account?.balance) || 0;
+    const id = `acc:${account?.id || index}`;
+    addNode(id, {
+      label: account?.name || 'Account',
+      color: '#4ade80',
+      size: 6 + clampValue(Math.abs(balance) / 2500, 0, 4),
+    });
+    links.push({
+      source: 'nest',
+      target: id,
+      value: clampValue(Math.abs(balance) / 5000 + 0.5),
+    });
+  });
+
+  const goals = state?.goals || [];
+  goals.slice(0, 8).forEach((goal, index) => {
+    const progress = Number(goal?.currentAmount || 0) / Math.max(1, Number(goal?.targetAmount) || 1);
+    const id = `goal:${goal?.id || index}`;
+    addNode(id, {
+      label: goal?.name || 'Goal',
+      color: '#fde68a',
+      size: 5 + clampValue(progress * 4, 0, 5),
+    });
+    links.push({
+      source: 'nest',
+      target: id,
+      value: clampValue(progress * 3 + 0.4),
+    });
+  });
+
+  const budgets = state?.budgets || [];
+  budgets.slice(0, 6).forEach((budget, index) => {
+    const limit = Number(budget?.amount || budget?.limit) || 0;
+    const id = `budget:${budget?.id || index}`;
+    addNode(id, {
+      label: budget?.category || 'Budget',
+      color: '#c4b5fd',
+      size: 4 + clampValue(limit / 2000, 0, 4),
+    });
+    links.push({
+      source: 'nest',
+      target: id,
+      value: clampValue(limit / 4000 + 0.4),
+    });
+  });
+
+  const transactions = (state?.transactions || []).filter((tx) => tx?.type === 'expense');
+  const categoryMap = new Map();
+  transactions.forEach((tx) => {
+    const category = tx?.category || 'General';
+    const amount = Number(tx?.amount) || 0;
+    categoryMap.set(category, (categoryMap.get(category) || 0) + amount);
+  });
+
+  const topCategories = Array.from(categoryMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  topCategories.forEach(([category, total], index) => {
+    const id = `cat:${category.toLowerCase().replace(/\s+/g, '-')}-${index}`;
+    addNode(id, {
+      label: category,
+      color: '#38bdf8',
+      size: 4 + clampValue(total / 2000, 0, 4),
+    });
+    links.push({
+      source: 'nest',
+      target: id,
+      value: clampValue(total / 4000 + 0.3),
+    });
+  });
+
+  if (!nodes.length) {
+    addNode('empty', { label: 'Gathering data…', color: '#94a3b8', size: 6 });
+    links.push({ source: 'nest', target: 'empty', value: 0.6 });
+  }
 
   return { nodes, links };
-}
+};
 
 function NestForceGraph({ color }) {
   const fgRef = useRef();
-  const graphData = useMemo(() => createGraphData(), []);
+  const initialState = useRef(useDataStore.getState());
+  const graphDataRef = useRef(buildGraphData(initialState.current, color));
+  const lastRevisionRef = useRef(signatureFromState(initialState.current));
+
+  const rebuildGraph = useCallback(
+    (state) => {
+      graphDataRef.current = buildGraphData(state, color);
+      if (fgRef.current) {
+        fgRef.current.graphData(graphDataRef.current);
+      }
+    },
+    [color],
+  );
+
+  useEffect(() => {
+    rebuildGraph(initialState.current);
+  }, [rebuildGraph]);
 
   useFrame(() => {
+    const state = useDataStore.getState();
+    const revision = signatureFromState(state);
+    if (revision !== lastRevisionRef.current) {
+      lastRevisionRef.current = revision;
+      rebuildGraph(state);
+    }
     fgRef.current?.tickFrame();
   });
 
@@ -168,12 +265,13 @@ function NestForceGraph({ color }) {
   return (
     <R3fForceGraph
       ref={fgRef}
-      graphData={graphData}
+      graphData={graphDataRef.current}
       nodeThreeObject={nodeThreeObject}
       nodeThreeObjectExtend
       nodeRelSize={4}
       linkOpacity={0.35}
       linkColor={() => '#0ea5e9'}
+      linkWidth={(link) => clampValue(link?.value || 0.6, 0.4, 3)}
       linkDirectionalParticles={0}
       warmupTicks={60}
       cooldownTicks={0}
@@ -181,33 +279,15 @@ function NestForceGraph({ color }) {
   );
 }
 
-function ScrollChoreographer({ onProgress }) {
-  const scroll = useScroll();
-  const { invalidate } = useThree();
-  const lastOffset = useRef(0);
-
-  useFrame(() => {
-    const offset = scroll.offset;
-    if (Math.abs(offset - lastOffset.current) < 1e-4) {
-      return;
-    }
-    lastOffset.current = offset;
-    const morphProgress = scroll.range(0.12, 0.62);
-    onProgress(morphProgress, offset);
-    invalidate();
-  });
-
-  return null;
-}
-
-function Scene({ onScrollProgress }) {
+function Scene({ progress }) {
   const primary = useThemeColor('--color-primary');
   const accent = useThemeColor('--color-accent');
   const morphRef = useRef();
   const graphGroupRef = useRef();
   const sparklesRef = useRef();
 
-  const handleProgress = useCallback((value) => {
+  useEffect(() => {
+    const value = THREE.MathUtils.clamp(progress, 0, 1);
     if (morphRef.current) {
       morphRef.current.uniforms.uProgress.value = value;
     }
@@ -225,8 +305,7 @@ function Scene({ onScrollProgress }) {
         }
       });
     }
-    onScrollProgress?.(value);
-  }, [onScrollProgress]);
+  }, [progress]);
 
   useEffect(() => {
     if (graphGroupRef.current) {
@@ -253,22 +332,16 @@ function Scene({ onScrollProgress }) {
       <group ref={graphGroupRef} position={[0, -0.2, 0]} visible={false}>
         <NestForceGraph color={primary} />
       </group>
-      <ScrollChoreographer onProgress={handleProgress} />
     </>
   );
 }
 
-export default function NestExperienceCanvas({ children, pages = 5.2, onScrollProgress }) {
+export default function NestExperienceCanvas({ progress = 0 }) {
   return (
     <Canvas frameloop="demand" dpr={[1, 1.5]} gl={{ antialias: true, alpha: true }}>
       <color attach="background" args={['#020617']} />
       <Suspense fallback={null}>
-        <ScrollControls pages={pages} damping={0.18}>
-          <Scene onScrollProgress={onScrollProgress} />
-          <Scroll html style={{ width: '100%' }}>
-            {children}
-          </Scroll>
-        </ScrollControls>
+        <Scene progress={progress} />
       </Suspense>
     </Canvas>
   );
