@@ -8,7 +8,7 @@ const { themes } = require('../theme/themes');
 const THEME_STORAGE_KEY = 'nest-finance-theme';
 
 // Supported theme selections. "system" follows the OS preference.
-const availableThemes = ['default', 'midnight', 'system'];
+const availableThemes = ['nestdark', 'default', 'midnight', 'system'];
 
 export const THEME_OPTIONS = availableThemes;
 
@@ -25,27 +25,23 @@ const ThemeContext = createContext({
 });
 
 const getSystemThemeName = () => {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'default';
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'nestdark';
   try {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'midnight' : 'default';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'midnight' : 'nestdark';
   } catch (_) {
-    return 'default';
+    return 'nestdark';
   }
 };
 
 const resolveInitialTheme = () => {
   if (typeof window === 'undefined') {
-    return 'default';
+    return 'nestdark';
   }
 
-  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-
-  // Default to following system if nothing stored or stored value invalid
-  const preferred = availableThemes.includes(stored) ? stored : 'system';
-
-  const toApply = preferred === 'system' ? getSystemThemeName() : preferred;
-  window.document.documentElement.dataset.theme = toApply;
-  return preferred;
+  const fallback = 'nestdark';
+  window.document.documentElement.dataset.theme = fallback;
+  window.localStorage.setItem(THEME_STORAGE_KEY, fallback);
+  return fallback;
 };
 
 export const ThemeProvider = ({ children }) => {
@@ -85,7 +81,7 @@ export const ThemeProvider = ({ children }) => {
     }
 
     const normalized = availableThemes.includes(themeName) ? themeName : 'system';
-    const resolved = normalized === 'system' ? (prefersDark ? 'midnight' : 'default') : normalized;
+    const resolved = normalized === 'system' ? (prefersDark ? 'midnight' : 'nestdark') : normalized;
 
     window.document.documentElement.dataset.theme = resolved;
     window.localStorage.setItem(THEME_STORAGE_KEY, normalized);
@@ -93,8 +89,8 @@ export const ThemeProvider = ({ children }) => {
 
   const value = useMemo(() => {
     const normalizedThemeName = availableThemes.includes(themeName) ? themeName : 'system';
-    const resolvedThemeName = normalizedThemeName === 'system' ? (prefersDark ? 'midnight' : 'default') : normalizedThemeName;
-    const activeTheme = themes[resolvedThemeName] || themes.default;
+    const resolvedThemeName = normalizedThemeName === 'system' ? (prefersDark ? 'midnight' : 'nestdark') : normalizedThemeName;
+    const activeTheme = themes[resolvedThemeName] || themes.nestdark || themes.default;
 
     return {
       theme: activeTheme,

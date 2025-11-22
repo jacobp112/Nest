@@ -54,7 +54,7 @@ export default function App() {
     };
   }, [connectData, disconnectData, isAuthenticated, user?.uid]);
 
-  if (authLoading) return <LoadingScreen />;
+  if (authLoading && isAuthenticated) return <LoadingScreen />;
 
   if (!isAuthenticated) {
     return (
