@@ -1,103 +1,126 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, RotateCw, Lock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCw, Lock, Share, Plus, MoreHorizontal } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const TRAFFIC_LIGHTS = [
-  { color: '#FF5F57', label: 'Close tab', symbol: 'x' },
-  { color: '#FEBC2E', label: 'Minimize window', symbol: '-' },
-  { color: '#28C840', label: 'Expand window', symbol: '+' },
+  { color: '#FF5F57', border: '#E0443E', label: 'Close tab', symbol: 'x' },
+  { color: '#FEBC2E', border: '#D89E24', label: 'Minimize window', symbol: '-' },
+  { color: '#28C840', border: '#1AAB29', label: 'Expand window', symbol: '+' },
 ];
 
-const clampLabel = (value) => {
-  if (!value) return 'VIEW';
-  return value.replace(/https?:\/\//, '').split(/[/?#]/)[0].slice(0, 3).toUpperCase();
-};
-
 export default function BrowserChrome({ url = 'nest.finance', faviconColor = '#34d399', reducedMotion = false }) {
-  const [displayUrl, setDisplayUrl] = useState(url);
+  const [displayUrl, setDisplayUrl] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const timeoutsRef = useRef([]);
-  const lastUpdateRef = useRef(0);
 
-  const clearTypingTimers = () => {
-    timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
-    timeoutsRef.current = [];
-  };
-
-  useEffect(() => () => clearTypingTimers(), []);
-
+  // --- Typing Simulation Logic ---
   useEffect(() => {
-    clearTypingTimers();
+    // Clear existing timers
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
 
     if (!url) {
       setDisplayUrl('');
       return;
     }
 
-    const now = performance.now();
-    const elapsed = now - lastUpdateRef.current;
-    lastUpdateRef.current = now;
-
-    if (reducedMotion || elapsed < 180) {
+    // Instant render for reduced motion
+    if (reducedMotion) {
       setDisplayUrl(url);
+      setIsTyping(false);
       return;
     }
 
+    // Start typing sequence
+    setIsTyping(true);
     setDisplayUrl('');
+
     const chars = url.split('');
-    chars.forEach((_, index) => {
+    const baseDelay = 400; // Wait a bit before starting
+
+    chars.forEach((char, index) => {
       const timeout = setTimeout(() => {
-        setDisplayUrl(url.slice(0, index + 1));
-      }, 70 + index * 28);
+        setDisplayUrl((prev) => prev + char);
+        // If it's the last character, stop the cursor blinking shortly after
+        if (index === chars.length - 1) {
+          setTimeout(() => setIsTyping(false), 800);
+        }
+      }, baseDelay + index * (30 + Math.random() * 20)); // Random typing speed variance
+
       timeoutsRef.current.push(timeout);
     });
 
-    const finalize = setTimeout(() => setDisplayUrl(url), 70 + chars.length * 28 + 120);
-    timeoutsRef.current.push(finalize);
+    return () => timeoutsRef.current.forEach(clearTimeout);
   }, [url, reducedMotion]);
 
   return (
-    <div className="flex items-center gap-4 border-b border-white/10 bg-white/5 px-4 py-3 backdrop-blur-xl">
-      <div className="flex gap-2">
+    <div className="relative flex w-full items-center gap-4 border-b border-white/5 bg-slate-900/80 px-5 py-3.5 backdrop-blur-xl">
+
+      {/* 1. Traffic Lights (MacOS Style) */}
+      <div className="flex gap-2 shrink-0">
         {TRAFFIC_LIGHTS.map((light) => (
-          <button
+          <div
             key={light.label}
-            type="button"
-            className="group relative flex h-3.5 w-3.5 items-center justify-center rounded-full transition shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white/70"
-            style={{ backgroundColor: light.color }}
+            className="group relative flex h-3 w-3 items-center justify-center rounded-full shadow-inner"
+            style={{ backgroundColor: light.color, border: `1px solid ${light.border}` }}
             aria-label={light.label}
           >
-            <span className="pointer-events-none text-[8px] font-bold text-black/40 opacity-0 transition group-hover:opacity-70">
+            <span className="pointer-events-none text-[8px] font-bold text-black/50 opacity-0 transition group-hover:opacity-100">
               {light.symbol}
             </span>
-          </button>
+          </div>
         ))}
       </div>
 
-      <div className="flex gap-4 text-slate-500" aria-hidden="true">
-        <ChevronLeft size={16} className="transition hover:text-slate-200" />
-        <ChevronRight size={16} className="transition hover:text-slate-200" />
-        <RotateCw size={14} className="transition hover:text-slate-200" />
+      {/* 2. Navigation Controls */}
+      <div className="flex gap-3 text-slate-500 shrink-0 pl-2">
+        <ChevronLeft size={18} strokeWidth={2} className="transition hover:text-slate-200 cursor-pointer" />
+        <ChevronRight size={18} strokeWidth={2} className="opacity-50 cursor-not-allowed" />
+        <RotateCw size={16} strokeWidth={2.5} className="mt-[1px] transition hover:text-slate-200 cursor-pointer hover:rotate-180 duration-500" />
       </div>
 
-      <div className="mx-4 flex flex-1 items-center justify-center gap-2 rounded-lg border border-white/5 bg-slate-950/60 px-3 py-1.5 text-center font-mono text-xs text-slate-200 shadow-inner">
-        <Lock size={12} className="text-emerald-400" aria-hidden="true" />
-        <span aria-hidden="true" className="truncate">
-          {displayUrl}
-        </span>
-        <span className="sr-only">{url}</span>
+      {/* 3. Address Bar (The Centerpiece) */}
+      <div className="group relative mx-2 flex flex-1 items-center justify-center rounded-lg border border-white/5 bg-slate-950/50 px-3 py-1.5 shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)] transition-colors hover:bg-slate-950/70 hover:border-white/10">
+
+        {/* Secure Lock Badge */}
+        <div className="flex items-center gap-1.5 opacity-90">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Lock
+              size={10}
+              className="text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]"
+              fill="currentColor"
+            />
+          </motion.div>
+
+          {/* URL Text with Blinking Cursor */}
+          <div className="font-mono text-[11px] tracking-wide text-slate-300 selection:bg-emerald-500/30">
+            {displayUrl}
+            <span
+              className={`inline-block h-3 w-[2px] align-middle bg-emerald-400 ml-[1px] ${isTyping ? 'animate-pulse' : 'opacity-0'}`}
+            />
+          </div>
+        </div>
+
+        {/* Reload visual cue (hidden detail) */}
+        <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="h-1.5 w-1.5 rounded-full bg-slate-500" />
+        </div>
       </div>
 
-      <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.25em] text-slate-400">
-        <span>Tab</span>
-        <span
-          className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 font-semibold text-[11px] shadow-lg"
-          style={{ background: faviconColor, color: '#020617' }}
-          aria-hidden="true"
-        >
-          {clampLabel(url)}
-        </span>
+      {/* 4. Right Side Actions (Visual Balance) */}
+      <div className="flex gap-4 text-slate-500 shrink-0 pr-1">
+        <Share size={14} className="transition hover:text-slate-200 cursor-pointer" />
+        <Plus size={16} className="transition hover:text-slate-200 cursor-pointer" />
+        <div className="w-px h-4 bg-white/10 my-auto" />
+        <MoreHorizontal size={16} className="transition hover:text-slate-200 cursor-pointer" />
       </div>
+
     </div>
   );
 }

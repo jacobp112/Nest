@@ -64,13 +64,17 @@
   }
 }
 
-@layer components {
+@media (max-width: 768px) {
 
-  /* == GLASSMORPHISM == */
-  .glass-panel {
-    @apply backdrop-blur-xl bg-slate-900/60 border border-white/10 shadow-2xl;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  input,
+  button,
+  select,
+  textarea {
+    font-size: 16px;
   }
+}
+
+@layer components {
 
   .glass-panel-hover {
     @apply transition-all duration-300 ease-out;
@@ -95,6 +99,7 @@
     @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl font-semibold transition-all duration-200 active:scale-95;
   }
 
+  /* FIX: Removed spaces inside rgba(...) for arbitrary value syntax */
   .btn-primary {
     @apply bg-emerald-500 text-emerald-950 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)];
   }
@@ -116,6 +121,64 @@
   .glow-orb {
     @apply absolute rounded-full blur-[100px] opacity-20 pointer-events-none;
     background: radial-gradient(circle, var(--color-primary), transparent 70%);
+  }
+}
+
+@layer utilities {
+  .h-dvh {
+    height: 100dvh;
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .range-thumb-pro {
+    appearance: none;
+    width: 100%;
+    background: transparent;
+  }
+
+  .range-thumb-pro::-webkit-slider-runnable-track {
+    height: 12px;
+    border-radius: 999px;
+    background-color: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .range-thumb-pro::-moz-range-track {
+    height: 12px;
+    border-radius: 999px;
+    background-color: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .range-thumb-pro::-webkit-slider-thumb {
+    height: 24px;
+    width: 24px;
+    border-radius: 9999px;
+    border: 3px solid rgba(15, 23, 42, 0.9);
+    background: linear-gradient(135deg, #34d399, #059669);
+    margin-top: -6px;
+    box-shadow: 0 12px 25px rgba(5, 150, 105, 0.3);
+  }
+
+  .range-thumb-pro::-moz-range-thumb {
+    height: 24px;
+    width: 24px;
+    border-radius: 9999px;
+    border: 3px solid rgba(15, 23, 42, 0.9);
+    background: linear-gradient(135deg, #34d399, #059669);
+    box-shadow: 0 12px 25px rgba(5, 150, 105, 0.3);
   }
 }
 
@@ -213,4 +276,18 @@
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+@keyframes scanner {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.animate-scan {
+  animation: scanner 3.5s ease-in-out infinite alternate;
 }
