@@ -4,6 +4,7 @@ import MoneyScreen from './screens/MoneyScreen.jsx';
 import AccountListScreen from './screens/AccountListScreen.jsx';
 import InsightsScreen from './screens/InsightsScreen.jsx';
 import GoalsScreen from './screens/GoalsScreen.jsx';
+import BudgetEligibility from './pages/BudgetEligibility.jsx';
 
 export default function PrototypeRouter() {
   const [route, setRoute] = useState({ name: 'Dashboard', params: {} });
@@ -29,6 +30,8 @@ export default function PrototypeRouter() {
         return <InsightsScreen navigate={navigate} />;
       case 'Goals':
         return <GoalsScreen navigate={navigate} />;
+      case 'BudgetEligibility':
+        return <BudgetEligibility navigate={navigate} />;
       default:
         return <DashboardScreen navigate={navigate} />;
     }

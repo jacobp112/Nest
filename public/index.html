@@ -18,12 +18,7 @@
     <script>
       (function() {
         try {
-          var KEY = 'nest-finance-theme';
-          var stored = localStorage.getItem(KEY);
-          var preferred = (stored === 'default' || stored === 'midnight' || stored === 'system') ? stored : 'system';
-          var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var themeToApply = preferred === 'system' ? (systemDark ? 'midnight' : 'default') : preferred;
-          document.documentElement.dataset.theme = themeToApply;
+          document.documentElement.dataset.theme = 'nestdark';
         } catch (e) {}
       })();
     </script>
