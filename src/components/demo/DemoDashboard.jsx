@@ -11,10 +11,12 @@ import GoalsCenterView from '../../pages/GoalsCenterView.jsx';
 import ReportingHubView from '../../pages/ReportingHubView.jsx';
 import RitualsView from '../../pages/RitualsView.jsx';
 import VaultView from '../../pages/VaultView.jsx';
-import VisionPage from '../../pages/VisionPage.jsx';
 import FamilyView from '../../pages/views/FamilyView.jsx';
 import ArchetypeQuiz from './ArchetypeQuiz';
 import PersonaSwitcher from './PersonaSwitcher';
+import DemoDisclaimer from './DemoDisclaimer.jsx';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { NestShadowLogo } from '../NestShadowLogo';
 
 // Persona Dashboards
 import DebtDestroyerView from '../../pages/DebtDestroyerView.jsx';
@@ -30,7 +32,6 @@ const TABS = [
   { id: 'rituals', label: 'Rituals', icon: Coffee },
   { id: 'vault', label: 'The Vault', icon: Shield },
   { id: 'family', label: 'Family', icon: Users },
-  { id: 'vision', label: 'Vision', icon: Sparkles },
 ];
 
 // --- DATA ---
@@ -109,14 +110,21 @@ const TabButton = ({ tab, isActive, onClick, isDrawer = false }) => {
   );
 };
 
-export default function DemoDashboard({ onExit, initialTab = 'overview', initialPersona = 'architect', showIntro = true }) {
+export default function DemoDashboard({ onExit, initialTab = 'overview', initialPersona = 'architect', showIntro = true, isPreviewMode = false }) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(showIntro);
+  const [showWelcome, setShowWelcome] = useState(showIntro && !isPreviewMode);
   const [toast, setToast] = useState(null);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(isPreviewMode);
+  const [hasMounted, setHasMounted] = useState(false);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // Persona State
-  const [quizComplete, setQuizComplete] = useState(false);
+  const [quizComplete, setQuizComplete] = useState(isPreviewMode);
   const [persona, setPersona] = useState(initialPersona);
 
   const data = DATA_PROFILES[persona] || DATA_PROFILES.architect;
@@ -135,11 +143,13 @@ export default function DemoDashboard({ onExit, initialTab = 'overview', initial
   };
 
   useEffect(() => {
-    if (initialPersona && !showIntro) {
+    if (initialPersona && (!showIntro || isPreviewMode)) {
       setQuizComplete(true);
       setPersona(initialPersona);
     }
-  }, [initialPersona, showIntro]);
+  }, [initialPersona, showIntro, isPreviewMode]);
+
+  if (!hasMounted) return null;
 
   // --- 1. RENDER QUIZ IF NOT COMPLETE ---
   if (!quizComplete && showIntro) {
@@ -150,6 +160,11 @@ export default function DemoDashboard({ onExit, initialTab = 'overview', initial
         setShowWelcome(true);
       }} />
     );
+  }
+
+  // --- 1.5 SHOW DISCLAIMER BEFORE DASHBOARD ---
+  if (quizComplete && !disclaimerAccepted) {
+    return <DemoDisclaimer onEnter={() => setDisclaimerAccepted(true)} />;
   }
 
   // --- 2. MAIN DASHBOARD CONTENT ---
@@ -171,8 +186,6 @@ export default function DemoDashboard({ onExit, initialTab = 'overview', initial
         return <VaultView onInteract={showToast} />;
       case 'family':
         return <FamilyView onInteract={showToast} />;
-      case 'vision':
-        return <VisionPage />;
       default: return null;
     }
   };
@@ -181,13 +194,15 @@ export default function DemoDashboard({ onExit, initialTab = 'overview', initial
     <div className="flex h-full bg-[#020617] text-slate-200 overflow-hidden relative selection:bg-indigo-500/30">
 
       {/* CINEMATIC BACKGROUND */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        {/* Noise Texture */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
-        {/* Ambient Spotlights */}
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[120px]" />
-      </div>
+      {!isPreviewMode && (
+        <div className="fixed inset-0 pointer-events-none z-0">
+          {/* Noise Texture */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
+          {/* Ambient Spotlights */}
+          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[120px]" />
+        </div>
+      )}
 
       {/* Welcome Overlay */}
       <AnimatePresence>
@@ -232,103 +247,103 @@ export default function DemoDashboard({ onExit, initialTab = 'overview', initial
       </AnimatePresence>
 
       {/* Desktop Sidebar (Glassmorphic) */}
-      <aside className="hidden w-72 flex-col border-r border-white/5 bg-slate-950/30 backdrop-blur-xl z-20 md:flex relative">
-        <div className="p-8">
-          <div className="flex items-center gap-3 font-display text-2xl font-bold text-white tracking-tight">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 shadow-[0_0_20px_rgba(99,102,241,0.5)]" />
-            Nest
+      {!isPreviewMode && (
+        <aside className="hidden w-72 flex-col border-r border-white/5 bg-slate-950/30 backdrop-blur-xl z-20 md:flex relative">
+          <div className="p-8">
+            <NestShadowLogo className="scale-90 origin-left" />
           </div>
-        </div>
 
-        <nav className="flex-1 space-y-2 px-4">
-          {TABS.map((tab) => (
-            <TabButton
-              key={tab.id}
-              tab={tab}
-              isActive={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-            />
-          ))}
-        </nav>
+          <nav className="flex-1 space-y-2 px-4">
+            {TABS.map((tab) => (
+              <TabButton
+                key={tab.id}
+                tab={tab}
+                isActive={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+              />
+            ))}
+          </nav>
 
-        {/* Footer: Persona Switcher (Direction UP) */}
-        {/* Z-20 ensures the popup menu renders ON TOP of the nav list above it */}
-        <div className="p-6 border-t border-white/5 space-y-4 bg-slate-900/20 relative z-20">
-          <PersonaSwitcher currentPersona={persona} onChange={setPersona} direction="up" />
+          {/* Footer: Persona Switcher (Direction UP) */}
+          {/* Z-20 ensures the popup menu renders ON TOP of the nav list above it */}
+          <div className="p-6 border-t border-white/5 space-y-4 bg-slate-900/20 relative z-20">
+            <PersonaSwitcher currentPersona={persona} onChange={setPersona} direction="up" />
 
-          <button onClick={onExit} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-rose-400 transition-colors hover:bg-white/5">
-            <LogOut size={16} /> Sign Out
-          </button>
-        </div>
-      </aside>
+            <button onClick={onExit} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-rose-400 transition-colors hover:bg-white/5">
+              <LogOut size={16} /> Sign Out
+            </button>
+          </div>
+        </aside>
+      )}
 
       {/* Mobile Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-white/5 bg-slate-950/80 px-4 py-3 backdrop-blur-xl md:hidden">
-        <div className="flex items-center gap-2 font-display text-lg font-bold text-white">
-          <div className="h-6 w-6 rounded-lg bg-indigo-500 shadow-lg" />
-          Nest
+      {!isPreviewMode && (
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-white/5 bg-slate-950/80 px-4 py-3 backdrop-blur-xl md:hidden">
+          <NestShadowLogo className="scale-75 origin-left" />
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="p-2 rounded-lg bg-white/5 text-white hover:bg-white/10"
+          >
+            <Menu size={20} />
+          </button>
         </div>
-        <button
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="p-2 rounded-lg bg-white/5 text-white hover:bg-white/10"
-        >
-          <Menu size={20} />
-        </button>
-      </div>
+      )}
 
       {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed inset-y-0 left-0 z-50 flex w-[85%] max-w-xs flex-col bg-slate-900 p-6 shadow-2xl border-r border-white/10"
-            >
-              <div className="flex items-center justify-between mb-8">
-                <div className="font-display text-xl font-bold text-white">Nest</div>
-                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 rounded-full bg-white/5 text-slate-400 hover:text-white">
-                  <X size={20} />
-                </button>
-              </div>
+      {!isPreviewMode && (
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+              />
+              <motion.div
+                initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                className="fixed inset-y-0 left-0 z-50 flex w-[85%] max-w-xs flex-col bg-slate-900 p-6 shadow-2xl border-r border-white/10"
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <NestShadowLogo className="scale-75 origin-left" />
+                  <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 rounded-full bg-white/5 text-slate-400 hover:text-white">
+                    <X size={20} />
+                  </button>
+                </div>
 
-              {/* Mobile Switcher: Direction DOWN */}
-              <div className="mb-6 relative z-20">
-                <PersonaSwitcher currentPersona={persona} onChange={setPersona} direction="down" />
-              </div>
+                {/* Mobile Switcher: Direction DOWN */}
+                <div className="mb-6 relative z-20">
+                  <PersonaSwitcher currentPersona={persona} onChange={setPersona} direction="down" />
+                </div>
 
-              <nav className="space-y-2 relative z-10">
-                {TABS.map((tab) => (
-                  <TabButton
-                    key={tab.id}
-                    tab={tab}
-                    isActive={activeTab === tab.id}
-                    onClick={() => {
-                      setActiveTab(tab.id);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    isDrawer
-                  />
-                ))}
-              </nav>
+                <nav className="space-y-2 relative z-10">
+                  {TABS.map((tab) => (
+                    <TabButton
+                      key={tab.id}
+                      tab={tab}
+                      isActive={activeTab === tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      isDrawer
+                    />
+                  ))}
+                </nav>
 
-              <div className="mt-auto pt-6 border-t border-white/5">
-                <button onClick={onExit} className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-slate-300 hover:bg-white/10 transition-colors">
-                  <LogOut size={16} /> Sign Out
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                <div className="mt-auto pt-6 border-t border-white/5">
+                  <button onClick={onExit} className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-slate-300 hover:bg-white/10 transition-colors">
+                    <LogOut size={16} /> Sign Out
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      )}
 
       {/* Main Content Area */}
-      <main className="relative flex-1 overflow-y-auto overflow-x-hidden z-10 pt-20 pb-10 md:pt-0 scrollbar-hide">
+      <main className={`relative flex-1 overflow-y-auto overflow-x-hidden z-10 ${isPreviewMode ? 'pt-0' : 'pt-20'} pb-10 md:pt-0 scrollbar-hide`}>
         <div className="px-4 py-8 md:p-10 mx-auto max-w-7xl min-h-full">
 
           {/* Header */}
@@ -352,10 +367,10 @@ export default function DemoDashboard({ onExit, initialTab = 'overview', initial
           <AnimatePresence mode="wait">
             <motion.div
               key={`${activeTab}-${persona}`}
-              initial={{ opacity: 0, y: 20, scale: 0.98 }}
+              initial={isPreviewMode ? { opacity: 1 } : { opacity: 0, y: 20, scale: isMobile ? 1 : 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.98 }}
-              transition={{ duration: 0.4, ease: "circOut" }}
+              exit={isPreviewMode ? { opacity: 0 } : { opacity: 0, y: -20, scale: isMobile ? 1 : 0.98 }}
+              transition={{ duration: isPreviewMode ? 0 : 0.4, ease: "circOut" }}
               className="h-full"
             >
               {renderContent()}

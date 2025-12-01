@@ -91,7 +91,7 @@ const DynamicBackground = ({ step }) => {
 
 export const ProblemScenarioView = ({ step }) => {
     return (
-        <div className="h-full w-full flex items-center justify-center text-white p-8 text-center relative overflow-hidden font-sans">
+        <div className="h-full w-full flex items-center justify-center text-white p-6 sm:p-8 text-center relative overflow-hidden font-sans">
             <DynamicBackground step={step} />
 
             {/* 0:00 - 0:01 Intro */}
@@ -99,7 +99,7 @@ export const ProblemScenarioView = ({ step }) => {
                 {step === 'intro' && (
                     <motion.div
                         key="intro"
-                        className="max-w-xl z-10 flex flex-col items-center gap-6"
+                        className="max-w-xl z-10 flex flex-col items-center gap-4 sm:gap-6"
                         exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
                     >
                         <motion.div
@@ -111,7 +111,7 @@ export const ProblemScenarioView = ({ step }) => {
                             <TrendingDown size={32} className="text-slate-400" />
                         </motion.div>
 
-                        <h2 className="text-4xl md:text-5xl font-light leading-tight text-slate-300">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-light leading-tight text-slate-300">
                             Money is the <br />
                             <motion.span
                                 initial={{ opacity: 0, y: 20 }}
@@ -138,7 +138,7 @@ export const ProblemScenarioView = ({ step }) => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5 }}
-                            className="text-3xl font-light mb-24 text-slate-300 tracking-wide"
+                            className="text-2xl sm:text-3xl font-light mb-24 text-slate-300 tracking-wide"
                         >
                             Everyone deals with it <span className="font-bold text-white">alone</span>.
                         </motion.h2>
@@ -236,17 +236,17 @@ export const ProblemScenarioView = ({ step }) => {
                         >
                             <div className="absolute inset-0 bg-rose-500/10 mix-blend-overlay z-0" />
 
-                            <motion.div className="z-10 flex flex-col gap-8 items-center">
+                            <motion.div className="z-10 flex flex-col gap-6 sm:gap-8 items-center">
                                 <motion.div
                                     initial={{ scale: 2, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
-                                    className="p-6 rounded-full bg-rose-500/20 border border-rose-500 text-rose-500"
+                                    className="p-4 sm:p-6 rounded-full bg-rose-500/20 border border-rose-500 text-rose-500"
                                 >
                                     <HeartCrack size={64} />
                                 </motion.div>
 
                                 <div className="space-y-4 text-center">
-                                    <h2 className="text-5xl font-black uppercase tracking-tighter">
+                                    <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter">
                                         <GlitchText>GUILT</GlitchText>
                                     </h2>
                                     <div className="flex flex-wrap justify-center gap-3 max-w-md">
@@ -296,7 +296,7 @@ export const ProblemScenarioView = ({ step }) => {
                             <div className="inline-flex p-4 mb-6 bg-indigo-500/20 rounded-full border border-indigo-400/30 backdrop-blur-md shadow-[0_0_30px_rgba(99,102,241,0.3)]">
                                 <ShieldCheck size={48} className="text-indigo-200" />
                             </div>
-                            <h2 className="text-3xl font-light text-indigo-100">
+                            <h2 className="text-2xl sm:text-3xl font-light text-indigo-100">
                                 It doesn't have to be <span className="font-serif italic text-white font-bold">this way.</span>
                             </h2>
                         </motion.div>
@@ -349,7 +349,7 @@ export const ProblemScenarioView = ({ step }) => {
                                 initial={{ y: "100%" }}
                                 animate={{ y: 0 }}
                                 transition={{ delay: 0.3, type: "spring" }}
-                                className="text-7xl font-bold tracking-tighter text-white"
+                                className="text-6xl sm:text-7xl font-bold tracking-tighter text-white"
                             >
                                 Nest
                             </motion.h1>
@@ -359,7 +359,7 @@ export const ProblemScenarioView = ({ step }) => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.6 }}
-                            className="text-emerald-100/70 text-sm uppercase tracking-[0.4em] font-medium"
+                            className="text-emerald-100/70 text-xs sm:text-sm uppercase tracking-[0.4em] font-medium"
                         >
                             Family Operating System
                         </motion.p>

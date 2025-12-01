@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, Play, Pause, EyeOff, Type, Layout, Image as ImageIcon, Smartphone, Shield, Box, Sparkles, Grid, Monitor } from 'lucide-react';
+import { Settings, Play, Pause, EyeOff, Type, Layout, Image as ImageIcon, Smartphone, Shield, Box, Sparkles, Grid, Monitor, Download, UserCircle, Video, X } from 'lucide-react';
 import Starfield from '../components/experience/Starfield.jsx';
 import GoldenTicket from '../components/experience/GoldenTicket.jsx';
 import { DeviceFrame, SafeZone } from '../components/experience/StudioOverlays.jsx';
 import { NetWorthCard, SubscriptionCard, NotificationToast } from '../components/experience/MarketingComponents.jsx';
 import { ProblemScenarioView } from '../components/experience/ProblemScenarioView.jsx';
 import { ArchetypesScenarioView } from '../components/experience/ArchetypesScenarioView.jsx';
+import { NestIcon } from '../components/NestIcon.jsx';
+
+// Make sure you created this file from the previous step!
+import { NestProfilePic } from '../components/NestProfilePic.jsx';
+import { NestLinkedInPic } from '../components/NestLinkedInPic.jsx';
+import { NestCompanyAssets } from '../components/NestCompanyAssets.jsx';
+import { HighlightGenerator } from '../components/experience/HighlightGenerator.jsx';
+import { NestHighlightIcons } from '../components/demo/NestHighlightIcons.jsx';
 
 // Dashboard Views
 import ArchitectView from './ArchitectView.jsx';
@@ -27,6 +35,11 @@ const COMPONENTS = {
     'toast': { label: 'Notification', icon: Box },
     'dashboards': { label: 'Archetypes', icon: Layout },
     'problem_visuals': { label: 'The Problem', icon: Sparkles },
+    'logo': { label: 'Logo (Transparent)', icon: Sparkles },
+    'profile_pic': { label: 'Insta Profile', icon: UserCircle },
+    'linkedin_pic': { label: 'LinkedIn', icon: UserCircle },
+    'linkedin_company': { label: 'Company Page', icon: Layout },
+    'highlights': { label: 'Highlight Gen', icon: Video },
 };
 
 const FRAMES = {
@@ -57,6 +70,42 @@ const LAYOUTS = {
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+const getFrameWidth = (aspectRatio, deviceFrame) => {
+    if (deviceFrame === 'none') return '100%';
+    const ratio = ASPECT_RATIOS[aspectRatio];
+    return `${ratio.width + 40}px`;
+};
+
+const getFrameHeight = (aspectRatio, deviceFrame) => {
+    if (deviceFrame === 'none') return '100%';
+    const ratio = ASPECT_RATIOS[aspectRatio];
+    return `${ratio.height + 40}px`;
+};
+
+const getInnerWidth = (aspectRatio, deviceFrame) => {
+    if (deviceFrame === 'none') return '100%';
+    return `${ASPECT_RATIOS[aspectRatio].width}px`;
+};
+
+const getInnerHeight = (aspectRatio, deviceFrame) => {
+    if (deviceFrame === 'none') return '100%';
+    return `${ASPECT_RATIOS[aspectRatio].height}px`;
+};
+
+const getFrameClasses = (deviceFrame) => {
+    switch (deviceFrame) {
+        case 'iphone': return 'border-[12px] border-slate-800 bg-slate-950 shadow-2xl';
+        case 'window': return 'border border-slate-700 bg-slate-900 shadow-xl rounded-lg';
+        default: return '';
+    }
+};
+
+const getSafeZoneClasses = (safeZone, aspectRatio) => {
+    if (safeZone === 'none') return 'hidden';
+    // Simplified logic for safe zones
+    return 'inset-8';
+};
+
 export default function SocialAssetsPage() {
     // --- State Management ---
     const [aspectRatio, setAspectRatio] = useState('story');
@@ -78,6 +127,11 @@ export default function SocialAssetsPage() {
     const [isPlayingScenario, setIsPlayingScenario] = useState(false);
     const [scrollIndex, setScrollIndex] = useState(0);
     const [problemStep, setProblemStep] = useState('intro');
+    const [exportingLogo, setExportingLogo] = useState(false);
+    const [exportingGif, setExportingGif] = useState(false);
+    const [exportMessage, setExportMessage] = useState(null);
+    const [exportGifMessage, setExportGifMessage] = useState(null);
+    const logoRef = useRef(null);
 
     // Toggle clean mode with Escape key
     useEffect(() => {
@@ -91,6 +145,7 @@ export default function SocialAssetsPage() {
     }, []);
 
     const currentRatio = ASPECT_RATIOS[aspectRatio];
+    const isTransparentBg = bgType === 'transparent';
 
     // --- Scenario Logic ---
     const runScenario = async (scenarioId) => {
@@ -100,13 +155,11 @@ export default function SocialAssetsPage() {
 
         try {
             if (scenarioId === 'compound') {
-                // Setup
                 setActiveComponent('networth');
                 setValue('£10,000');
                 setText('Total Net Worth');
                 await wait(1000);
 
-                // Action
                 const start = 10000;
                 const end = 142500;
                 const duration = 3000;
@@ -118,7 +171,6 @@ export default function SocialAssetsPage() {
                     await wait(duration / steps);
                 }
 
-                // Climax
                 setActiveComponent('toast');
                 setText('Milestone Reached');
                 setSubtext('🎉 Welcome to the £100k Club');
@@ -127,33 +179,28 @@ export default function SocialAssetsPage() {
             }
 
             if (scenarioId === 'trap') {
-                // Setup
                 setActiveComponent('subscription');
                 setText('Netflix');
                 setValue('£15.99');
                 await wait(1500);
 
-                // Suspense
                 setActiveComponent('toast');
                 setText('Price Hike Detected');
                 setSubtext('⚠️ Netflix is increasing prices by 12%');
                 await wait(2500);
 
-                // Reveal
                 setActiveComponent('subscription');
-                setValue('£17.99'); // Price jump
+                setValue('£17.99');
                 await wait(1000);
             }
 
             if (scenarioId === 'reveal') {
-                // Setup
                 setActiveComponent('ticket');
                 setAutoPlay(false);
                 setText('');
                 setSubtext('');
                 await wait(1000);
 
-                // Action
                 setAutoPlay(true);
                 await wait(2000);
                 setText('Welcome to Nest');
@@ -165,106 +212,231 @@ export default function SocialAssetsPage() {
             if (scenarioId === 'archetypes_scroll') {
                 setActiveComponent('dashboards');
                 setDeviceFrame('iphone');
-
-                // Cycle through dashboards
                 for (let i = 0; i < 4; i++) {
                     setScrollIndex(i);
-                    await wait(4000); // Hold on each dashboard
+                    await wait(4000);
                 }
-
-                // Reset to start
                 setScrollIndex(0);
             }
 
-            // Updated Timing for The Problem Scenario
             if (scenarioId === 'problem') {
                 setActiveComponent('problem_visuals');
-                setDeviceFrame('none'); // Full screen feel
-
-                // 1. Intro
-                setProblemStep('intro');
-                await wait(3000);
-
-                // 2. Alone
-                setProblemStep('alone');
-                await wait(5000);
-
-                // 3. Guilt
-                setProblemStep('guilt');
-                await wait(5000);
-
-                // 4. Hope
-                setProblemStep('hope');
-                await wait(4000);
-
-                // 5. Reveal
-                setProblemStep('reveal');
-                await wait(6000);
+                setDeviceFrame('none');
+                setProblemStep('intro'); await wait(3000);
+                setProblemStep('alone'); await wait(5000);
+                setProblemStep('guilt'); await wait(5000);
+                setProblemStep('hope'); await wait(4000);
+                setProblemStep('reveal'); await wait(6000);
             }
 
             if (scenarioId === 'archetypes_cinematic') {
                 setActiveComponent('archetypes_cinematic');
                 setDeviceFrame('none');
-
-                // 0:00 - 0:01 Fade in
-                setProblemStep('intro');
-                await wait(1500);
-
-                // 0:01 - 0:03 Architect
-                setProblemStep('architect');
-                await wait(3000);
-
-                // 0:03 - 0:06 Steward
-                setProblemStep('steward');
-                await wait(3000);
-
-                // 0:06 - 0:09 Ascender
-                setProblemStep('ascender');
-                await wait(3000);
-
-                // 0:09 - 0:12 Collaborator
-                setProblemStep('collaborator');
-                await wait(3000);
-
-                // 0:12 - 0:15 Grid Snap
-                setProblemStep('grid');
-                await wait(3000);
-
-                // 0:15 - 0:18 Message Reveal
-                setProblemStep('message');
-                await wait(3000);
-
-                // 0:18 - 0:20 Outro
-                setProblemStep('outro');
-                await wait(3000);
+                setProblemStep('intro'); await wait(1500);
+                setProblemStep('architect'); await wait(3000);
+                setProblemStep('steward'); await wait(3000);
+                setProblemStep('ascender'); await wait(3000);
+                setProblemStep('collaborator'); await wait(3000);
+                setProblemStep('grid'); await wait(3000);
+                setProblemStep('message'); await wait(3000);
+                setProblemStep('outro'); await wait(3000);
             }
 
         } catch (e) {
             console.error(e);
         } finally {
             setIsPlayingScenario(false);
-            setCleanMode(false); // Show UI again
+            setCleanMode(false);
         }
     };
 
-    // --- Component Rendering Helper ---
+    // --- FIX: Updated Capture Function for High Res ---
+    const captureSvgFrame = async (svg, targetWidth = null, targetHeight = null) => {
+        console.log('Starting capture...');
+
+        const clone = svg.cloneNode(true);
+        const viewBox = svg.getAttribute('viewBox')?.split(' ').map(Number);
+        const originalWidth = viewBox?.[2] || svg.clientWidth || 512;
+        const originalHeight = viewBox?.[3] || svg.clientHeight || 512;
+
+        const width = targetWidth || originalWidth;
+        const height = targetHeight || originalHeight;
+        console.log(`Export dimensions: ${width}x${height}`);
+
+        clone.setAttribute('width', width);
+        clone.setAttribute('height', height);
+        clone.style.width = `${width}px`;
+        clone.style.height = `${height}px`;
+
+        const serializer = new XMLSerializer();
+        const source = serializer.serializeToString(clone);
+        const svgBlob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        try {
+            const pngDataUrl = await new Promise((resolve, reject) => {
+                const image = new Image();
+                image.crossOrigin = 'Anonymous';
+
+                image.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, width, height);
+                    ctx.drawImage(image, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+
+                image.onerror = (e) => {
+                    console.error('Image load failed:', e);
+                    reject(new Error('Failed to render SVG to image'));
+                };
+
+                image.src = url;
+            });
+
+            return { pngDataUrl, width, height };
+        } finally {
+            URL.revokeObjectURL(url);
+        }
+    };
+
+    // --- FIX: Updated Export Function to use 1080p ---
+    const exportLogoAsPng = async () => {
+        if (activeComponent !== 'logo') {
+            alert('Error: Active component is not logo.');
+            return;
+        }
+        if (!logoRef.current) {
+            alert('Error: Could not find the Logo element on screen. Please refresh and try again.');
+            return;
+        }
+
+        setExportingLogo(true);
+        setExportMessage('Preparing 1080p export...');
+
+        try {
+            const svg = logoRef.current.querySelector('svg');
+            if (!svg) throw new Error('Missing logo SVG element in DOM. Make sure the logo is visible.');
+
+            // Force 1080x1080 resolution here
+            const { pngDataUrl } = await captureSvgFrame(svg, 1080, 1080);
+
+            const link = document.createElement('a');
+            link.download = `nest-logo-1080p-${Date.now()}.png`;
+            link.href = pngDataUrl;
+            link.click();
+
+            setExportMessage('Logo exported as 1080p transparent PNG.');
+        } catch (error) {
+            console.error('Export Error:', error);
+            setExportMessage('Export failed. Check console.');
+            alert('Export failed: ' + error.message);
+        } finally {
+            setExportingLogo(false);
+        }
+    };
+
+    // Helper for GIF generation
+    const loadGifshot = () =>
+        new Promise((resolve, reject) => {
+            if (typeof window !== 'undefined' && window.gifshot) {
+                resolve(window.gifshot);
+                return;
+            }
+            const existing = document.querySelector('script[data-gifshot]');
+            if (existing) {
+                existing.addEventListener('load', () => resolve(window.gifshot));
+                existing.addEventListener('error', () => reject(new Error('gifshot failed to load')));
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/gifshot@0.4.5/build/gifshot.min.js';
+            script.async = true;
+            script.dataset.gifshot = 'true';
+            script.onload = () => {
+                if (window.gifshot) {
+                    resolve(window.gifshot);
+                } else {
+                    reject(new Error('gifshot failed to load'));
+                }
+            };
+            script.onerror = () => reject(new Error('gifshot failed to load'));
+            document.body.appendChild(script);
+        });
+
+    const exportLogoAsGif = async () => {
+        if (activeComponent !== 'logo' || !logoRef.current) return;
+        setExportingGif(true);
+        setExportGifMessage(null);
+
+        try {
+            const svg = logoRef.current.querySelector('svg');
+            if (!svg) throw new Error('Missing logo SVG element');
+
+            const frames = [];
+            let width = 0;
+            let height = 0;
+            const frameCount = 24;
+            const frameDelayMs = 80; // ~12.5 FPS
+
+            for (let i = 0; i < frameCount; i += 1) {
+                const frame = await captureSvgFrame(svg);
+                frames.push(frame.pngDataUrl);
+                width = frame.width;
+                height = frame.height;
+                await wait(frameDelayMs);
+            }
+
+            const gifshotLib = await loadGifshot();
+
+            const gifDataUrl = await new Promise((resolve, reject) => {
+                gifshotLib.createGIF(
+                    {
+                        images: frames,
+                        gifWidth: width,
+                        gifHeight: height,
+                        interval: frameDelayMs / 1000,
+                        numFrames: frames.length,
+                        crossOrigin: 'Anonymous',
+                        sampleInterval: 10,
+                        numWorkers: 2,
+                    },
+                    (obj) => {
+                        if (!obj.error) {
+                            resolve(obj.image);
+                        } else {
+                            reject(new Error(obj.error));
+                        }
+                    },
+                );
+            });
+
+            const link = document.createElement('a');
+            link.download = `nest-logo-animated-${Date.now()}.gif`;
+            link.href = gifDataUrl;
+            link.click();
+
+            setExportGifMessage('Animated GIF exported!');
+        } catch (error) {
+            console.error('GIF Export Error:', error);
+            setExportGifMessage('GIF export failed. Check console.');
+            alert('GIF export failed: ' + error.message);
+        } finally {
+            setExportingGif(false);
+        }
+    };
+
     const renderComponent = () => {
         switch (activeComponent) {
-            case 'ticket':
-                return <GoldenTicket text={text} subtext={subtext} autoPlay={autoPlay} />;
-            case 'networth':
-                return <NetWorthCard value={value} change="+£3,200" />;
-            case 'subscription':
-                return <SubscriptionCard name={text || "Netflix"} cost={value || "£15.99"} />;
-            case 'toast':
+            case 'notification':
                 return <NotificationToast title={text || "Budget Alert"} message={subtext || "You exceeded your limit."} />;
             case 'problem_visuals':
                 return <ProblemScenarioView step={problemStep} />;
             case 'dashboards':
                 const isMobile = deviceFrame === 'iphone';
-                // Scale content for mobile to give it more breathing room (render at ~460px, scale to 393px)
                 const mobileScale = 0.85;
-
                 return (
                     <div className="h-full w-full overflow-hidden relative bg-slate-950">
                         <motion.div
@@ -278,158 +450,158 @@ export default function SocialAssetsPage() {
                                 transformOrigin: 'top left'
                             }}
                         >
-                            <div className="h-1/4 w-full overflow-hidden relative">
-                                <div className="absolute inset-0 overflow-y-auto scrollbar-hide">
-                                    <ArchitectView />
-                                </div>
-                            </div>
-                            <div className="h-1/4 w-full overflow-hidden relative">
-                                <div className="absolute inset-0 overflow-y-auto scrollbar-hide">
-                                    <PropertyTycoonView />
-                                </div>
-                            </div>
-                            <div className="h-1/4 w-full overflow-hidden relative">
-                                <div className="absolute inset-0 overflow-y-auto scrollbar-hide">
-                                    <DebtDestroyerView />
-                                </div>
-                            </div>
-                            <div className="h-1/4 w-full overflow-hidden relative">
-                                <div className="absolute inset-0 overflow-y-auto scrollbar-hide">
-                                    <CollaboratorView />
-                                </div>
-                            </div>
+                            <div className="h-1/4 w-full overflow-hidden relative"><div className="absolute inset-0 overflow-y-auto scrollbar-hide"><ArchitectView /></div></div>
+                            <div className="h-1/4 w-full overflow-hidden relative"><div className="absolute inset-0 overflow-y-auto scrollbar-hide"><PropertyTycoonView /></div></div>
+                            <div className="h-1/4 w-full overflow-hidden relative"><div className="absolute inset-0 overflow-y-auto scrollbar-hide"><DebtDestroyerView /></div></div>
+                            <div className="h-1/4 w-full overflow-hidden relative"><div className="absolute inset-0 overflow-y-auto scrollbar-hide"><CollaboratorView /></div></div>
                         </motion.div>
                     </div>
                 );
             case 'archetypes_cinematic':
                 return <ArchetypesScenarioView step={problemStep} />;
+            case 'highlights':
+                return (
+                    <div className="w-full h-full bg-slate-950 overflow-y-auto p-8">
+                        <div className="max-w-7xl mx-auto space-y-12">
+                            {/* Section 1: Instagram Story Journey */}
+                            <section>
+                                <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                                    <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
+                                        <Sparkles size={20} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-white">Instagram Story Journey</h2>
+                                        <p className="text-sm text-slate-400">7-slide narrative sequence (1080x1920)</p>
+                                    </div>
+                                </div>
+                                <HighlightGenerator />
+                            </section>
+
+                            {/* Section 2: Instagram Highlight Covers */}
+                            <section>
+                                <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                                    <div className="p-2 rounded-lg bg-pink-500/20 text-pink-400">
+                                        <Layout size={20} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-white">Instagram Highlight Covers</h2>
+                                        <p className="text-sm text-slate-400">7 circular category icons (1080x1080)</p>
+                                    </div>
+                                </div>
+                                <NestHighlightIcons />
+                            </section>
+                        </div>
+                    </div>
+                );
+            case 'logo':
+                return (
+                    <div ref={logoRef} className="relative flex items-center justify-center w-full h-full p-6">
+                        <NestIcon size={320} showGlow={!isTransparentBg} glowOpacity={isTransparentBg ? 0 : 0.5} />
+                    </div>
+                );
+            case 'profile_pic':
+                return (
+                    <div className="relative flex items-center justify-center w-full h-full p-6">
+                        <NestProfilePic showControls={true} />
+                    </div>
+                );
+            case 'linkedin_pic':
+                return (
+                    <div className="relative flex items-center justify-center w-full h-full p-6">
+                        <NestLinkedInPic showControls={true} />
+                    </div>
+                );
+            case 'linkedin_company':
+                return (
+                    <div className="flex items-center justify-center w-full h-full bg-slate-900 overflow-y-auto">
+                        <NestCompanyAssets />
+                    </div>
+                );
             default:
                 return null;
         }
     };
 
-    // --- Main Layout Render ---
     return (
-        <div className="relative h-screen w-screen overflow-hidden bg-slate-950 flex items-center justify-center">
+        <div className="relative flex h-screen w-screen items-center justify-center overflow-hidden bg-slate-950">
+            {/* 1. Main Content Area */}
+            <div className="relative flex h-full w-full items-center justify-center">
+                {/* Background */}
+                {bgType === 'starfield' && <Starfield />}
+                {bgType === 'gradient' && <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 to-purple-900 opacity-75" />}
+                {bgType === 'solid' && <div className="absolute inset-0 bg-slate-900" />}
 
-            {/* 1. Background Layer */}
-            <div className="absolute inset-0 z-0">
-                {bgType === 'starfield' && (
-                    <Starfield density={1500} speed={0.2} className="opacity-60" />
-                )}
-                {bgType === 'gradient' && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900" />
-                )}
-                {bgType === 'solid' && (
-                    <div className="absolute inset-0 bg-slate-950" />
+                {/* Conditional Rendering for Full Screen vs Device Frame */}
+                {(activeComponent === 'highlights' || activeComponent === 'linkedin_company') ? (
+                    // Full Screen Mode for Tools
+                    <div className="relative w-full h-full overflow-hidden z-10">
+                        {renderComponent()}
+                    </div>
+                ) : (
+                    // Device Frame Mode for Previews
+                    <div className={`relative flex items-center justify-center ${FRAMES[deviceFrame].className}`}>
+                        <div className={`relative flex items-center justify-center overflow-hidden rounded-[inherit] bg-slate-950 ${ASPECT_RATIOS[aspectRatio].className}`}>
+                            {/* Safe Zones */}
+                            {safeZone !== 'none' && (
+                                <div className={`absolute inset-0 flex items-center justify-center border-2 border-dashed border-rose-500/50 ${PLATFORMS[safeZone].className}`}>
+                                    <span className="absolute top-2 left-2 text-[8px] font-bold uppercase text-rose-500/70">{PLATFORMS[safeZone].label} Safe Zone</span>
+                                </div>
+                            )}
+
+                            {/* Render Active Component */}
+                            {renderComponent()}
+                        </div>
+                    </div>
                 )}
             </div>
 
-            {/* 2. The Stage */}
-            <motion.div
-                layout
-                className={`relative z-10 flex items-center justify-center transition-all duration-500 ${layoutMode === 'center' && deviceFrame === 'none' ? 'border border-white/5 shadow-2xl bg-black/20 backdrop-blur-sm' : ''
-                    } ${layoutMode === 'showcase' ? 'w-full max-w-6xl px-12 gap-12' : ''
-                    }`}
-                style={{
-                    width: layoutMode === 'center' && deviceFrame === 'none' ? currentRatio.width :
-                        deviceFrame === 'window' ? 1024 : 'auto',
-                    height: layoutMode === 'center' && deviceFrame === 'none' ? currentRatio.height :
-                        deviceFrame === 'window' ? 640 : 'auto',
-                    borderColor: cleanMode ? 'transparent' : 'rgba(255,255,255,0.1)',
-                    flexDirection: aspectRatio === 'landscape' ? 'row' : 'column'
-                }}
-            >
-                {layoutMode === 'showcase' && (
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className={`flex flex-col justify-center ${aspectRatio === 'landscape' ? 'text-left items-start w-1/2' : 'text-center items-center w-full mb-8'}`}
-                    >
-                        <h1 className="text-5xl font-bold text-white mb-4 leading-tight tracking-tight drop-shadow-lg">
-                            {showcaseTitle}
-                        </h1>
-                        <p className="text-xl text-slate-300 font-medium max-w-md leading-relaxed drop-shadow-md">
-                            {showcaseCaption}
-                        </p>
-                    </motion.div>
-                )}
+            {/* 2. Showcase Overlay */}
+            {layoutMode === 'showcase' && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    className="absolute bottom-10 left-1/2 -translate-x-1/2 text-center text-white"
+                >
+                    <h1 className="text-4xl font-bold">{showcaseTitle}</h1>
+                    <p className="text-lg text-slate-400">{showcaseCaption}</p>
+                </motion.div>
+            )}
 
-                <div className={`${layoutMode === 'showcase' ? 'relative' : ''} h-full w-full`}>
-                    <DeviceFrame type={deviceFrame}>
-                        <div className={`relative flex items-center justify-center h-full w-full ${deviceFrame !== 'none' ? 'bg-slate-950' : ''}`}>
-                            <SafeZone platform={safeZone} visible={!cleanMode && layoutMode === 'center'} />
-                            {renderComponent()}
-                        </div>
-                    </DeviceFrame>
-                </div>
-            </motion.div>
-
-            {/* 3. Control Panel */}
+            {/* 3. Controls Panel */}
             <AnimatePresence>
                 {!cleanMode && (
                     <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        className="absolute right-8 top-8 z-50 w-80 max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-slate-900/80 p-6 backdrop-blur-xl shadow-2xl scrollbar-hide"
+                        initial={{ x: '100%' }}
+                        animate={{ x: 0 }}
+                        exit={{ x: '100%' }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        className="absolute right-0 top-0 z-20 h-full w-80 overflow-y-auto border-l border-white/10 bg-slate-900/90 p-6 backdrop-blur-lg scrollbar-hide"
                     >
                         <div className="mb-6 flex items-center justify-between">
-                            <h2 className="flex items-center gap-2 text-sm font-bold text-white">
-                                <Settings size={16} className="text-indigo-400" />
-                                Studio Controls
-                            </h2>
-                            <button
-                                onClick={() => setCleanMode(true)}
-                                className="rounded-lg bg-white/5 p-2 text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
-                                title="Enter Clean Mode (Press ESC to exit)"
-                            >
-                                <EyeOff size={16} />
+                            <h2 className="text-lg font-bold text-white">Nest Studio</h2>
+                            <button onClick={() => setCleanMode(true)} className="rounded-full bg-white/5 p-2 text-slate-400 hover:bg-white/10">
+                                <X size={16} />
                             </button>
                         </div>
 
                         {/* Layout Mode */}
                         <div className="mb-6 space-y-3">
-                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                <Grid size={12} /> Layout Mode
-                            </label>
+                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2"><Grid size={12} /> Layout Mode</label>
                             <div className="grid grid-cols-2 gap-2">
                                 {Object.entries(LAYOUTS).map(([key, { label, icon: Icon }]) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => setLayoutMode(key)}
-                                        className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-[10px] font-bold transition-all ${layoutMode === key
-                                            ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                                            }`}
-                                    >
-                                        <Icon size={12} />
-                                        {label}
-                                    </button>
+                                    <button key={key} onClick={() => setLayoutMode(key)} className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-[10px] font-bold transition-all ${layoutMode === key ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>{label}</button>
                                 ))}
                             </div>
                         </div>
 
                         {layoutMode === 'showcase' && (
                             <div className="mb-6 space-y-3">
-                                <label className="text-xs font-medium text-indigo-400 uppercase tracking-wider flex items-center gap-2">
-                                    <Type size={12} /> Showcase Text
-                                </label>
+                                <label className="text-xs font-medium text-indigo-400 uppercase tracking-wider flex items-center gap-2"><Type size={12} /> Showcase Text</label>
                                 <div className="space-y-2">
-                                    <input
-                                        type="text"
-                                        value={showcaseTitle}
-                                        onChange={(e) => setShowcaseTitle(e.target.value)}
-                                        className="w-full rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-xs text-white placeholder-indigo-300 focus:border-indigo-500 focus:outline-none transition-colors"
-                                        placeholder="Main Headline"
-                                    />
-                                    <textarea
-                                        value={showcaseCaption}
-                                        onChange={(e) => setShowcaseCaption(e.target.value)}
-                                        className="w-full rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-xs text-white placeholder-indigo-300 focus:border-indigo-500 focus:outline-none transition-colors resize-none"
-                                        placeholder="Subtitle / Caption"
-                                        rows={3}
-                                    />
+                                    <input type="text" value={showcaseTitle} onChange={(e) => setShowcaseTitle(e.target.value)} className="w-full rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-xs text-white placeholder-indigo-300 focus:border-indigo-500 focus:outline-none transition-colors" placeholder="Main Headline" />
+                                    <textarea value={showcaseCaption} onChange={(e) => setShowcaseCaption(e.target.value)} className="w-full rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-xs text-white placeholder-indigo-300 focus:border-indigo-500 focus:outline-none transition-colors resize-none" placeholder="Subtitle / Caption" rows={3} />
                                 </div>
                             </div>
                         )}
@@ -438,20 +610,10 @@ export default function SocialAssetsPage() {
 
                         {/* Magic Moments */}
                         <div className="mb-6 space-y-3">
-                            <label className="text-xs font-medium text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                                <Sparkles size={12} /> Magic Moments
-                            </label>
+                            <label className="text-xs font-medium text-amber-400 uppercase tracking-wider flex items-center gap-2"><Sparkles size={12} /> Magic Moments</label>
                             <div className="space-y-2">
                                 {Object.entries(SCENARIOS).map(([key, { label }]) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => runScenario(key)}
-                                        disabled={isPlayingScenario}
-                                        className="flex w-full items-center justify-between rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-200 hover:bg-amber-500/20 disabled:opacity-50 transition-all"
-                                    >
-                                        {label}
-                                        <Play size={10} />
-                                    </button>
+                                    <button key={key} onClick={() => runScenario(key)} disabled={isPlayingScenario} className="flex w-full items-center justify-between rounded-lg bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-200 hover:bg-amber-500/20 disabled:opacity-50 transition-all">{label} <Play size={10} /></button>
                                 ))}
                             </div>
                         </div>
@@ -460,152 +622,88 @@ export default function SocialAssetsPage() {
 
                         {/* Component Selector */}
                         <div className="mb-6 space-y-3">
-                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                <Box size={12} /> Component
-                            </label>
+                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2"><Box size={12} /> Component</label>
                             <div className="grid grid-cols-2 gap-2">
                                 {Object.entries(COMPONENTS).map(([key, { label }]) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => setActiveComponent(key)}
-                                        className={`rounded-lg px-3 py-2 text-[10px] font-bold transition-all ${activeComponent === key
-                                            ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                                            }`}
-                                    >
-                                        {label}
-                                    </button>
+                                    <button key={key} onClick={() => setActiveComponent(key)} className={`rounded-lg px-3 py-2 text-[10px] font-bold transition-all ${activeComponent === key ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>{label}</button>
                                 ))}
                             </div>
                         </div>
 
+                        {/* MAIN LOGO EXPORT CONTROLS */}
+                        {activeComponent === 'logo' && (
+                            <div className="mb-6 space-y-3">
+                                <label className="text-xs font-medium text-emerald-400 uppercase tracking-wider flex items-center gap-2"><Download size={12} /> Logo Export</label>
+                                <div className="grid grid-cols-1 gap-2">
+                                    <button onClick={exportLogoAsPng} disabled={exportingLogo} className={`flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${exportingLogo ? 'bg-white/10 text-slate-500 cursor-wait' : 'bg-emerald-500/20 text-emerald-200 hover:bg-emerald-500/30 border border-emerald-500/20'}`}>{exportingLogo ? 'Exporting…' : 'Download PNG (1080p)'}</button>
+                                    <button onClick={exportLogoAsGif} disabled={exportingGif || exportingLogo} className={`flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${exportingGif ? 'bg-white/10 text-slate-500 cursor-wait' : 'bg-indigo-500/20 text-indigo-100 hover:bg-indigo-500/30 border border-indigo-500/20'}`}>{exportingGif ? 'Building GIF…' : 'Download GIF (Animated)'}</button>
+                                </div>
+                                {exportMessage && <p className="text-[10px] text-slate-400">{exportMessage}</p>}
+                                {exportGifMessage && <p className="text-[10px] text-slate-400">{exportGifMessage}</p>}
+                            </div>
+                        )}
+
+                        {/* INSTAGRAM PROFILE HINT */}
+                        {activeComponent === 'profile_pic' && (
+                            <div className="mb-6 p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+                                <p className="text-[10px] text-indigo-200 leading-relaxed">
+                                    The download button for the Instagram Profile Picture is located directly below the image in the main view.
+                                </p>
+                            </div>
+                        )}
+
                         {/* Aspect Ratio */}
                         <div className="mb-6 space-y-3">
-                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                <Layout size={12} /> Format
-                            </label>
+                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2"><Layout size={12} /> Format</label>
                             <div className="grid grid-cols-3 gap-2">
                                 {Object.entries(ASPECT_RATIOS).map(([key, { label }]) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => setAspectRatio(key)}
-                                        className={`rounded-lg px-3 py-2 text-[10px] font-bold transition-all ${aspectRatio === key
-                                            ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                                            }`}
-                                    >
-                                        {key.charAt(0).toUpperCase() + key.slice(1)}
-                                    </button>
+                                    <button key={key} onClick={() => setAspectRatio(key)} className={`rounded-lg px-3 py-2 text-[10px] font-bold transition-all ${aspectRatio === key ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>{key.charAt(0).toUpperCase() + key.slice(1)}</button>
                                 ))}
                             </div>
                         </div>
 
                         {/* Device Frame */}
                         <div className="mb-6 space-y-3">
-                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                <Smartphone size={12} /> Device Frame
-                            </label>
+                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2"><Smartphone size={12} /> Device Frame</label>
                             <div className="grid grid-cols-3 gap-2">
                                 {Object.entries(FRAMES).map(([key, { label }]) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => setDeviceFrame(key)}
-                                        className={`rounded-lg px-3 py-2 text-[10px] font-bold transition-all ${deviceFrame === key
-                                            ? 'bg-indigo-500 text-white'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                                            }`}
-                                    >
-                                        {label}
-                                    </button>
+                                    <button key={key} onClick={() => setDeviceFrame(key)} className={`rounded-lg px-3 py-2 text-[10px] font-bold transition-all ${deviceFrame === key ? 'bg-indigo-500 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>{label}</button>
                                 ))}
                             </div>
                         </div>
 
                         {/* Safe Zones */}
                         <div className="mb-6 space-y-3">
-                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                <Shield size={12} /> Safe Zones
-                            </label>
+                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2"><Shield size={12} /> Safe Zones</label>
                             <div className="grid grid-cols-3 gap-2">
                                 {Object.entries(PLATFORMS).map(([key, { label }]) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => setSafeZone(key)}
-                                        className={`rounded-lg px-3 py-2 text-[10px] font-bold transition-all ${safeZone === key
-                                            ? 'bg-rose-500 text-white'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                                            }`}
-                                    >
-                                        {label}
-                                    </button>
+                                    <button key={key} onClick={() => setSafeZone(key)} className={`rounded-lg px-3 py-2 text-[10px] font-bold transition-all ${safeZone === key ? 'bg-rose-500 text-white' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>{label}</button>
                                 ))}
                             </div>
                         </div>
 
                         {/* Content */}
                         <div className="mb-6 space-y-3">
-                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                <Type size={12} /> Content Mixer
-                            </label>
+                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2"><Type size={12} /> Content Mixer</label>
                             <div className="space-y-2">
-                                <input
-                                    type="text"
-                                    value={text}
-                                    onChange={(e) => setText(e.target.value)}
-                                    className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors"
-                                    placeholder="Primary Text"
-                                />
-                                <input
-                                    type="text"
-                                    value={subtext}
-                                    onChange={(e) => setSubtext(e.target.value)}
-                                    className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors"
-                                    placeholder="Secondary Text"
-                                />
-                                <input
-                                    type="text"
-                                    value={value}
-                                    onChange={(e) => setValue(e.target.value)}
-                                    className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors"
-                                    placeholder="Value / Cost"
-                                />
+                                <input type="text" value={text} onChange={(e) => setText(e.target.value)} className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors" placeholder="Primary Text" />
+                                <input type="text" value={subtext} onChange={(e) => setSubtext(e.target.value)} className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors" placeholder="Secondary Text" />
+                                <input type="text" value={value} onChange={(e) => setValue(e.target.value)} className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors" placeholder="Value / Cost" />
                             </div>
                         </div>
 
                         {/* Animation */}
                         <div className="mb-6 space-y-3">
-                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                <Play size={12} /> Animation
-                            </label>
-                            <button
-                                onClick={() => setAutoPlay(!autoPlay)}
-                                className={`flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-bold transition-all ${autoPlay
-                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20'
-                                    : 'bg-white/5 text-slate-400 hover:bg-white/10'
-                                    }`}
-                            >
-                                {autoPlay ? <Pause size={14} /> : <Play size={14} />}
-                                {autoPlay ? 'Auto-Play Active' : 'Start Animation'}
-                            </button>
+                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2"><Play size={12} /> Animation</label>
+                            <button onClick={() => setAutoPlay(!autoPlay)} className={`flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-bold transition-all ${autoPlay ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-white/5 text-slate-400 hover:bg-white/10'}`}>{autoPlay ? <Pause size={14} /> : <Play size={14} />}{autoPlay ? 'Auto-Play Active' : 'Start Animation'}</button>
                         </div>
 
                         {/* Background */}
                         <div className="space-y-3">
-                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                                <ImageIcon size={12} /> Background
-                            </label>
+                            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2"><ImageIcon size={12} /> Background</label>
                             <div className="flex gap-2">
-                                {['starfield', 'gradient', 'solid'].map((type) => (
-                                    <button
-                                        key={type}
-                                        onClick={() => setBgType(type)}
-                                        className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold uppercase transition-all ${bgType === type
-                                            ? 'bg-white/20 text-white'
-                                            : 'bg-white/5 text-slate-500 hover:bg-white/10'
-                                            }`}
-                                    >
-                                        {type}
-                                    </button>
+                                {['starfield', 'gradient', 'solid', 'transparent'].map((type) => (
+                                    <button key={type} onClick={() => setBgType(type)} className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold uppercase transition-all ${bgType === type ? 'bg-white/20 text-white' : 'bg-white/5 text-slate-500 hover:bg-white/10'}`}>{type}</button>
                                 ))}
                             </div>
                         </div>
@@ -617,14 +715,7 @@ export default function SocialAssetsPage() {
             {/* 4. Clean Mode Hint */}
             <AnimatePresence>
                 {cleanMode && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        className="absolute bottom-8 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-4 py-2 text-[10px] text-slate-400 backdrop-blur-md border border-white/5"
-                    >
-                        Press ESC to show controls
-                    </motion.div>
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-4 py-2 text-[10px] text-slate-400 backdrop-blur-md border border-white/5">Press ESC to show controls</motion.div>
                 )}
             </AnimatePresence>
         </div>

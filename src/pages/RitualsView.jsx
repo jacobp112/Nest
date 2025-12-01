@@ -21,7 +21,7 @@ const MoodSlider = ({ label, value, onChange, leftIcon: LeftIcon, rightIcon: Rig
 
   return (
     <div className="space-y-4 select-none group">
-      <div className="flex justify-between text-sm font-bold text-slate-400 uppercase tracking-wider">
+      <div className="flex justify-between text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">
         <span className="flex items-center gap-2 group-hover:text-rose-400 transition-colors">
           <LeftIcon size={14} /> Anxious
         </span>
@@ -83,17 +83,17 @@ const SwipeCard = ({ topic, onSwipe, index }) => {
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
       whileDrag={{ scale: 1.05, cursor: 'grabbing' }}
-      className="absolute inset-0 rounded-3xl border border-white/10 p-8 flex flex-col justify-between shadow-2xl cursor-grab z-10"
+      className="absolute inset-0 rounded-3xl border border-white/10 p-6 sm:p-8 flex flex-col justify-between shadow-2xl cursor-grab z-10"
     >
       <div>
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/20 text-white/70 text-[10px] font-bold uppercase tracking-widest mb-6 border border-white/5">
           <MessageCircle size={12} /> Topic {index + 1}
         </div>
-        <h3 className="text-3xl font-display font-bold text-white mb-4 leading-tight">{topic.title}</h3>
-        <p className="text-lg text-white/80 leading-relaxed">{topic.desc}</p>
+        <h3 className="text-2xl sm:text-3xl font-display font-bold text-white mb-4 leading-tight">{topic.title}</h3>
+        <p className="text-base sm:text-lg text-white/80 leading-relaxed">{topic.desc}</p>
       </div>
 
-      <div className="flex justify-between items-center text-white/50 text-xs font-bold uppercase tracking-widest">
+      <div className="flex justify-between items-center text-white/50 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
         <span className="flex items-center gap-2"><X size={16} /> Swipe Left to Skip</span>
         <span className="flex items-center gap-2">Swipe Right to Done <Check size={16} /></span>
       </div>
@@ -103,7 +103,7 @@ const SwipeCard = ({ topic, onSwipe, index }) => {
 
 // --- Main View ---
 
-const RitualsView = ({ onInteract = () => {}, className = '' }) => {
+const RitualsView = ({ onInteract = () => { }, className = '' }) => {
   const [mood, setMood] = useState(65);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
@@ -118,25 +118,25 @@ const RitualsView = ({ onInteract = () => {}, className = '' }) => {
     if (window.navigator.vibrate) window.navigator.vibrate(50); // Haptic
 
     setTimeout(() => {
-        if (activeCardIndex < TOPICS.length - 1) {
-            setActiveCardIndex(prev => prev + 1);
-        } else {
-            setCompleted(true);
-            onInteract('Ritual Completed');
-        }
+      if (activeCardIndex < TOPICS.length - 1) {
+        setActiveCardIndex(prev => prev + 1);
+      } else {
+        setCompleted(true);
+        onInteract('Ritual Completed');
+      }
     }, 200); // Wait for animation
   };
 
   const ACTION_ITEMS = [
     { id: 1, text: 'Cancel Adobe Subscription', who: 'You', done: false },
-    { id: 2, text: 'Move £200 to Holiday Pot', who: 'Jamie', done: true },
+    { id: 2, text: 'Move £200 to Holiday Pot', who: 'Lucy', done: true },
   ];
 
   return (
-    <div className={`mx-auto w-full max-w-6xl space-y-8 pb-20 ${className}`}>
+    <div className={`mx-auto w-full max-w-6xl space-y-6 sm:space-y-8 pb-20 ${className}`}>
 
       {/* 1. Hero: The Weekly Ritual */}
-      <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-[2fr_1fr]">
         <DashboardCard className="relative overflow-hidden flex flex-col justify-center min-h-[240px] border-0 ring-1 ring-white/5 bg-slate-900/50 group">
           <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none group-hover:bg-indigo-600/20 transition-colors duration-1000" />
 
@@ -147,41 +147,36 @@ const RitualsView = ({ onInteract = () => {}, className = '' }) => {
               </div>
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-indigo-400">Weekly Sync</p>
             </div>
-            <h2 className="text-5xl font-display font-bold text-white tracking-tight mb-4">
+            <h2 className="text-4xl sm:text-5xl font-display font-bold text-white tracking-tight mb-4">
               Money Date
             </h2>
-            <p className="text-slate-400 max-w-md leading-relaxed text-sm">
-              Align on spending, check goals, and clear the air. <br/>
+            <p className="text-slate-400 max-w-md leading-relaxed text-xs sm:text-sm">
+              Align on spending, check goals, and clear the air. <br />
               <span className="text-white font-bold">You are on a 3 week streak! 🔥</span>
             </p>
           </div>
         </DashboardCard>
 
         <DashboardCard className="flex flex-col items-center justify-center text-center border-dashed border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors cursor-pointer group" onClick={() => onInteract('Calendar')}>
-          <div className="h-16 w-16 rounded-full bg-gradient-to-tr from-emerald-500 to-cyan-500 p-[2px] mb-4 group-hover:scale-110 transition-transform shadow-2xl">
-            <div className="h-full w-full rounded-full bg-slate-900 flex items-center justify-center">
-              <Calendar size={24} className="text-white" />
-            </div>
-          </div>
-          <h3 className="font-bold text-white mb-1">Next Date</h3>
-          <p className="text-sm text-slate-400 mb-4">Sunday, 7:00 PM</p>
+          <h3 className="font-bold text-white mb-2">Next Date</h3>
+          <p className="text-sm text-emerald-100 mb-4">Sunday, 7:00 PM</p>
           <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Add to Calendar</span>
         </DashboardCard>
       </div>
 
       {/* 2. Main Interactive Grid */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
 
         {/* Left: Pulse Check (Mood) */}
         <DashboardCard className="border-0 ring-1 ring-white/5 bg-slate-900/50 h-full flex flex-col justify-center">
           <div className="flex items-center justify-between mb-10">
-            <h3 className="text-xl font-bold text-white">Pulse Check</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-white">Pulse Check</h3>
             <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
               Live Sync Active
             </span>
           </div>
 
-          <div className="space-y-10">
+          <div className="space-y-8 sm:space-y-10">
             <MoodSlider
               label="How do you feel about our finances?"
               value={mood}
@@ -192,22 +187,22 @@ const RitualsView = ({ onInteract = () => {}, className = '' }) => {
 
             {/* Partner (Hidden State) */}
             <div className="relative h-24 rounded-2xl bg-slate-950/50 border border-white/5 flex items-center justify-center overflow-hidden group cursor-wait">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] opacity-5" />
-                <div className="flex flex-col items-center gap-3 relative z-10">
-                    <div className="flex gap-1.5">
-                        {[0, 1, 2].map(i => (
-                            <motion.div
-                                key={i}
-                                animate={{ y: [0, -6, 0], opacity: [0.5, 1, 0.5] }}
-                                transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
-                                className="h-2.5 w-2.5 bg-indigo-500 rounded-full shadow-[0_0_10px_#6366f1]"
-                            />
-                        ))}
-                    </div>
-                    <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">
-                        Jamie is answering...
-                    </span>
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] opacity-5" />
+              <div className="flex flex-col items-center gap-3 relative z-10">
+                <div className="flex gap-1.5">
+                  {[0, 1, 2].map(i => (
+                    <motion.div
+                      key={i}
+                      animate={{ y: [0, -6, 0], opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
+                      className="h-2.5 w-2.5 bg-indigo-500 rounded-full shadow-[0_0_10px_#6366f1]"
+                    />
+                  ))}
                 </div>
+                <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">
+                  Lucy is answering...
+                </span>
+              </div>
             </div>
           </div>
         </DashboardCard>
@@ -218,30 +213,30 @@ const RitualsView = ({ onInteract = () => {}, className = '' }) => {
             {!completed ? (
               // Stack Effect
               <div className="relative w-full h-full">
-                 {/* Background Cards for Depth */}
-                 <div className="absolute inset-0 bg-slate-800 rounded-3xl transform translate-y-4 scale-95 opacity-40 border border-white/10 z-0" />
-                 <div className="absolute inset-0 bg-slate-800 rounded-3xl transform translate-y-8 scale-90 opacity-20 border border-white/10 -z-10" />
+                {/* Background Cards for Depth */}
+                <div className="absolute inset-0 bg-slate-800 rounded-3xl transform translate-y-4 scale-95 opacity-40 border border-white/10 z-0" />
+                <div className="absolute inset-0 bg-slate-800 rounded-3xl transform translate-y-8 scale-90 opacity-20 border border-white/10 -z-10" />
 
-                 {/* Active Card */}
-                 <SwipeCard
-                    key={activeCardIndex}
-                    topic={TOPICS[activeCardIndex]}
-                    onSwipe={handleSwipe}
-                    index={activeCardIndex}
-                 />
+                {/* Active Card */}
+                <SwipeCard
+                  key={activeCardIndex}
+                  topic={TOPICS[activeCardIndex]}
+                  onSwipe={handleSwipe}
+                  index={activeCardIndex}
+                />
               </div>
             ) : (
               // Completion State
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 to-slate-900 rounded-3xl border border-emerald-500/30 flex flex-col items-center justify-center text-center p-8 backdrop-blur-xl"
+                className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 to-slate-900 rounded-3xl border border-emerald-500/30 flex flex-col items-center justify-center text-center p-6 sm:p-8 backdrop-blur-xl"
               >
                 <div className="h-24 w-24 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.4)] mb-6">
                   <HeartHandshake size={48} className="text-emerald-950" />
                 </div>
-                <h3 className="text-4xl font-display font-bold text-white mb-2">All Sync'd Up!</h3>
-                <p className="text-emerald-100/70 max-w-xs text-sm leading-relaxed">
+                <h3 className="text-3xl sm:text-4xl font-display font-bold text-white mb-2">All Sync'd Up!</h3>
+                <p className="text-emerald-100/70 max-w-xs text-xs sm:text-sm leading-relaxed">
                   Great job. You've cleared the deck for this week. See you next Sunday.
                 </p>
                 <button
@@ -260,22 +255,21 @@ const RitualsView = ({ onInteract = () => {}, className = '' }) => {
       <DashboardCard className="bg-slate-900/50 border-0 ring-1 ring-white/5">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
-             <Sparkles size={18} />
+            <Sparkles size={18} />
           </div>
-          <h3 className="text-lg font-bold text-white">Action Items</h3>
+          <h3 className="text-base sm:text-lg font-bold text-white">Action Items</h3>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {ACTION_ITEMS.map((item) => (
-            <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-slate-950 border border-white/5 hover:border-white/10 transition-colors group cursor-pointer" onClick={() => onInteract(`Toggle Item ${item.id}`)}>
+            <div key={item.id} className="flex items-center justify-between p-3 sm:p-4 rounded-2xl bg-slate-950 border border-white/5 hover:border-white/10 transition-colors group cursor-pointer" onClick={() => onInteract(`Toggle Item ${item.id}`)}>
               <div className="flex items-center gap-4">
                 <div
-                  className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                    item.done ? 'bg-emerald-500 border-emerald-500' : 'border-slate-600 group-hover:border-emerald-500'
-                  }`}
+                  className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all ${item.done ? 'bg-emerald-500 border-emerald-500' : 'border-slate-600 group-hover:border-emerald-500'
+                    }`}
                 >
                   {item.done && <Check size={14} className="text-slate-900 stroke-[3]" />}
                 </div>
-                <span className={`text-sm font-medium ${item.done ? 'text-slate-500 line-through' : 'text-white'}`}>
+                <span className={`text-xs sm:text-sm font-medium ${item.done ? 'text-slate-500 line-through' : 'text-white'}`}>
                   {item.text}
                 </span>
               </div>

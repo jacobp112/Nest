@@ -1,80 +1,72 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight, Brain, Shield, Users, TrendingUp, Check,
   HeartHandshake, Phone, Globe, MessageCircle, X
 } from 'lucide-react';
 
+import { useIsMobile } from '../../hooks/useIsMobile';
+
 // --- EXPANDED QUESTION SET ---
 const QUESTIONS = [
   {
     id: 'windfall',
-    question: "You unexpectedly receive £50,000. What is your immediate reflex?",
+    question: "You unexpectedly receive £10,000. What is your honest immediate reaction?",
     options: [
-      { label: "Optimize: Max out ISA/Pension allowances immediately.", weight: { architect: 5, steward: 1 } },
-      { label: "Protect: Pay down mortgage or lock into a secure bond.", weight: { steward: 5, architect: 1 } },
-      { label: "Discuss: Sit down with my partner to decide together.", weight: { collaborator: 5, steward: 1 } },
-      { label: "Leverage: Invest in a high-growth opportunity or business.", weight: { ascender: 5, architect: 2 } },
+      { label: "Plan: I open a spreadsheet to calculate the best allocation.", weight: { architect: 5, steward: 1 } },
+      { label: "Relief: I put it straight into savings/mortgage for safety.", weight: { steward: 5, architect: 1 } },
+      { label: "Share: I call my partner. We decide together.", weight: { collaborator: 5, steward: 1 } },
+      { label: "Action: I use it to pay off a debt or upgrade my lifestyle immediately.", weight: { ascender: 5 } },
     ]
   },
   {
-    id: 'tool',
-    question: "Which tool best describes your current financial management?",
+    id: 'current_state',
+    question: "How do you currently track your money?",
     options: [
-      { label: "Complex Spreadsheets / Custom Dashboards", weight: { architect: 5 } },
-      { label: "Joint Bank Accounts / Splitwise", weight: { collaborator: 5 } },
-      { label: "Physical Files / Insurance Documents", weight: { steward: 4 } },
-      { label: "Banking Apps / Crypto Wallets / Mental Math", weight: { ascender: 4 } },
+      { label: "I have a detailed system (Excel/Notion) that I update manually.", weight: { architect: 5 } },
+      { label: "We have a joint account, but it gets messy sometimes.", weight: { collaborator: 5 } },
+      { label: "I keep mental notes and check my banking app when I'm worried.", weight: { steward: 3, ascender: 3 } },
+      { label: "I try not to look until I have to.", weight: { ascender: 5 } },
     ]
   },
   {
-    id: 'fear',
-    question: "What is your biggest financial anxiety?",
+    id: 'nightmare',
+    question: "What keeps you up at night regarding finance?",
     options: [
-      { label: "Inefficiency: Losing money to fees, tax, or inflation.", weight: { architect: 5 } },
-      { label: "Instability: Something happening to me or my income.", weight: { steward: 5 } },
-      { label: "Conflict: Arguments about money with loved ones.", weight: { collaborator: 5 } },
-      { label: "Stagnation: Not growing wealth fast enough.", weight: { ascender: 5 } },
+      { label: "Chaos: Not knowing exactly where every penny is going.", weight: { architect: 5 } },
+      { label: "Security: The fear of losing my job or home.", weight: { steward: 5 } },
+      { label: "Tension: Arguments or awkward silence with my partner.", weight: { collaborator: 5 } },
+      { label: "Speed: Feeling like I'm working hard but not moving forward.", weight: { ascender: 5 } },
     ]
   },
   {
-    id: 'market_crash',
-    question: "The market drops 20% overnight. You...",
+    id: 'purchase',
+    question: "You need to buy something expensive (like a car or holiday). You...",
     options: [
-      { label: "Execute rebalancing strategy. Buy the dip.", weight: { architect: 4, ascender: 3 } },
-      { label: "Worry about safety. Check emergency funds.", weight: { steward: 5 } },
-      { label: "Check in with family. Ensure we are on the same page.", weight: { collaborator: 5 } },
-      { label: "Double down. Volatility is opportunity.", weight: { ascender: 5 } },
+      { label: "Research specs and resale value for weeks before buying.", weight: { architect: 5 } },
+      { label: "Worry about if we can really afford it right now.", weight: { steward: 5 } },
+      { label: "Discuss it with family to make sure everyone is happy.", weight: { collaborator: 5 } },
+      { label: "If I can afford the monthly payment, I get it.", weight: { ascender: 5 } },
     ]
   },
   {
-    id: 'success',
-    question: "What does 'Financial Success' look like to you?",
+    id: 'dream',
+    question: "What does 'Financial Freedom' feel like to you?",
     options: [
-      { label: "A perfectly automated, tax-efficient machine.", weight: { architect: 5 } },
-      { label: "Knowing my family is secure, no matter what.", weight: { steward: 5 } },
-      { label: "A harmonious life with zero money stress.", weight: { collaborator: 5 } },
-      { label: "Complete freedom of time and location.", weight: { ascender: 5 } },
+      { label: "Total Control: A dashboard where all the lights are green.", weight: { architect: 5 } },
+      { label: "Safety: A paid-off home and money for the kids.", weight: { steward: 5 } },
+      { label: "Harmony: Never fighting about bills again.", weight: { collaborator: 5 } },
+      { label: "Momentum: Being debt-free and seeing the numbers go up.", weight: { ascender: 5 } },
     ]
   },
   {
-    id: 'legacy',
-    question: "How do you view inheritance and legacy?",
+    id: 'motivation',
+    question: "Why did you click on Nest today?",
     options: [
-      { label: "It should be structured efficiently to minimize tax.", weight: { architect: 4 } },
-      { label: "It is the primary goal. Building a dynasty.", weight: { steward: 5 } },
-      { label: "It's about shared experiences now, not just cash later.", weight: { collaborator: 4 } },
-      { label: "I want to spend it all while I'm alive (Die With Zero).", weight: { ascender: 4 } },
-    ]
-  },
-  {
-    id: 'focus',
-    question: "Finally, what do you need most from Nest right now?",
-    options: [
-      { label: "Data clarity and advanced analytics.", weight: { architect: 5 } },
-      { label: "Safety features and document storage.", weight: { steward: 5 } },
-      { label: "Tools to manage money with a partner.", weight: { collaborator: 5 } },
-      { label: "Tools to accelerate debt payoff or savings.", weight: { ascender: 5 } },
+      { label: "My current system is broken/ugly and I want better data.", weight: { architect: 5 } },
+      { label: "I want to make sure my family is protected.", weight: { steward: 5 } },
+      { label: "I want to get on the same page as my partner.", weight: { collaborator: 5 } },
+      { label: "I want to finally sort my sh*t out.", weight: { ascender: 5 } },
     ]
   }
 ];
@@ -82,8 +74,8 @@ const QUESTIONS = [
 const ARCHETYPES = {
   architect: {
     title: "The Architect",
-    subtitle: "Optimization • Efficiency • Control",
-    desc: "You treat wealth as an engineering problem. Your dashboard prioritizes raw data, tax efficiency, and performance metrics.",
+    subtitle: "Optimisation • Efficiency • Control",
+    desc: "You treat wealth as an engineering problem. Your dashboard prioritises raw data, tax efficiency, and performance metrics.",
     icon: Brain, color: "text-indigo-400", bg: "bg-indigo-500", border: "border-indigo-500"
   },
   steward: {
@@ -108,29 +100,30 @@ const ARCHETYPES = {
 
 // --- Components ---
 
-const OptionButton = ({ option, index, onClick, isSelected }) => (
+const OptionButton = ({ option, index, onClick, isSelected, lowMotion, isMobile }) => (
   <motion.button
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ delay: index * 0.05 }}
+    initial={isMobile ? false : (lowMotion ? { opacity: 0 } : { opacity: 0, x: -10 })}
+    animate={isMobile ? false : (lowMotion ? { opacity: 1 } : { opacity: 1, x: 0 })}
+    transition={isMobile ? { duration: 0 } : {
+      delay: lowMotion ? 0 : index * 0.05,
+      duration: 0.2,
+      ease: 'easeOut',
+    }}
     onClick={onClick}
-    className={`group relative w-full flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200 ${
-      isSelected
+    className={`group relative w-full flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200 ${isSelected
       ? 'bg-white/10 border-white/40 shadow-[0_0_30px_rgba(255,255,255,0.1)]'
       : 'bg-slate-900/40 border-white/5 hover:bg-slate-800/60 hover:border-white/10'
-    }`}
+      }`}
   >
-    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
-      isSelected
+    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${isSelected
       ? 'bg-white text-slate-900 border-white'
       : 'bg-white/5 text-slate-500 border-white/10 group-hover:border-white/30 group-hover:text-white'
-    }`}>
+      }`}>
       {index + 1}
     </div>
 
-    <span className={`text-sm font-medium transition-colors ${
-        isSelected ? 'text-white' : 'text-slate-300 group-hover:text-white'
-    }`}>
+    <span className={`text-sm font-medium transition-colors ${isSelected ? 'text-white' : 'text-slate-300 group-hover:text-white'
+      }`}>
       {option.label}
     </span>
 
@@ -174,7 +167,7 @@ const AnalyzingScreen = ({ onFinish }) => {
 
         {/* Central Pulse */}
         <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-12 w-12 bg-white/10 rounded-full animate-pulse" />
+          <div className="h-12 w-12 bg-white/10 rounded-full animate-pulse" />
         </div>
       </div>
       <div>
@@ -203,56 +196,56 @@ const SupportModal = ({ isOpen, onClose }) => (
         >
           <div className="bg-gradient-to-br from-teal-900/20 to-slate-900 p-8">
             <div className="flex justify-between items-start mb-6">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                        <HeartHandshake size={24} />
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-white font-display">You Are Not Alone</h3>
-                        <p className="text-xs text-teal-200/70 uppercase tracking-wider font-bold">Support Resources</p>
-                    </div>
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                  <HeartHandshake size={24} />
                 </div>
-                <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
-                    <X size={20} />
-                </button>
+                <div>
+                  <h3 className="text-xl font-bold text-white font-display">You Are Not Alone</h3>
+                  <p className="text-xs text-teal-200/70 uppercase tracking-wider font-bold">Support Resources</p>
+                </div>
+              </div>
+              <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
+                <X size={20} />
+              </button>
             </div>
 
             <p className="text-slate-300 text-sm leading-relaxed mb-8 border-l-2 border-teal-500/50 pl-4">
-                "We at Nest understand that fighting debt or financial stress can be isolating.
-                Please remember there are free, confidential resources available to you.
-                There is always someone willing to help."
+              "We at Nest understand that fighting debt or financial stress can be isolating.
+              Please remember there are free, confidential resources available to you.
+              There is always someone willing to help."
             </p>
 
             <div className="space-y-6">
-                {/* Debt Help */}
-                <div className="space-y-3">
-                    <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Debt Advice (Free & Confidential)</h4>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                        <a href="https://www.stepchange.org/" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-teal-500/30 transition-all group">
-                            <Globe size={18} className="text-teal-400" />
-                            <span className="text-sm font-bold text-white group-hover:text-teal-200">StepChange</span>
-                        </a>
-                        <a href="https://nationaldebtline.org/" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-teal-500/30 transition-all group">
-                            <Phone size={18} className="text-teal-400" />
-                            <span className="text-sm font-bold text-white group-hover:text-teal-200">National Debtline</span>
-                        </a>
-                    </div>
+              {/* Debt Help */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Debt Advice (Free & Confidential)</h4>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <a href="https://www.stepchange.org/" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-teal-500/30 transition-all group">
+                    <Globe size={18} className="text-teal-400" />
+                    <span className="text-sm font-bold text-white group-hover:text-teal-200">StepChange</span>
+                  </a>
+                  <a href="https://nationaldebtline.org/" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-teal-500/30 transition-all group">
+                    <Phone size={18} className="text-teal-400" />
+                    <span className="text-sm font-bold text-white group-hover:text-teal-200">National Debtline</span>
+                  </a>
                 </div>
+              </div>
 
-                {/* Mental Health */}
-                <div className="space-y-3">
-                    <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mental Health Support</h4>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                        <a href="https://www.samaritans.org/" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-rose-500/30 transition-all group">
-                            <Phone size={18} className="text-rose-400" />
-                            <span className="text-sm font-bold text-white group-hover:text-rose-200">Samaritans</span>
-                        </a>
-                        <a href="https://giveusashout.org/" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-indigo-500/30 transition-all group">
-                            <MessageCircle size={18} className="text-indigo-400" />
-                            <span className="text-sm font-bold text-white group-hover:text-indigo-200">Shout (Text 85258)</span>
-                        </a>
-                    </div>
+              {/* Mental Health */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mental Health Support</h4>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <a href="https://www.samaritans.org/" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-rose-500/30 transition-all group">
+                    <Phone size={18} className="text-rose-400" />
+                    <span className="text-sm font-bold text-white group-hover:text-rose-200">Samaritans</span>
+                  </a>
+                  <a href="https://giveusashout.org/" target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-indigo-500/30 transition-all group">
+                    <MessageCircle size={18} className="text-indigo-400" />
+                    <span className="text-sm font-bold text-white group-hover:text-indigo-200">Shout (Text 85258)</span>
+                  </a>
                 </div>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -268,6 +261,14 @@ export default function ArchetypeQuiz({ onComplete }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selection, setSelection] = useState(null);
   const [showSupport, setShowSupport] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const lowMotion = prefersReducedMotion;
+  const [hasMounted, setHasMounted] = useState(false);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const handleAnswer = (weights, index) => {
     setSelection(index);
@@ -311,8 +312,10 @@ export default function ArchetypeQuiz({ onComplete }) {
   // Progress Calculation
   const progress = ((step) / QUESTIONS.length) * 100;
 
+  if (!hasMounted) return null;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#020617] text-slate-200 p-6 relative overflow-hidden selection:bg-indigo-500/30">
+    <div className="flex min-h-[100dvh] items-start md:items-center justify-center bg-[#020617] text-slate-200 p-4 md:p-6 relative overflow-hidden selection:bg-indigo-500/30">
 
       {/* Support Modal */}
       <SupportModal isOpen={showSupport} onClose={() => setShowSupport(false)} />
@@ -322,26 +325,22 @@ export default function ArchetypeQuiz({ onComplete }) {
       <div className="absolute -top-[20%] -right-[10%] w-[60%] h-[60%] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="w-full max-w-xl relative z-10">
+      <div className="w-full max-w-xl relative z-10 flex flex-col justify-center py-8 md:py-0 min-h-[550px] md:min-h-[600px]">
         <AnimatePresence mode="wait">
 
           {/* 1. QUESTION PHASE */}
           {!result && !isAnalyzing && (
-            <motion.div
+            <div
               key={step}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
               className="space-y-8"
             >
               {/* Progress Bar */}
               <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
                 <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.5 }}
-                    className="h-full bg-indigo-500"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5 }}
+                  className="h-full bg-indigo-500"
                 />
               </div>
 
@@ -362,21 +361,23 @@ export default function ArchetypeQuiz({ onComplete }) {
                     index={i}
                     option={opt}
                     isSelected={selection === i}
+                    lowMotion={lowMotion}
+                    isMobile={isMobile}
                     onClick={() => handleAnswer(opt.weight, i)}
                   />
                 ))}
               </div>
 
-              <div className="pt-4 flex items-center gap-4 text-[10px] text-slate-600 uppercase tracking-widest">
-                 <div className="flex gap-1">
-                    <span className="w-5 h-5 border border-slate-800 rounded flex items-center justify-center">1</span>
-                    <span className="w-5 h-5 border border-slate-800 rounded flex items-center justify-center">2</span>
-                    <span className="w-5 h-5 border border-slate-800 rounded flex items-center justify-center">3</span>
-                    <span className="w-5 h-5 border border-slate-800 rounded flex items-center justify-center">4</span>
-                 </div>
-                 <span>Key Press Select</span>
+              <div className="hidden md:flex pt-4 items-center gap-4 text-[10px] text-slate-600 uppercase tracking-widest">
+                <div className="flex gap-1">
+                  <span className="w-5 h-5 border border-slate-800 rounded flex items-center justify-center">1</span>
+                  <span className="w-5 h-5 border border-slate-800 rounded flex items-center justify-center">2</span>
+                  <span className="w-5 h-5 border border-slate-800 rounded flex items-center justify-center">3</span>
+                  <span className="w-5 h-5 border border-slate-800 rounded flex items-center justify-center">4</span>
+                </div>
+                <span>Key Press Select</span>
               </div>
-            </motion.div>
+            </div>
           )}
 
           {/* 2. ANALYZING PHASE */}
@@ -433,7 +434,7 @@ export default function ArchetypeQuiz({ onComplete }) {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                 <span className="relative flex items-center justify-center gap-2">
-                   Enter Dashboard <ArrowRight size={16} />
+                  Enter Dashboard <ArrowRight size={16} />
                 </span>
               </motion.button>
             </motion.div>

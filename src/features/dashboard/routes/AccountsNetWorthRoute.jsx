@@ -63,17 +63,17 @@ const AccountsNetWorthRoute = ({ onShowPricingModal }) => {
         const balance = Number(account.balance) || 0;
         const type =
           account.type ||
-          (account.category || '').toLowerCase().includes('loan') ||
-          (account.accountType || '').toLowerCase().includes('liability')
+            (account.category || '').toLowerCase().includes('loan') ||
+            (account.accountType || '').toLowerCase().includes('liability')
             ? 'liability'
             : balance >= 0
               ? 'asset'
               : 'liability';
         const isLinked = Boolean(
           account.isLinked ||
-            account.connection === 'linked' ||
-            account.provider ||
-            account.institution,
+          account.connection === 'linked' ||
+          account.provider ||
+          account.institution,
         );
         return {
           ...account,
@@ -233,7 +233,7 @@ const AccountsNetWorthRoute = ({ onShowPricingModal }) => {
                 <div>
                   <p className="text-xs uppercase tracking-[0.4em] text-slate-300/80">Net worth today</p>
                   <p className={cx('mt-4 text-4xl font-semibold leading-tight sm:text-5xl', gradientNumberClasses)}>
-                    {isLoading ? '—' : formatCurrency(netWorthMetrics.netWorth)}
+                    {isLoading ? '–' : formatCurrency(netWorthMetrics.netWorth)}
                   </p>
                   <p className="mt-2 text-sm text-slate-300/90">
                     A living snapshot of your assets, liabilities, and the energy driving your balance sheet.
@@ -258,7 +258,7 @@ const AccountsNetWorthRoute = ({ onShowPricingModal }) => {
                     Assets
                   </div>
                   <p className={cx('mt-3 text-2xl font-semibold', gradientNumberClasses)}>
-                    {isLoading ? '—' : formatCurrency(netWorthMetrics.assets)}
+                    {isLoading ? '–' : formatCurrency(netWorthMetrics.assets)}
                   </p>
                   <p className="mt-1 text-xs text-slate-400">Cash, investments, property</p>
                 </div>
@@ -268,7 +268,7 @@ const AccountsNetWorthRoute = ({ onShowPricingModal }) => {
                     Liabilities
                   </div>
                   <p className={cx('mt-3 text-2xl font-semibold', accentNumberClasses)}>
-                    {isLoading ? '—' : formatCurrency(netWorthMetrics.liabilities)}
+                    {isLoading ? '–' : formatCurrency(netWorthMetrics.liabilities)}
                   </p>
                   <p className="mt-1 text-xs text-slate-400">Mortgages, lending, obligations</p>
                 </div>
@@ -278,7 +278,7 @@ const AccountsNetWorthRoute = ({ onShowPricingModal }) => {
                     Momentum
                   </div>
                   <p className={cx('mt-3 text-2xl font-semibold', gradientNumberClasses)}>
-                    {isLoading ? '—' : formatCurrency(netWorthMetrics.netWorth)}
+                    {isLoading ? '–' : formatCurrency(netWorthMetrics.netWorth)}
                   </p>
                   <p className="mt-1 text-xs text-slate-400">Blended net position</p>
                 </div>
@@ -306,7 +306,7 @@ const AccountsNetWorthRoute = ({ onShowPricingModal }) => {
                     <p className="text-xs text-slate-400">{accountGroups.linked.length} institutions</p>
                   </div>
                   <p className={cx('text-lg font-semibold', gradientNumberClasses)}>
-                    {isLoading ? '—' : formatCurrency(accountGroups.linkedValue)}
+                    {isLoading ? '–' : formatCurrency(accountGroups.linkedValue)}
                   </p>
                 </div>
                 <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 backdrop-blur-xl">
@@ -315,7 +315,7 @@ const AccountsNetWorthRoute = ({ onShowPricingModal }) => {
                     <p className="text-xs text-slate-400">{accountGroups.manual.length} statements</p>
                   </div>
                   <p className={cx('text-lg font-semibold', accentNumberClasses)}>
-                    {isLoading ? '—' : formatCurrency(accountGroups.manualValue)}
+                    {isLoading ? '–' : formatCurrency(accountGroups.manualValue)}
                   </p>
                 </div>
               </div>
@@ -511,7 +511,7 @@ const AccountsNetWorthRoute = ({ onShowPricingModal }) => {
               )}
             </div>
             <p className="text-sm text-slate-300">
-              Keep high-value items, private equity, or art cataloged with intelligent depreciation and secure metadata.
+              Keep high-value items, private equity, or art catalogued with intelligent depreciation and secure metadata.
             </p>
             <button
               type="button"

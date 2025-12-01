@@ -1,164 +1,42 @@
 'use client';
 
-
-
-import React, { Suspense, lazy, startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-
-import { AnimatePresence, animate, motion, useMotionValue, useTransform, useReducedMotion, useScroll, useSpring } from 'framer-motion';
-
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion, useInView, useMotionValue, useTransform, useReducedMotion } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
-
 import { Pagination, Keyboard, A11y } from 'swiper/modules';
+import {
+  ArrowRight, Check, ChevronRight, Lock, Users, Layers, Radar,
+  ArrowUpRight, History, DraftingCompass, TrendingUp, ShieldCheck, Zap
+} from 'lucide-react';
 
-import { useInView } from 'react-intersection-observer';
-
-import { ArrowRight, Check, ChevronDown, ChevronRight, Sparkles, Lock } from 'lucide-react';
 import BrowserChrome from '../components/BrowserChrome.jsx';
-
-import useSafariPhysics from '../hooks/useSafariPhysics';
-
-import useThemeColor from '../hooks/useThemeColor';
-
 import 'swiper/css';
-
 import 'swiper/css/pagination';
 
 import Starfield from '../components/experience/Starfield.jsx';
+import AdminLoginModal from '../components/AdminLoginModal.jsx';
 import TopNav from '../components/TopNav.jsx';
-import DemoDashboard from '../components/demo/DemoDashboard.jsx';
 
-
-const LazyNestCanvas = lazy(() => import('../components/experience/NestExperienceCanvas.jsx'));
+const DemoDashboard = lazy(() => import('../components/demo/DemoDashboard.jsx'));
 const AccountsNetWorthView = lazy(() => import('./AccountsNetWorthView'));
 const GoalsCenterView = lazy(() => import('./GoalsCenterView'));
 const ReportingHubView = lazy(() => import('./ReportingHubView'));
 
-const IMMERSIVE_HEIGHT = 300; // vh
-
 const POSTER_NOISE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAACoWZ8PAAAAF0lEQVQYV2NkYGD4z0AEYBxVSFUBAwBnGQHhX9nuSAAAAABJRU5ErkJggg==';
-
-
-
-
-
-const IMMERSIVE_STARFIELD_CONFIG = {
-
-  maxStarsDesktop: 3200,
-
-  maxStarsMobile: 1800,
-
-  spawnRatePerSec: 2000,
-
-  spawnRampDuration: 1.8,
-
-  initialFill: 0.12,
-
-  targetFill: 0.98,
-
-  baseStarSize: 5.2,
-
-  twinkleMinPeriod: 1,
-
-  twinkleMaxPeriod: 2.8,
-
-  parallaxStrength: 4.2,
-
-  hotStarProbability: 0.18,
-
-};
-
 const CONFETTI_COLORS = ['#34d399', '#2dd4bf', '#0d9488', '#6ee7b7', '#5eead4', '#a7f3d0'];
-
 const CONFETTI_PIECES = 48;
 
-const SAVINGS_MILESTONES = [
-
-  { id: 'glow', value: 1000, glowStrength: 0.35, particleCount: 0, hapticDuration: 18 },
-
-  { id: 'burst', value: 5000, glowStrength: 0.6, particleCount: 18, hapticDuration: 32 },
-
-  { id: 'celebration', value: 10000, glowStrength: 0.85, particleCount: 28, hapticDuration: 64, confetti: true },
-
-];
-
-const currencyFormatter = new Intl.NumberFormat('en-GB', {
-
-  style: 'currency',
-
-  currency: 'GBP',
-
-  maximumFractionDigits: 0,
-
-});
-
-const formatCurrency = (value) => currencyFormatter.format(Math.max(0, Math.round(Number(value) || 0)));
-
-const formatInteger = (value) => Math.round(Number(value) || 0).toLocaleString('en-US');
-
-const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
-
-
-
-
-
-const VALUE_PROPS = [
-
-  {
-
-    id: 'aggregation',
-
-    label: 'Connect',
-
-    title: 'First, we connect everything',
-
-    subtitle: 'Secure bank-level aggregation pulls in every account, card, loan, and pocketed savings so nothing is lost in the shuffle.',
-
-  },
-
-  {
-
-    id: 'insights',
-
-    label: 'Insights',
-
-    title: 'Then, our AI finds insights',
-
-    subtitle: 'Threads of cash flow, spending spikes, and goal gaps surface automatically so you focus on decisions, not detective work.',
-
-  },
-
-  {
-
-    id: 'collaboration',
-
-    label: 'Collaborate',
-
-    title: 'Finally, you work together',
-
-    subtitle: 'Shared rituals, nudges, and accountability keep partners and co-parents flying in formation instead of fighting the current.',
-
-  },
-
-];
-
 const DEFAULT_WAITLIST_MESSAGE = 'Join 5,000+ families already on the waitlist.';
-const DEFAULT_WAITLIST_SUBTEXT =
-  'We only send one welcome email plus launch-day priority instructions.';
+const DEFAULT_WAITLIST_SUBTEXT = 'We only send one welcome email plus launch-day priority instructions.';
 const DEFAULT_VELVET_TEXT = 'Secure your Founding Member rate.';
-
-
 
 const productSlides = [
   {
     id: 'architect',
     slug: 'architect',
     title: 'The Architect View',
-    description: 'See your entire financial life in one high-fidelity dashboard. Assets, liabilities, and net worth—visualized.',
-    accent: 'from-indigo-500/20 via-purple-400/10 to-slate-900/60',
-    url: 'nest.finance/architect',
-    faviconColor: '#6366f1',
-    ambientColor: 'rgba(99,102,241,0.35)',
-    stats: [],
+    description: 'See your entire financial life in one high-fidelity dashboard. Assets, liabilities, and net worth - visualised.',
+    url: 'https://nest.finance/architect',
     items: [],
   },
   {
@@ -166,23 +44,15 @@ const productSlides = [
     slug: 'rituals',
     title: 'Shared Rituals',
     description: 'Build healthy financial habits together with guided monthly reviews and automated check-ins.',
-    accent: 'from-orange-500/20 via-amber-400/10 to-slate-900/60',
-    url: 'nest.finance/rituals',
-    faviconColor: '#f59e0b',
-    ambientColor: 'rgba(245,158,11,0.35)',
-    stats: [],
+    url: 'https://nest.finance/rituals',
     items: [],
   },
   {
     id: 'vision',
     slug: 'vision',
     title: 'Long-term Vision',
-    description: 'Align on your 5, 10, and 20-year goals. Visualize your future and track progress towards your dreams.',
-    accent: 'from-emerald-500/20 via-teal-400/10 to-slate-900/60',
-    url: 'nest.finance/vision',
-    faviconColor: '#10b981',
-    ambientColor: 'rgba(16,185,129,0.35)',
-    stats: [],
+    description: 'Align on your 5, 10, and 20-year goals. Visualise your future and track progress towards your dreams.',
+    url: 'https://nest.finance/vision',
     items: [],
   },
   {
@@ -190,1242 +60,622 @@ const productSlides = [
     slug: 'collaborator',
     title: 'Collaborator Mode',
     description: 'Seamlessly manage joint finances while maintaining individual privacy. The perfect balance for modern couples.',
-    accent: 'from-rose-500/20 via-pink-400/10 to-slate-900/60',
-    url: 'nest.finance/collaborator',
-    faviconColor: '#f43f5e',
-    ambientColor: 'rgba(244,63,94,0.35)',
-    stats: [],
+    url: 'https://nest.finance/collaborator',
     items: [],
   },
-]; const slideVariantsBase = {
+];
 
-  active: {
-
-    opacity: 1,
-
-    y: 0,
-
-    scale: 1,
-
-    transition: { duration: 0.45, ease: 'easeOut' },
-
-  },
-
-  inactive: {
-
-    opacity: 0.75,
-
-    y: 16,
-
-    scale: 0.99,
-
-    transition: { duration: 0.35, ease: 'easeOut' },
-
-  },
-
+// Lighter configuration object (just data, no heavy components)
+const SLIDE_CONFIG = {
+  architect: { tab: 'overview', persona: 'architect' },
+  rituals: { tab: 'rituals', persona: 'collaborator' },
+  vision: { tab: 'goals', persona: 'steward' },
+  collaborator: { tab: 'overview', persona: 'collaborator' },
 };
 
-
-
-const slideVariantsReduced = {
-
-  active: {
-
-    opacity: 1,
-
-    y: 0,
-
-    scale: 1,
-
-    transition: { duration: 0.35, ease: 'easeOut' },
-
-  },
-
-  inactive: {
-
-    opacity: 0.85,
-
-    y: 0,
-
-    scale: 1,
-
-    transition: { duration: 0.3, ease: 'easeOut' },
-
-  },
-
-};
-
-
-
-const textContainerVariants = {
-
-  active: {
-
-    transition: {
-
-      staggerChildren: 0.08,
-
-      delayChildren: 0.12,
-
-    },
-
-  },
-
-  inactive: {},
-
-};
-
-
-
-const textItemVariants = {
-
-  active: {
-
-    opacity: 1,
-
-    y: 0,
-
-    transition: { duration: 0.4, ease: 'easeOut' },
-
-  },
-
-  inactive: {
-
-    opacity: 0.65,
-
-    y: 12,
-
-    transition: { duration: 0.3, ease: 'easeOut' },
-
-  },
-
-};
-
-
-
-const textItemVariantsReduced = {
-
-  active: {
-
-    opacity: 1,
-
-    y: 0,
-
-    transition: { duration: 0.3, ease: 'easeOut' },
-
-  },
-
-  inactive: {
-
-    opacity: 0.5,
-
-    y: 0,
-
-    transition: { duration: 0.2, ease: 'easeOut' },
-
-  },
-
-};
-
-
-
-const mockVariants = {
-
-  active: {
-
-    opacity: 1,
-
-    y: 0,
-
-    transition: { duration: 0.6, ease: 'easeOut' },
-
-  },
-
-  inactive: {
-
-    opacity: 0.65,
-
-    y: 24,
-
-    transition: { duration: 0.4, ease: 'easeIn' },
-
-  },
-
-};
-
-
-
-const mockVariantsReduced = {
-
-  active: {
-
-    opacity: 1,
-
-    y: 0,
-
-    transition: { duration: 0.4, ease: 'easeOut' },
-
-  },
-
-  inactive: {
-
-    opacity: 0.8,
-
-    y: 0,
-
-    transition: { duration: 0.3, ease: 'easeOut' },
-
-  },
-
-};
-
-
-
-const householdFocusOptions = ['Get on the same page weekly', 'Plan major purchases calmly', 'Pay off debt together', 'Grow generational wealth'];
-
-
-
-const motionFade = {
-
-  initial: { opacity: 0, y: 24 },
-
-  animate: { opacity: 1, y: 0 },
-
-};
-
-
-
-const fadeByProgress = (progress, start, end) => {
-
-  const padding = 0.08;
-
-  const paddedStart = Math.max(0, start - padding);
-
-  const paddedEnd = Math.min(1, end + padding);
-
-
-
-  if (progress <= paddedStart) {
-
-    return start === 0 ? 1 : 0;
-
-  }
-
-  if (progress >= paddedEnd) return 0;
-
-
-
-  const midpoint = (start + end) / 2;
-
-  if (progress <= midpoint) {
-
-    return (progress - paddedStart) / Math.max(0.0001, midpoint - paddedStart);
-
-  }
-
-  return (paddedEnd - progress) / Math.max(0.0001, paddedEnd - midpoint);
-
-};
-
-
-
-const ITEM_GLYPHS = ['A', 'B', 'C', 'D'];
-
-const getItemGlyph = (item, index) => {
-
-  const typeInitial = item?.type?.[0] ?? ITEM_GLYPHS[index % ITEM_GLYPHS.length];
-
-  return `${typeInitial}`.toUpperCase();
-
-};
-
-
-
-const MetricDelta = ({
-
-  delta,
-
-  visible,
-
-  formatter = (value) => value,
-
-  positiveColor = 'text-emerald-300',
-
-  negativeColor = 'text-slate-100/80',
-
-}) => (
-
-  <AnimatePresence initial={false}>
-
-    {visible && delta !== 0 ? (
-
-      <motion.span
-
-        key={`${delta > 0 ? 'inc' : 'dec'}-${Math.abs(delta)}`}
-
-        className={`text-sm font-semibold ${delta > 0 ? positiveColor : negativeColor}`}
-
-        initial={{ opacity: 0, y: -4 }}
-
-        animate={{ opacity: 1, y: 0 }}
-
-        exit={{ opacity: 0, y: -4 }}
-
-      >
-
-        {delta > 0 ? '+' : '-'}
-
-        {formatter(Math.abs(delta))}
-
-      </motion.span>
-
-    ) : null}
-
-  </AnimatePresence>
-
-);
-
-
-
-const CelebrationParticles = ({ count = 16 }) => (
-
-  <div className="pointer-events-none absolute inset-0">
-
-    {Array.from({ length: count }).map((_, index) => {
-
-      const angle = (index / count) * Math.PI * 2;
-
-      const distance = 70 + (index % 6) * 10;
-
-      const delay = index * 0.015;
-
-      return (
-
-        <motion.span
-
-          key={`particle-${index}`}
-
-          className="absolute left-1/2 top-1/2 h-1 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-emerald-300 via-emerald-400 to-teal-300 shadow-[0_0_14px_rgba(16,185,129,0.3)]"
-
-          style={{ transformOrigin: 'center' }}
-
-          initial={{ opacity: 0, x: 0, y: 0, scale: 0.6 }}
-
-          animate={{
-
-            opacity: [0, 1, 0],
-
-            x: Math.cos(angle) * distance,
-
-            y: Math.sin(angle) * distance,
-
-            scale: [0.8, 1.05, 0.8],
-
-            rotate: angle * (180 / Math.PI),
-
-          }}
-
-          transition={{ duration: 1.2, delay, ease: 'easeOut' }}
-
-        />
-
-      );
-
-    })}
-
-  </div>
-
-);
-
-
-
-const CelebrationConfetti = ({ pieces = 28 }) => {
-
-  const config = useMemo(
-
-    () =>
-
-      Array.from({ length: pieces }, (_, index) => ({
-
-        id: index,
-
-        left: `${Math.round((index / pieces) * 100)}%`,
-
-        delay: (index % 6) * 0.05,
-
-        duration: 1.4 + (index % 5) * 0.15,
-
-        color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
-
-      })),
-
-    [pieces],
-
-  );
-
-
-
-  return (
-
-    <div className="pointer-events-none absolute inset-0 overflow-visible">
-
-      {config.map((piece) => (
-
-        <motion.span
-
-          key={`inline-confetti-${piece.id}`}
-
-          className="absolute block rounded-full shadow-[0_2px_6px_rgba(15,118,110,0.25)]"
-
-          style={{ width: 6, height: 12, left: piece.left, backgroundColor: piece.color }}
-
-          initial={{ opacity: 0, y: '-10%', scale: 0.8 }}
-
-          animate={{
-
-            opacity: [0, 1, 1, 0],
-
-            y: '110%',
-
-            scale: [0.8, 1, 1],
-
-            rotate: 90 + piece.id * 6,
-
-          }}
-
-          transition={{ duration: piece.duration, delay: piece.delay, ease: 'easeOut' }}
-
-        />
-
-      ))}
-
-    </div>
-
-  );
-
-};
-
-
-
-const PosterOrnament = ({ glowHex }) => (
-
-  <div className="absolute inset-0 overflow-hidden rounded-[36px] bg-background">
-    <Starfield density={800} reducedMotion={true} />
-
-    <div
-
-      className="absolute inset-0 opacity-[0.08]"
-
-      style={{
-
-        background: 'transparent', // Removed green circle gradient completely
-
-      }}
-
-    />
-
-    <div
-
-      className="absolute inset-0 opacity-[0.04]"
-
-      style={{ backgroundImage: `url(${POSTER_NOISE})`, backgroundRepeat: 'repeat' }}
-
-    />
-
-  </div>
-
-);
-
-
-
-const CanvasPoster = ({ glowHex }) => (
-
-  <div className="relative flex h-full items-center justify-center bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-6">
-
-    <PosterOrnament glowHex={glowHex} />
-    <Starfield density={1200} reducedMotion={true} />
-
-    <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-transparent to-slate-900/80 pointer-events-none" />
-
-    <div className="absolute inset-0 opacity-40 blur-3xl bg-gradient-to-tr from-emerald-500/10 via-cyan-400/5 to-transparent pointer-events-none" />
-
-  </div>
-
-);
-
-const DESKTOP_TARGET_WIDTH = 1024; // Lowered to 1024px (lg) for larger text while maintaining grid layout
-
-const ScaleWrapper = ({ children }) => {
-  const containerRef = useRef(null);
-  const contentRef = useRef(null);
-  const [scale, setScale] = useState(1);
-
-  useLayoutEffect(() => {
-    const updateScale = () => {
-      if (containerRef.current) {
-        const parentWidth = containerRef.current.offsetWidth;
-        const newScale = parentWidth / DESKTOP_TARGET_WIDTH;
-        setScale(newScale);
-      }
-    };
-
-    // Initial scale
-    updateScale();
-
-    // Resize observer for container width
-    const resizeObserver = new ResizeObserver(() => {
-      window.requestAnimationFrame(updateScale);
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={containerRef}
-      className="relative w-full h-full overflow-hidden bg-slate-950 select-none"
+// --- ANIMATED TEXT COMPONENT ---
+const AuroraText = ({ text = "reimagined.", className = "" }) => (
+  <span className={`relative inline-flex flex-col ${className}`}>
+    {/* Invisible HTML text ensures correct layout size */}
+    <span className="invisible opacity-0" aria-hidden="true">
+      {text}
+    </span>
+
+    {/* SVG Overlay for the Gradient Animation */}
+    <svg
+      className="absolute inset-0 w-full h-full overflow-visible select-none"
+      xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Interaction Shield */}
-      <div className="absolute inset-0 z-50 bg-transparent" />
+      <defs>
+        <style>
+          {`
+            @keyframes auroraFlowText {
+              0% { stop-color: #34d399; }
+              25% { stop-color: #3b82f6; }
+              50% { stop-color: #8b5cf6; }
+              75% { stop-color: #3b82f6; }
+              100% { stop-color: #34d399; }
+            }
+            .stop-text-a { animation: auroraFlowText 6s infinite linear; }
+            .stop-text-b { animation: auroraFlowText 6s infinite linear; animation-delay: -1.5s; }
+            .stop-text-c { animation: auroraFlowText 6s infinite linear; animation-delay: -3s; }
+          `}
+        </style>
 
-      {/* Scaled Content */}
-      <div
-        ref={contentRef}
-        className="origin-top-left will-change-transform"
-        style={{
-          width: `${DESKTOP_TARGET_WIDTH}px`,
-          transform: `scale(${scale})`,
-          transformOrigin: 'top left'
-        }}
+        <linearGradient id="textAuroraGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" className="stop-text-a" />
+          <stop offset="50%" className="stop-text-b" />
+          <stop offset="100%" className="stop-text-c" />
+        </linearGradient>
+      </defs>
+
+      <text
+        x="50%"
+        y="55%"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="url(#textAuroraGradient)"
+        className="font-display font-bold"
+        style={{ fontSize: 'inherit', fontFamily: 'inherit', fontWeight: 'inherit' }}
       >
-        {children}
-      </div>
-    </div>
-  );
-};
+        {text}
+      </text>
+    </svg>
+  </span>
+);
 
-const SafariWindow = ({
-  children,
-  url,
-  className,
-  faviconColor,
-  ambientColor,
-  reducedMotion,
-  isReady,
-}) => {
-  const {
-    containerRef,
-    tiltStyle,
-    rimLight,
-    glareGradient,
-    glareTransform,
-    boxShadow,
-    handlers,
-    cursor,
-  } = useSafariPhysics({ reducedMotion });
-
-  return (
-    <div
-      ref={containerRef}
-      className={`relative z-10 ${className || ''}`}
-      {...handlers}
-    >
-      <motion.div
-        className="group relative h-full overflow-hidden rounded-[32px] border border-white/10 bg-slate-900/80 backdrop-blur-2xl transition-all duration-500 ease-in-out"
-        style={{
-          ...tiltStyle,
-          boxShadow,
-          transformStyle: 'preserve-3d',
-        }}
-      >
-        {!reducedMotion && (
-          <>
-            <motion.div
-              aria-hidden="true"
-              className="pointer-events-none absolute -inset-px rounded-[32px] z-50"
-              style={{ backgroundImage: rimLight, opacity: 0.65, mixBlendMode: 'screen' }}
-            />
-            <motion.div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 rounded-[32px] z-40"
-              style={{ backgroundImage: glareGradient, opacity: 0.35, mixBlendMode: 'soft-light', transform: glareTransform }}
-            />
-          </>
-        )}
-        {ambientColor ? (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 rounded-[32px]"
-            style={{ background: `radial-gradient(circle at 25% -10%, ${ambientColor}, transparent 60%)`, opacity: 0.4 }}
-          />
-        ) : null}
-
-        <div className="relative z-10 flex flex-col h-full overflow-hidden rounded-[32px]">
-          <BrowserChrome url={url} faviconColor={faviconColor} reducedMotion={reducedMotion} />
-
-          {/* Content Container */}
-          <div className="relative flex-1 bg-slate-950/85 overflow-hidden">
-            <div
-              aria-hidden="true"
-              className={`absolute inset-0 z-20 border-t border-white/5 bg-gradient-to-br from-slate-900/80 to-slate-950/90 transition-opacity duration-500 ${isReady ? 'opacity-0' : 'opacity-100'} ${reducedMotion ? '' : 'animate-pulse'}`}
-            >
-              <div className="absolute inset-6 rounded-2xl border border-white/5 bg-slate-800/40" />
-            </div>
-
-            {/* Actual Content */}
-            <div className={`relative z-10 h-full w-full transition-opacity duration-500 ${isReady ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              {children}
-            </div>
-
-            {/* Bottom Blur Gradient */}
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent z-30 pointer-events-none" />
-          </div>
-        </div>
-      </motion.div>
-
-      {!reducedMotion && (
-        <motion.div
-          className="pointer-events-none absolute left-1/2 top-1/2 z-[60] flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 text-[10px] font-semibold uppercase tracking-[0.35em] text-white mix-blend-difference backdrop-blur-sm"
-          style={{ x: cursor.x, y: cursor.y, opacity: cursor.visible ? 0.85 : 0 }}
-        >
-          Drag
-        </motion.div>
-      )}
-    </div>
-  );
-};
-
-
-
-const HeroTitle = () => (
-  <div className="relative z-10 text-center space-y-6 max-w-5xl mx-auto pt-32 pb-24 px-6">
-    {/* Badge */}
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-900/20 border border-emerald-500/20 backdrop-blur-md mb-6 shadow-lg shadow-emerald-900/20"
-    >
-      <Sparkles size={14} className="text-emerald-400 animate-pulse" />
-      <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-200">
-        Private Wealth OS
-      </span>
-    </motion.div>
-
-    {/* Massive Headline */}
+const HeroTitle = ({ onNavigate }) => (
+  <div className="relative z-10 text-center space-y-8 max-w-5xl mx-auto pt-32 pb-24 px-6">
     <motion.h1
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+      initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
       className="text-6xl md:text-8xl lg:text-9xl font-display font-bold text-white tracking-tighter leading-[0.9]"
     >
-      Family finance <br />
-      <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-white">
-        reimagined.
-      </span>
+      <span className="text-white">Family finance</span> <br />
+      <AuroraText text="reimagined." className="pb-2 md:pb-4" />
     </motion.h1>
 
-    {/* Subtext */}
     <motion.p
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 0.4 }}
+      initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}
       className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed font-light"
     >
-      The first collaborative operating system for high-net-worth households.
-      Align your wealth, goals, and legacy in one secure vault.
+      Whether you are crushing debt, merging finances, or building a legacy – Nest aligns your money, goals, and relationships in one secure vault.
     </motion.p>
 
-    {/* Magnetic CTA Button */}
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.6, duration: 0.5 }}
-      className="pt-10"
+      initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6, duration: 0.5 }}
+      className="pt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
     >
       <button
         onClick={() => document.getElementById('register-form')?.scrollIntoView({ behavior: 'smooth' })}
-        className="group relative px-10 py-5 rounded-full bg-white text-slate-950 font-bold text-sm uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_50px_rgba(255,255,255,0.3)] overflow-hidden"
+        className="group relative px-8 py-4 rounded-full bg-white text-slate-950 font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] overflow-hidden w-full sm:w-auto"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-300 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
-        <span className="relative z-10">Request Early Access</span>
+        <span className="relative z-10">Request Access</span>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-300 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+      </button>
+      <button
+        onClick={() => onNavigate && onNavigate('demo')}
+        className="group px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
+      >
+        <span>Live Demo</span>
+        <ChevronRight size={14} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
       </button>
     </motion.div>
   </div>
 );
 
-
-
-const PROGRESS_TRACK_HEIGHT = 120;
-
-
-
-function ValuePropProgressIndicator({ progressValue, currentProgress = 0, onSegmentClick, reducedMotion, isVisible = true }) {
-
-  const fallbackProgressValue = useMotionValue(0);
-
-  const resolvedProgressValue = progressValue ?? fallbackProgressValue;
-
-
-
-  const springProgress = useSpring(resolvedProgressValue, {
-
-    stiffness: 200,
-
-    damping: 32,
-
-    mass: 0.8,
-
-  });
-
-
-
-  const animatedProgress = reducedMotion ? resolvedProgressValue : springProgress;
-
-
-
-  const dotY = useTransform(animatedProgress, (value = 0) => Math.min(1, Math.max(0, value)) * PROGRESS_TRACK_HEIGHT);
-
-
-
-  const activeIndex = Math.min(
-
-    VALUE_PROPS.length - 1,
-
-    Math.max(0, Math.floor(currentProgress * VALUE_PROPS.length + 0.00001)),
-
-  );
-
-
-
-  if (!progressValue || !isVisible) return null;
-
-
-
+// --- PAIN POINTS SECTION ---
+const PainPointsSection = () => {
   return (
-
-    <motion.div
-
-      className="pointer-events-none fixed right-6 top-1/2 z-30 -translate-y-1/2 text-left"
-
-      initial={{ opacity: 0 }}
-
-      animate={{ opacity: isVisible ? 1 : 0 }}
-
-      transition={{ duration: reducedMotion ? 0.2 : 0.4, ease: 'easeOut' }}
-
-    >
-
-      <div className="pointer-events-auto">
-
-        <div
-
-          className="relative flex w-16 flex-col items-center justify-between"
-
-          style={{ height: PROGRESS_TRACK_HEIGHT }}
-
-        >
-
-          <div
-
-            className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 rounded-full bg-slate-500/25"
-
-            aria-hidden="true"
-
-          />
-
-          <motion.span
-
-            aria-hidden="true"
-
-            className={`absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-300 ${reducedMotion ? '' : 'shadow-[0_0_14px_rgba(16,185,129,0.8)]'}`}
-
-            style={{
-
-              width: '0.85rem',
-
-              height: '0.85rem',
-
-              y: dotY,
-
-            }}
-
-          />
-
-          {VALUE_PROPS.map((prop, index) => {
-
-            const status = index < activeIndex ? 'complete' : index === activeIndex ? 'active' : 'upcoming';
-
-            const isActive = status === 'active';
-
-            const isComplete = status === 'complete';
-
-            const widthClass = isActive ? 'w-[3px]' : 'w-0.5';
-
-            const colorClass = isActive
-
-              ? 'bg-emerald-300'
-
-              : isComplete
-
-                ? 'bg-emerald-300/80'
-
-                : 'bg-slate-500/55';
-
-            const opacity = isActive ? 1 : isComplete ? 0.65 : 0.25;
-
-            const boxShadow = isActive && !reducedMotion ? '0 0 12px rgba(16,185,129,0.65)' : 'none';
-
-            return (
-
-              <button
-
-                key={prop.id}
-
-                type="button"
-
-                aria-label={`Skip to ${prop.label || prop.title}`}
-
-                aria-current={isActive ? 'step' : undefined}
-
-                onClick={() => onSegmentClick?.(index)}
-
-                className="group relative flex w-full flex-col items-center gap-2 rounded-full px-2 py-1 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300/60"
-
-              >
-
-                <span
-
-                  className={`block ${widthClass} rounded-full transition-all duration-300 ease-out ${colorClass}`}
-
-                  style={{
-
-                    height: `${PROGRESS_TRACK_HEIGHT / VALUE_PROPS.length - 6}px`,
-
-                    opacity,
-
-                    boxShadow,
-
-                  }}
-
-                />
-
-                <motion.span
-
-                  className="pointer-events-none absolute right-full mr-3 whitespace-nowrap text-right text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-slate-50"
-
-                  initial={{ opacity: 0, x: 8 }}
-
-                  animate={{ opacity: isVisible ? 0.9 : 0, x: isVisible ? 0 : 8 }}
-
-                  transition={{ duration: reducedMotion ? 0.2 : 0.35, ease: 'easeOut' }}
-
-                >
-
-                  {prop.label || prop.title}
-
-                </motion.span>
-
-              </button>
-
-            );
-
-          })}
-
-        </div>
-
-      </div>
-
-    </motion.div>
-
-  );
-
-}
-
-
-
-function ValuePropOverlay({ progressValue, progress = 0, sectionRef = null, reducedMotion = false, isSectionActive = true }) {
-
-  const fallbackProgressValue = useMotionValue(progress);
-
-  useEffect(() => {
-
-    fallbackProgressValue.set(progress);
-
-  }, [progress, fallbackProgressValue]);
-
-
-
-  const trackedProgressValue = progressValue ?? fallbackProgressValue;
-
-  const [currentProgress, setCurrentProgress] = useState(trackedProgressValue?.get?.() ?? progress);
-
-
-
-  useEffect(() => {
-
-    if (!trackedProgressValue || typeof trackedProgressValue.on !== 'function') {
-
-      setCurrentProgress(progress);
-
-      return undefined;
-
-    }
-
-    setCurrentProgress(trackedProgressValue.get?.() ?? progress);
-
-    const unsubscribe = trackedProgressValue.on('change', (latest) => {
-
-      setCurrentProgress(latest);
-
-    });
-
-    return () => unsubscribe();
-
-  }, [trackedProgressValue, progress]);
-
-
-
-  const slot = currentProgress * VALUE_PROPS.length;
-
-  const handleSegmentClick = useCallback(
-
-    (index) => {
-
-      if (!sectionRef?.current || typeof window === 'undefined') return;
-
-      const sectionNode = sectionRef.current;
-
-      const rect = sectionNode.getBoundingClientRect();
-
-      const startOffset = (window.pageYOffset || window.scrollY || 0) + rect.top;
-
-      const sectionHeight = sectionNode.offsetHeight || rect.height || 0;
-
-      if (sectionHeight <= 0) return;
-
-      const denominator = Math.max(1, VALUE_PROPS.length - 1);
-
-      const targetProgress = VALUE_PROPS.length === 1 ? 0 : index / denominator;
-
-      const targetScroll = startOffset + sectionHeight * targetProgress;
-
-      window.scrollTo({
-
-        top: targetScroll,
-
-        behavior: reducedMotion ? 'auto' : 'smooth',
-
-      });
-
-    },
-
-    [sectionRef, reducedMotion],
-
-  );
-
-  return (
-
-    <>
-
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 sm:px-6">
-
-        {VALUE_PROPS.map((block, idx) => {
-
-          const start = idx / VALUE_PROPS.length;
-
-          const end = (idx + 1) / VALUE_PROPS.length;
-
-          const opacity = fadeByProgress(currentProgress, start, end);
-
-          const relative = idx - slot;
-
-          const translateY = relative * 60;
-
-          const scale = 1 - Math.min(Math.abs(relative) * 0.06, 0.18);
-
-          const blur = 0;
-
-          const depth = 100 - Math.abs(relative) * 20;
-
-          return (
-
-            <div
-
-              key={block.id}
-
-              className="absolute inset-x-0 flex justify-center"
-
-              style={{
-
-                opacity,
-
-                transform: `translateY(${translateY}px) scale(${scale})`,
-
-                zIndex: depth,
-
-              }}
-
-            >
-
-              <div
-
-                className="w-full max-w-xl rounded-[24px] border border-white/12 bg-slate-950/65 p-5 sm:p-6 text-left shadow-[0_40px_90px_rgba(8,47,73,0.35)] backdrop-blur-xl transition-all duration-300"
-
-                style={{
-
-                  filter: `blur(${blur}px)`,
-
-                  willChange: 'transform, opacity',
-
-                }}
-
-              >
-
-                <p className="font-sans text-[0.58rem] font-semibold uppercase tracking-[0.55em] text-text-secondary">Windows of Clarity</p>
-
-                <h3 className="font-display mt-4 text-2xl font-semibold text-text-primary md:text-3xl leading-tight">
-
-                  <span className="text-emerald-300">{block.title}</span>
-
-                </h3>
-
-                <p className="font-sans mt-4 text-base text-text-secondary">{block.subtitle}</p>
-
-              </div>
-
-            </div>
-
-          );
-
-        })}
-
-      </div>
-
-      <ValuePropProgressIndicator
-
-        progressValue={trackedProgressValue}
-
-        currentProgress={currentProgress}
-
-        onSegmentClick={handleSegmentClick}
-
-        reducedMotion={reducedMotion}
-
-        isVisible={isSectionActive}
-
-      />
-
-    </>
-
-  );
-
-}
-
-
-
-function ActThreeIntro() {
-
-  return (
-
-    <section className="flex min-h-[100vh] items-center py-16 md:py-24">
-
-      <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-
-        <p className="font-sans text-xs font-semibold uppercase tracking-[0.4em] text-emerald-200/70">The Next Step</p>
-
-        <h2 className="font-display mt-6 text-3xl font-semibold text-text-primary sm:text-4xl md:text-4xl">The nest is almost ready. Claim your branch.</h2>
-
-        <p className="font-sans mt-6 max-w-2xl text-base text-text-secondary md:text-lg">
-
-          Curated onboarding waves mean seats are scarce. Register your interest with one tap, then share a collaborative savings plan to prove you&apos;re serious about building wealth together.
-
-        </p>
-
-      </div>
-
-    </section>
-
-  );
-
-}
-
-
-
-
-
-const MOCK_ACCOUNTS = [
-  { id: '1', name: 'Main Current', balance: 2450.50, type: 'asset', provider: 'Monzo' },
-  { id: '2', name: 'Joint Savings', balance: 12000.00, type: 'asset', provider: 'Starling' },
-  { id: '3', name: 'Amex Gold', balance: -450.20, type: 'liability', provider: 'Amex' },
-];
-
-const MOCK_TRANSACTIONS = [
-  { id: 't1', description: 'Waitrose', amount: -85.40, date: new Date().toISOString(), type: 'expense' },
-  { id: 't2', description: 'Salary', amount: 3200.00, date: new Date().toISOString(), type: 'income' },
-  { id: 't3', description: 'Netflix', amount: -15.99, date: new Date().toISOString(), type: 'expense' },
-  { id: 't4', description: 'TFL Travel', amount: -4.50, date: new Date().toISOString(), type: 'expense' },
-  { id: 't5', description: 'Coffee', amount: -3.50, date: new Date().toISOString(), type: 'expense' },
-];
-
-const MOCK_GOALS = [
-  { id: 'g1', name: 'Wedding Fund', target: 15000, current: 8500, deadline: '2024-12-01', color: 'rose' },
-  { id: 'g2', name: 'Emergency Fund', target: 10000, current: 10000, deadline: '2024-06-01', color: 'emerald' },
-  { id: 'g3', name: 'Japan Trip', target: 5000, current: 1200, deadline: '2025-04-01', color: 'sky' },
-];
-
-const MOCK_BUDGETS = [
-  { id: 'b1', category: 'Groceries', limit: 400, spent: 250, color: 'emerald' },
-  { id: 'b2', category: 'Dining Out', limit: 200, spent: 180, color: 'rose' },
-  { id: 'b3', category: 'Transport', limit: 150, spent: 45, color: 'sky' },
-];
-
-
-
-const PRODUCT_SLIDE_COMPONENTS = {
-  architect: <DemoDashboard initialTab="overview" initialPersona="architect" showIntro={false} />,
-  rituals: <DemoDashboard initialTab="rituals" showIntro={false} />,
-  vision: <DemoDashboard initialTab="vision" showIntro={false} />,
-  collaborator: <DemoDashboard initialTab="overview" initialPersona="collaborator" showIntro={false} />,
-};
-function ProductPreviewCarousel() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const prefersReducedMotion = useReducedMotion();
-
-  const handleSlideSelect = useCallback((idx) => {
-    startTransition(() => {
-      setActiveIndex(idx);
-    });
-  }, []);
-
-  const slides = productSlides.map((slide) => ({
-    ...slide,
-    component: PRODUCT_SLIDE_COMPONENTS[slide.id] ?? null,
-  }));
-
-  const activeSlide = slides[Math.min(activeIndex, slides.length - 1)] ?? slides[0];
-  if (!activeSlide) return null;
-
-  const fallbackPoster = <CanvasPoster glowHex={activeSlide.faviconColor} />;
-
-  const motionTransition = prefersReducedMotion
-    ? { duration: 0.4, ease: 'easeOut' }
-    : { duration: 0.8, ease: [0.16, 1, 0.3, 1] };
-
-  return (
-    <div className="relative w-full max-w-[1400px] mx-auto px-6 py-32">
-      <div className="flex flex-col items-center gap-12">
-
-        {/* Header & Navigation */}
-        <div className="text-center space-y-8 max-w-3xl mx-auto">
-          <div className="space-y-4 flex flex-col items-center">
-            <h2 className="text-4xl md:text-6xl font-display font-bold text-white tracking-tight">Inside the OS</h2>
-            <div className="h-1.5 w-24 bg-emerald-500 rounded-full" />
-          </div>
-
-          {/* Horizontal Tabs */}
-          <div className="flex flex-wrap justify-center gap-2">
-            {slides.map((slide, idx) => (
-              <button
-                key={slide.id}
-                onClick={() => handleSlideSelect(idx)}
-                className={`px-6 py-3 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-300 ${activeIndex === idx
-                  ? 'bg-white text-slate-950 shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105'
-                  : 'bg-slate-900/50 text-slate-500 hover:bg-slate-800 hover:text-slate-300 border border-white/5'
-                  }`}
-              >
-                {slide.title}
-              </button>
-            ))}
-          </div>
-
-          {/* Active Description */}
-          <motion.p
-            key={activeIndex}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto"
+    <section className="relative py-24 md:py-32 px-4 md:px-6 overflow-hidden">
+      {/* Dynamic Background Noise */}
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay pointer-events-none" />
+
+      {/* Ambient Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[50%] bg-indigo-900/10 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="max-w-screen-xl mx-auto relative z-10">
+        <div className="text-center max-w-3xl mx-auto mb-20 space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-md mb-4"
           >
-            {activeSlide.description}
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-200">The Governance Gap</span>
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-6xl font-display font-bold text-white tracking-tight leading-[1.1]"
+          >
+            You are running a Family Office. <br className="hidden md:block" />
+            <span className="text-slate-500">Start acting like one.</span>
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-base md:text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto"
+          >
+            Wealth isn't built by tracking £4 coffees. It is built by aligning on a vision, identifying blind spots, and compounding good decisions over decades.
           </motion.p>
         </div>
 
-        {/* Visual Window */}
-        <div className="relative h-[700px] w-full max-w-5xl perspective-[2000px]">
-          {/* Background Bloom */}
-          <div className="absolute inset-0 bg-emerald-500/10 blur-[150px] rounded-full -z-10" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          <SafariWindow
-            url={activeSlide.url}
-            faviconColor={activeSlide.faviconColor}
-            ambientColor={activeSlide.ambientColor}
-            reducedMotion={prefersReducedMotion}
-            className="h-full w-full"
-            isReady={true}
+          {/* Card 1: The Solo CFO Burden */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-10%" }}
+            transition={{ duration: 0.5 }}
+            className="md:col-span-2 relative group rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-8 md:p-12 overflow-hidden hover:border-indigo-500/30 transition-colors duration-500"
           >
-            <div className="relative flex h-full w-full overflow-hidden bg-[#0B0F19]">
-              <ScaleWrapper>
-                <Suspense fallback={fallbackPoster}>
-                  {activeSlide.component ?? fallbackPoster}
-                </Suspense>
-              </ScaleWrapper>
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-12">
+              <div className="shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-slate-800 flex items-center justify-center border border-white/5 group-hover:scale-105 transition-transform duration-500">
+                <Users className="w-8 h-8 md:w-10 md:h-10 text-indigo-400" />
+              </div>
+              <div className="space-y-4">
+                <h3 className="text-2xl md:text-3xl font-bold text-white font-display">The "Solo CFO" Burden</h3>
+                <p className="text-base md:text-lg text-slate-400 max-w-2xl leading-relaxed">
+                  In most households, one partner carries the entire mental load of the finances while the other is left in the dark. This creates anxiety, bottlenecks, and misalignment.
+                  <span className="block mt-2 text-indigo-300">Nest replaces the bottleneck with a transparent system of record.</span>
+                </p>
+              </div>
             </div>
-          </SafariWindow>
+          </motion.div>
+
+          {/* Card 2: Reactive vs Proactive */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-10%" }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="relative group rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-8 md:p-10 overflow-hidden hover:border-emerald-500/30 transition-colors duration-500"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+            <div className="relative z-10 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/5">
+                  <Radar className="w-7 h-7 text-emerald-400" />
+                </div>
+                <div className="flex items-center gap-2 opacity-60">
+                  <History size={14} className="text-slate-500" />
+                  <ArrowUpRight size={14} className="text-emerald-400" />
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold text-white font-display mb-3">Rear-view Mirror Management</h3>
+                <p className="text-sm md:text-base text-slate-400 leading-relaxed">
+                  Budgets tell you where you went. Wealth requires knowing where you are going. We replaced historical reporting with <span className="text-emerald-200">Monte-Carlo simulations</span> and forward-looking scenario planning.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Card 3: Fragmentation */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-10%" }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="relative group rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-8 md:p-10 overflow-hidden hover:border-blue-500/30 transition-colors duration-500"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+            <div className="relative z-10 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/5">
+                  <Layers className="w-7 h-7 text-blue-400" />
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold text-white font-display mb-3">The Fragmentation Tax</h3>
+                <p className="text-sm md:text-base text-slate-400 leading-relaxed">
+                  Checking, savings, private equity, and liabilities are scattered across a dozen logins. You cannot optimise a picture you cannot see. Nest brings your <span className="text-blue-200">entire balance sheet</span> into one high-fidelity vault.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// --- BEHAVIOURAL MODELLING SECTION ---
+const BehaviouralModelling = () => {
+  const [activeTab, setActiveTab] = React.useState('architect');
+
+  const tabs = [
+    {
+      id: 'architect',
+      label: 'The Architect',
+      icon: DraftingCompass,
+      color: 'text-indigo-400',
+      bg: 'bg-indigo-500',
+      description: "Treats wealth as an engineering problem. The interface shifts to high-density data, focusing on tax efficiency and raw performance metrics.",
+      features: ["XIRR & Alpha Benchmarking", "Tax-Wrap Efficiency", "Asset Allocation Sunbursts"]
+    },
+    {
+      id: 'steward',
+      label: 'The Steward',
+      icon: ShieldCheck,
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500',
+      description: "Focused on security and legacy. The dashboard highlights risk mitigation, insurance gaps, and multi-generational wealth horizons.",
+      features: ["Estate & Inheritance Projection", "Risk 'Safe-Zone' Gauges", "Circle of Trust View"]
+    },
+    {
+      id: 'collaborator',
+      label: 'The Collaborator',
+      icon: Users,
+      color: 'text-amber-400',
+      bg: 'bg-amber-500',
+      description: "Money is a team sport. The UI transforms to prioritise fairness, contribution balancing, and conflict-free communication tools.",
+      features: ["'Fair Share' Calculators", "Dream Board Visualisation", "Transaction Threads"]
+    },
+    {
+      id: 'ascender',
+      label: 'The Ascender',
+      icon: TrendingUp,
+      color: 'text-rose-400',
+      bg: 'bg-rose-500',
+      description: "High growth, high velocity. The experience gamifies debt destruction and focuses on cash flow runway and lifestyle momentum.",
+      features: ["Avalanche vs Snowball Toggles", "Liquidity Runway Timers", "Aggressive Progress Bars"]
+    },
+  ];
+
+  const activeContent = tabs.find(t => t.id === activeTab);
+
+  return (
+    <div className="w-full max-w-7xl mx-auto mb-40 px-4">
+
+      <div className="mb-16 text-center max-w-3xl mx-auto">
+        <h2 className="text-3xl md:text-5xl font-display font-bold text-white mb-6">
+          The Behavioural Engine
+        </h2>
+        <p className="text-slate-400 text-lg leading-relaxed">
+          Nest isn't a static database. It is a fluid operating system that reconfigures itself based on your psychological profile.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+
+        {/* Left: Navigation */}
+        <div className="lg:col-span-4 flex flex-col gap-3">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`group relative flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 text-left ${activeTab === tab.id
+                ? 'bg-slate-800 border-slate-700 shadow-xl'
+                : 'bg-transparent border-transparent hover:bg-slate-900/50'
+                }`}
+            >
+              <div className={`p-2 rounded-lg ${activeTab === tab.id ? `${tab.bg}/20 ${tab.color}` : 'bg-slate-800 text-slate-500'}`}>
+                <tab.icon size={20} />
+              </div>
+              <div>
+                <span className={`block font-bold text-sm ${activeTab === tab.id ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'}`}>
+                  {tab.label}
+                </span>
+              </div>
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className={`absolute left-0 w-1 h-8 rounded-r-full ${tab.bg}`}
+                />
+              )}
+            </button>
+          ))}
         </div>
 
+        {/* Right: Dynamic Preview */}
+        <div className="lg:col-span-8 min-h-[400px]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="relative h-full rounded-[32px] border border-white/10 bg-slate-900/60 backdrop-blur-md overflow-hidden p-8 flex flex-col"
+            >
+              {/* Background Glow */}
+              <div className={`absolute top-0 right-0 w-96 h-96 ${activeContent.bg} opacity-10 blur-[100px] pointer-events-none`} />
+
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <activeContent.icon className={activeContent.color} size={32} />
+                  <h3 className="text-2xl font-display font-bold text-white">{activeContent.label} Mode</h3>
+                </div>
+
+                <p className="text-lg text-slate-300 mb-8 max-w-2xl">
+                  {activeContent.description}
+                </p>
+
+                {/* Abstract UI Mockup */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Feature List */}
+                  <div className="space-y-4">
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Activated Modules</p>
+                    {activeContent.features.map((feat, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-slate-950/50 border border-white/5"
+                      >
+                        <Zap size={14} className={activeContent.color} />
+                        <span className="text-sm text-slate-200">{feat}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Visual Abstraction of Dashboard */}
+                  <div className="relative rounded-2xl bg-slate-950 border border-white/5 p-4 flex flex-col justify-between min-h-[180px]">
+                    <div className="flex gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-white/10" />
+                      <div className="h-2 w-24 bg-white/10 rounded my-auto" />
+                    </div>
+
+                    <div className="flex-1 flex items-center justify-center p-4">
+                      {activeTab === 'architect' && (
+                        <div className="grid grid-cols-4 gap-1 w-full h-16 items-end">
+                          <div className="bg-indigo-500/30 w-full h-[40%]" />
+                          <div className="bg-indigo-500/50 w-full h-[70%]" />
+                          <div className="bg-indigo-500/20 w-full h-[30%]" />
+                          <div className="bg-indigo-500 w-full h-[90%]" />
+                        </div>
+                      )}
+                      {activeTab === 'steward' && (
+                        <div className="relative w-24 h-24 rounded-full border-4 border-emerald-500/30 flex items-center justify-center">
+                          <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                            <ShieldCheck className="text-emerald-500" />
+                          </div>
+                        </div>
+                      )}
+                      {activeTab === 'collaborator' && (
+                        <div className="flex items-center gap-2">
+                          <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/50" />
+                          <div className="h-1 w-8 bg-white/20" />
+                          <div className="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/50" />
+                        </div>
+                      )}
+                      {activeTab === 'ascender' && (
+                        <div className="w-full space-y-2">
+                          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div className="h-full w-[85%] bg-rose-500" />
+                          </div>
+                          <div className="flex justify-between text-[10px] text-rose-400 font-mono">
+                            <span>VELOCITY</span>
+                            <span>85%</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+
+  );
+};
+
+
+
+// --- SUPPORT COMPONENTS FOR PREVIEW & REGISTRATION ---
+
+const MobileSafariFrame = ({ children, url }) => (
+  <div
+    className="relative w-full h-full bg-black rounded-[3rem] border-[8px] border-slate-900 overflow-hidden shadow-2xl ring-1 ring-white/10"
+    style={{
+      // Hint to browser: This container has its own paint layer
+      willChange: 'transform',
+      transform: 'translateZ(0)'
+    }}
+  >
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 h-7 w-32 bg-black rounded-b-xl z-50 flex items-center justify-center">
+      <div className="w-16 h-1 bg-slate-900 rounded-full" />
+    </div>
+    <div className="absolute top-3 left-6 text-[10px] font-bold text-white z-40">9:41</div>
+    <div className="absolute top-3 right-6 flex gap-1 z-40">
+      <div className="w-4 h-2.5 border border-white/30 rounded-sm" />
+    </div>
+    <div className="absolute inset-0 pt-10 pb-20 bg-[#0B0F19] overflow-hidden">
+      {/* WRAP CHILDREN IN OPTIMISED CONTAINER */}
+      <div className="w-full h-full" style={{ contain: 'strict' }}>
+        {children}
+      </div>
+    </div>
+    <div className="absolute bottom-0 left-0 right-0 h-20 bg-[#1c1c1e]/90 backdrop-blur-xl border-t border-white/5 flex flex-col items-center justify-start pt-3 px-6 z-50">
+      <div className="w-full h-10 bg-[#2c2c2e] rounded-xl flex items-center justify-center gap-2 text-slate-400">
+        <Lock size={10} />
+        <span className="text-[10px] font-medium">{url.replace('https://', '')}</span>
+      </div>
+      <div className="w-32 h-1 bg-white/20 rounded-full mt-4" />
+    </div>
+  </div>
+);
+
+function ProductPreviewCarousel() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Get the config for the current slide (fallback to first if missing)
+  const currentSlideId = productSlides[activeIndex]?.id || 'architect';
+  const config = SLIDE_CONFIG[currentSlideId] || SLIDE_CONFIG.architect;
+
+  // Loading Skeleton (Lightweight placeholder)
+  const DashboardSkeleton = () => (
+    <div className="w-full h-full bg-[#0B0F19] flex items-center justify-center flex-col gap-4 animate-pulse">
+      <div className="w-12 h-12 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
+      <div className="space-y-2 text-center">
+        <p className="text-xs text-slate-500 font-mono uppercase tracking-widest">Initializing Secure Environment...</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="relative w-full max-w-[1400px] mx-auto px-4 md:px-6 py-16 md:py-32">
+      <div className="flex flex-col lg:grid lg:grid-cols-[1fr_1.5fr] gap-12 items-center">
+        {/* Tabs */}
+        <div className="w-full space-y-8">
+          <div className="space-y-2 text-center lg:text-left">
+            <h2 className="text-3xl md:text-6xl font-display font-bold text-white tracking-tight">Inside the OS</h2>
+            <div className="h-1 md:h-1.5 w-16 md:w-24 bg-emerald-500 rounded-full mx-auto lg:mx-0" />
+          </div>
+
+          <div className="flex lg:flex-col gap-3 overflow-x-auto pb-4 lg:pb-0 no-scrollbar snap-x">
+            {productSlides.map((slide, idx) => (
+              <button
+                key={slide.id}
+                onClick={() => setActiveIndex(idx)}
+                className={`shrink-0 snap-center p-6 md:p-8 rounded-3xl border transition-all duration-500 text-left w-[280px] lg:w-full ${activeIndex === idx
+                  ? 'bg-slate-900/80 border-emerald-500/30 shadow-2xl scale-105'
+                  : 'bg-transparent border-transparent hover:bg-white/5 text-slate-500 opacity-60 hover:opacity-100'
+                  }`}
+              >
+                <h3 className={`text-lg md:text-2xl font-bold mb-2 transition-colors ${activeIndex === idx ? 'text-white' : 'text-slate-400'}`}>
+                  {slide.title}
+                </h3>
+                <p className={`text-sm md:text-base leading-relaxed transition-colors ${activeIndex === idx ? 'text-emerald-100/80' : 'text-slate-600'}`}>
+                  {slide.description}
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Preview Area */}
+        <div className="relative h-[500px] md:h-[700px] w-full perspective-[2000px]">
+          <motion.div
+            key={activeIndex}
+            initial={{ opacity: 0, rotateY: 5, x: 20 }}
+            animate={{ opacity: 1, rotateY: 0, x: 0 }}
+            transition={{ duration: 0.6, ease: "circOut" }}
+            className="h-full w-full"
+            style={{ willChange: "transform, opacity" }} // CPU Optimization hint
+          >
+            {/* MOBILE VIEW */}
+            <div className="block md:hidden h-full">
+              <MobileSafariFrame url={productSlides[activeIndex].url}>
+                <div className="h-full w-full overflow-hidden relative bg-[#0B0F19]">
+                  <div
+                    className="absolute inset-0 origin-top-left scale-[0.35] w-[285%] h-[285%] pointer-events-none select-none"
+                    style={{
+                      contain: 'content', // Tells browser this content is isolated
+                      contentVisibility: 'auto'
+                    }}
+                  >
+                    <Suspense fallback={<DashboardSkeleton />}>
+                      <DemoDashboard
+                        key={currentSlideId} // Force remount on tab change to reset dashboard state
+                        initialTab={config.tab}
+                        initialPersona={config.persona}
+                        isPreviewMode={true}
+                      />
+                    </Suspense>
+                  </div>
+                </div>
+              </MobileSafariFrame>
+            </div>
+
+            {/* DESKTOP VIEW */}
+            <div className="hidden md:block h-full rounded-[2.5rem] border border-white/10 bg-slate-950/80 backdrop-blur-xl overflow-hidden shadow-2xl">
+              <BrowserChrome url={productSlides[activeIndex].url} />
+
+              <div className="h-full w-full overflow-hidden relative bg-[#0B0F19]">
+                <Suspense fallback={<DashboardSkeleton />}>
+                  {/* Container for Scaling */}
+                  <div
+                    className="absolute inset-0 origin-top-left scale-[0.6] w-[166.6%] h-[166.6%]"
+                    style={{
+                      isolation: 'isolate',
+                      // PERFORMANCE MAGIC:
+                      // 1. content-visibility: auto -> Don't calculate layout if off-screen
+                      // 2. contain: strict -> Don't let inner layout changes affect the outer page
+                      contentVisibility: 'auto',
+                      contain: 'strict',
+                    }}
+                  >
+                    <div className="w-full h-full overflow-y-auto no-scrollbar bg-[#0B0F19]">
+                      {/* Added memoization key to force clean unmount/remount */}
+                      <DemoDashboard
+                        key={currentSlideId}
+                        initialTab={config.tab}
+                        initialPersona={config.persona}
+                        isPreviewMode={true}
+                      />
+                    </div>
+                  </div>
+                </Suspense>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
 }
 
-
-
-
-function RegisterInterestForm({ onRegister, loading }) {
+function RegisterInterestForm({ onRegister, loading, onNavigate }) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
 
   return (
-    <div id="register-form" className="relative w-full max-w-5xl mx-auto px-6 pb-40 pt-20">
-      <div className="relative rounded-[4rem] border border-white/10 bg-[#0B0F19] p-12 md:p-24 overflow-hidden text-center shadow-2xl">
-
-        {/* Lighting Effects */}
+    <div id="register-form" className="relative w-full max-w-5xl mx-auto px-4 md:px-6 pb-20 pt-10">
+      <div className="relative rounded-[2.5rem] md:rounded-[4rem] border border-white/10 bg-[#0B0F19] p-6 md:p-24 overflow-hidden text-center shadow-2xl">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-70 blur-[1px]" />
         <div className="absolute -top-[200px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px]" />
 
-        <div className="relative z-10 max-w-2xl mx-auto space-y-10">
-          <div className="space-y-4">
-            <h2 className="text-5xl md:text-7xl font-display font-bold text-white tracking-tighter">
+        <div className="relative z-10 max-w-2xl mx-auto space-y-8 md:space-y-10">
+          <div className="space-y-2 md:space-y-4">
+            <h2 className="text-3xl md:text-7xl font-display font-bold text-white tracking-tighter">
               Secure your spot.
             </h2>
-            <p className="text-xl text-slate-400 leading-relaxed">
+            <p className="text-base md:text-xl text-slate-400 leading-relaxed px-2">
               We are onboarding families in curated waves to ensure the highest quality of service.
             </p>
           </div>
 
           <form
             onSubmit={(e) => { e.preventDefault(); onRegister(email, name); }}
-            className="space-y-5 text-left bg-slate-900/50 p-8 rounded-3xl border border-white/5 backdrop-blur-sm"
+            className="space-y-4 text-left bg-slate-900/50 p-5 md:p-8 rounded-3xl border border-white/5 backdrop-blur-sm"
           >
-            <div className="grid md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-2">Full Name</label>
+                <label className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500 ml-2">Full Name</label>
                 <input
                   value={name} onChange={e => setName(e.target.value)}
-                  className="w-full px-6 py-4 rounded-2xl bg-slate-950 border border-white/10 text-white placeholder:text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                  className="w-full px-5 py-3 rounded-xl bg-slate-950 border border-white/10 text-white text-sm placeholder:text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all"
                   placeholder="Jane Doe"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-2">Email Address</label>
+                <label className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500 ml-2">Email Address</label>
                 <input
                   type="email"
                   value={email} onChange={e => setEmail(e.target.value)}
-                  className="w-full px-6 py-4 rounded-2xl bg-slate-950 border border-white/10 text-white placeholder:text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                  className="w-full px-5 py-3 rounded-xl bg-slate-950 border border-white/10 text-white text-sm placeholder:text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all"
                   placeholder="jane@example.com"
                   required
                 />
@@ -1434,17 +684,28 @@ function RegisterInterestForm({ onRegister, loading }) {
 
             <button
               disabled={loading}
-              className="w-full py-6 rounded-2xl bg-white text-slate-950 font-bold text-sm uppercase tracking-widest hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+              className="w-full py-4 md:py-6 rounded-2xl bg-white text-slate-950 font-bold text-xs md:text-sm uppercase tracking-widest hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
               {loading ? 'Processing...' : 'Join Waitlist'}
             </button>
           </form>
 
-          <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 uppercase tracking-widest pt-4">
+          <div className="pt-2">
+            <button
+              onClick={() => onNavigate && onNavigate('demo')}
+              className="group text-xs md:text-sm text-slate-500 hover:text-white transition-colors inline-flex items-center gap-2"
+            >
+              Not ready to join?
+              <span className="text-emerald-400 group-hover:underline decoration-emerald-500/50 underline-offset-4">
+                Enter Live Demo
+              </span>
+              <ArrowRight size={12} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 uppercase tracking-widest pt-2 md:pt-4 border-t border-white/5">
             <Lock size={12} className="text-emerald-500" />
             <span>Bank-Level Encryption</span>
-            <span className="text-slate-700">•</span>
-            <span>No Spam</span>
           </div>
         </div>
       </div>
@@ -1452,401 +713,202 @@ function RegisterInterestForm({ onRegister, loading }) {
   );
 }
 
-
-
 function ThankYouPanel({ referralCopied, onCopy, forceMotion = false }) {
-
   const systemPrefersReducedMotion = useReducedMotion();
-
   const prefersReducedMotion = forceMotion ? false : systemPrefersReducedMotion;
-
   const [burstId, setBurstId] = useState(0);
-
   const [buttonBurstId, setButtonBurstId] = useState(0);
-
   const celebrationCompleteRef = useRef(false);
 
-
-
   const handleCelebrationComplete = useCallback(() => {
-
     if (celebrationCompleteRef.current) return;
-
     celebrationCompleteRef.current = true;
-
     if (typeof window !== 'undefined') {
-
       window.dispatchEvent?.(new CustomEvent('nest:registration-celebration-complete'));
-
       window?.analytics?.track?.('registration_celebration_complete');
-
     }
-
   }, []);
 
-
-
   useEffect(() => {
-
     if (prefersReducedMotion) return;
-
     const timeout = setTimeout(() => setBurstId((prev) => prev + 1), 200);
-
     return () => clearTimeout(timeout);
-
   }, [prefersReducedMotion]);
 
-
-
   useEffect(() => {
-
     if (!referralCopied || prefersReducedMotion) return;
-
     setButtonBurstId((prev) => prev + 1);
-
   }, [referralCopied, prefersReducedMotion]);
 
-
-
   const containerVariants = useMemo(
-
     () => ({
-
       hidden: { opacity: 1 },
-
       visible: {
-
         opacity: 1,
-
         transition: prefersReducedMotion
-
           ? { duration: 0.2 }
-
           : { delayChildren: 0.45, staggerChildren: 0.12 },
-
       },
-
     }),
-
     [prefersReducedMotion],
-
   );
-
-
 
   const itemVariants = useMemo(
-
     () => ({
-
       hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 16 },
-
       visible: {
-
         opacity: 1,
-
         y: 0,
-
         transition: {
-
           type: prefersReducedMotion ? 'tween' : 'spring',
-
           stiffness: 220,
-
           damping: 18,
-
           duration: prefersReducedMotion ? 0.3 : 0.7,
-
         },
-
       },
-
     }),
-
     [prefersReducedMotion],
-
   );
-
-
 
   return (
-
     <div className="relative">
-
       {!prefersReducedMotion ? (
-
         <motion.div
-
           aria-hidden="true"
-
           className="pointer-events-none absolute -inset-1 rounded-[34px] bg-gradient-to-r from-emerald-400/20 via-teal-300/10 to-cyan-300/20 blur-2xl"
-
           animate={{ opacity: [0.25, 0.55, 0.25], scale: [0.96, 1.05, 0.96] }}
-
           transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
-
         />
-
       ) : null}
-
       <motion.div
-
         role="status"
-
         aria-live="polite"
-
         className="relative overflow-hidden rounded-3xl border border-emerald-300/25 bg-gradient-to-b from-emerald-900/40 via-emerald-900/30 to-emerald-900/10 p-6 shadow-[0_35px_80px_rgba(16,185,129,0.35)] backdrop-blur-xl md:p-10"
-
         initial={
-
           prefersReducedMotion
-
             ? { opacity: 0 }
-
             : { opacity: 0, scale: 0.85, filter: 'blur(8px)', backdropFilter: 'blur(8px)' }
-
         }
-
         animate={
-
           prefersReducedMotion
-
             ? { opacity: 1, scale: 1, y: 0, backdropFilter: 'blur(12px)' }
-
             : { opacity: 1, scale: 1, filter: 'blur(0px)', y: [0, -4, 0, -6, 0], backdropFilter: 'blur(18px)' }
-
         }
-
         exit={
-
           prefersReducedMotion
-
             ? { opacity: 0 }
-
             : { opacity: 0, scale: 0.9, filter: 'blur(6px)', backdropFilter: 'blur(6px)' }
-
         }
-
         onAnimationComplete={handleCelebrationComplete}
-
         transition={{
-
           default: prefersReducedMotion
-
             ? { duration: 0.35, ease: 'easeOut' }
-
             : { type: 'spring', stiffness: 160, damping: 18 },
-
           y: prefersReducedMotion
-
             ? { duration: 0 }
-
             : { duration: 10, repeat: Infinity, ease: 'easeInOut' },
-
         }}
-
       >
-
         {!prefersReducedMotion ? <ConfettiBurst burstId={burstId} disabled={prefersReducedMotion} /> : null}
-
         <motion.div
-
           className="relative z-20 space-y-4 text-text-primary"
-
           variants={containerVariants}
-
           initial="hidden"
-
           animate="visible"
-
         >
-
           <motion.p
-
             className="font-sans text-xs font-semibold uppercase tracking-[0.4em] text-emerald-200/80"
-
             variants={itemVariants}
-
           >
-
             Post-conversion · Viral loop
-
           </motion.p>
-
           <motion.h3 className="font-display text-3xl font-semibold text-white" variants={itemVariants}>
-
             You&apos;re on the manifest.
-
           </motion.h3>
-
           <motion.p className="font-sans text-base text-emerald-50/80" variants={itemVariants}>
-
             Your Nest needs a partner. Invite them to join the waitlist with you?
-
           </motion.p>
-
           <motion.div className="flex flex-col gap-3 md:flex-row md:items-center" variants={itemVariants}>
-
             <div className="relative md:w-auto">
-
               <motion.button
-
                 type="button"
-
                 onClick={onCopy}
-
                 className="relative flex items-center justify-center gap-2 rounded-2xl px-6 py-3 font-sans text-base font-semibold focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
-
                 whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
-
                 animate={
-
                   referralCopied
-
                     ? {
-
                       backgroundColor: 'rgba(16,185,129,1)',
-
                       color: '#ecfdf5',
-
                       scale: prefersReducedMotion ? 1 : [1, 1.05, 1],
-
                       boxShadow: '0 25px 60px rgba(16,185,129,0.35)',
-
                     }
-
                     : {
-
                       backgroundColor: '#ffffff',
-
                       color: '#065f46',
-
                       scale: 1,
-
                       boxShadow: '0 20px 45px rgba(15,118,110,0.25)',
-
                     }
-
                 }
-
                 transition={{
-
                   type: prefersReducedMotion ? 'tween' : 'spring',
-
                   stiffness: 320,
-
                   damping: 20,
-
                   duration: prefersReducedMotion ? 0.2 : 0.6,
-
                   scale: prefersReducedMotion
-
                     ? { duration: 0.2, ease: 'easeOut' }
-
                     : { type: 'tween', duration: 0.5, ease: 'easeOut' },
-
                 }}
-
               >
-
                 <AnimatePresence mode="wait" initial={false}>
-
                   {referralCopied ? (
-
                     <motion.span
-
                       key="copied"
-
                       className="flex items-center gap-2"
-
                       initial={{ opacity: 0, y: 6 }}
-
                       animate={{ opacity: 1, y: 0 }}
-
                       exit={{ opacity: 0, y: -6 }}
-
                       transition={{ duration: 0.25, ease: 'easeOut' }}
-
                     >
-
                       <motion.span
-
                         className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600/40"
-
                         initial={{ scale: 0.4, rotate: -20 }}
-
                         animate={{ scale: 1, rotate: 0 }}
-
                         exit={{ scale: 0.4, rotate: 20 }}
-
                         transition={{ duration: 0.25, ease: 'easeOut' }}
-
                       >
-
                         <Check size={16} className="text-emerald-50" strokeWidth={3} />
-
                       </motion.span>
-
                       <span>Referral link copied</span>
-
                     </motion.span>
-
                   ) : (
-
                     <motion.span
-
                       key="copy"
-
                       className="flex items-center gap-2"
-
                       initial={{ opacity: 0, y: 6 }}
-
                       animate={{ opacity: 1, y: 0 }}
-
                       exit={{ opacity: 0, y: -6 }}
-
                       transition={{ duration: 0.25, ease: 'easeOut' }}
-
                     >
-
                       <span>Copy referral link</span>
-
                       <ArrowRight size={16} />
-
                     </motion.span>
-
                   )}
-
                 </AnimatePresence>
-
                 {!prefersReducedMotion ? (
-
                   <ButtonSuccessParticles trigger={buttonBurstId} disabled={prefersReducedMotion} />
-
                 ) : null}
-
               </motion.button>
-
             </div>
-
             <p className="font-sans text-xs text-emerald-50/70">
-
               Partners who join from your link skip the next waitlist wave.
-
             </p>
-
           </motion.div>
-
         </motion.div>
-
       </motion.div>
-
     </div>
-
   );
-
 }
-
-
 
 function ConfettiBurst({ burstId, disabled }) {
   const [pieces, setPieces] = useState([]);
@@ -1940,76 +1002,31 @@ function ButtonSuccessParticles({ trigger, disabled }) {
   );
 }
 
-
-
+// --- MAIN PAGE COMPONENT ---
 export default function ExperienceRegistration({ onRegister, loading = false, error, onNavigate, planContext }) {
-  const [formStep, setFormStep] = useState(1);
-  const [formData, setFormData] = useState({
-    email: '',
-    name: '',
-    partnerEmail: '',
-    householdFocus: householdFocusOptions[0],
-  });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const [referralCopied, setReferralCopied] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [contactSubject, setContactSubject] = useState('');
   const [contactMessage, setContactMessage] = useState('');
   const contactFormRef = useRef(null);
   const canSendContact = Boolean(contactSubject.trim() && contactMessage.trim());
-  const waitlistHero = planContext?.heroText ?? DEFAULT_WAITLIST_MESSAGE;
-  const waitlistSubtext = planContext?.subtext ?? DEFAULT_WAITLIST_SUBTEXT;
-  const waitlistVelvetText = planContext ? planContext.velvetText ?? DEFAULT_VELVET_TEXT : null;
-
-  const primaryColor = useThemeColor('--color-primary');
-  const primaryHex = primaryColor.getStyle();
-
   const prefersReducedMotion = useReducedMotion();
-  const { ref: immersiveTriggerRef, inView: immersiveSectionInView } = useInView({ triggerOnce: true, rootMargin: '200px' });
-  const { ref: sectionVisibilityRef, inView: isSectionInView } = useInView({ threshold: 0 });
-  const pinnedSectionRef = useRef(null);
+  const heroRef = useRef(null);
+  const isHeroInView = useInView(heroRef, { margin: "0px 0px 200px 0px" });
 
-  useEffect(() => {
-    const node = pinnedSectionRef.current;
-    if (node) {
-      immersiveTriggerRef(node);
-      sectionVisibilityRef(node);
-    }
-    return () => {
-      if (node) {
-        immersiveTriggerRef(null);
-        sectionVisibilityRef(null);
+  const handleRegister = useCallback(
+    async (email, name) => {
+      if (!email) return;
+      if (typeof onRegister === 'function') {
+        await onRegister(email, '', name);
       }
-    };
-  }, [immersiveTriggerRef, sectionVisibilityRef]);
-
-  const immersiveEnabled = immersiveSectionInView && !prefersReducedMotion;
-
-  const { scrollYProgress } = useScroll({
-    target: pinnedSectionRef,
-    offset: ['start start', 'end end'],
-  });
-
-  const shootingStarOpacity = useTransform(scrollYProgress, [0.08, 0.2, 0.36], [0, 1, 0]);
-  const shootingStarX = useTransform(scrollYProgress, [0.08, 0.36], [-320, 420]);
-  const shootingStarY = useTransform(scrollYProgress, [0.08, 0.36], [60, -240]);
-  const shootingStarScale = useTransform(scrollYProgress, [0.08, 0.2, 0.36], [0.6, 1, 0.6]);
-
-  const handleFieldChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleStepOne = () => {
-    if (!formData.email) return;
-    setFormStep(2);
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.email || !formData.partnerEmail) return;
-    if (typeof onRegister === 'function') {
-      await onRegister(formData.email, formData.partnerEmail, formData.name);
-    }
-    setIsSubmitted(true);
-  };
+      setRegisteredEmail(email);
+      setIsSubmitted(true);
+    },
+    [onRegister],
+  );
 
   const handleContactSubmit = (event) => {
     event.preventDefault();
@@ -2023,7 +1040,7 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
   };
 
   const handleCopyReferral = async () => {
-    const link = `https://nest.finance/waitlist?ref=${encodeURIComponent(formData.email || 'nest')}`;
+    const link = `https://nest.finance/waitlist?ref=${encodeURIComponent(registeredEmail || 'nest')}`;
     try {
       await navigator.clipboard?.writeText(link);
       setReferralCopied(true);
@@ -2033,104 +1050,98 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
     }
   };
 
-  const PLACEHOLDER_NEST_DATA = {
-    nodes: [
-      { id: 'nest', label: 'Shared Nest', size: 14 },
-      { id: 'acc:1', label: 'Current', size: 8 },
-      { id: 'acc:2', label: 'Savings', size: 7 },
-      { id: 'goal:1', label: 'Holiday Fund', size: 6 },
-      { id: 'budget:1', label: 'Groceries', size: 5 },
-      { id: 'cat:wellness', label: 'Wellness', size: 5 },
-      { id: 'goal:2', label: 'Emergency Cushion', size: 6 },
-    ],
-    links: [
-      { source: 'nest', target: 'acc:1' },
-      { source: 'nest', target: 'acc:2' },
-      { source: 'nest', target: 'goal:1' },
-      { source: 'nest', target: 'goal:2' },
-      { source: 'nest', target: 'budget:1' },
-      { source: 'budget:1', target: 'cat:wellness' },
-    ],
-  };
-
   return (
-    <div className="relative min-h-screen bg-background text-text-primary">
+    // 1. Change bg-background to bg-slate-950 for global consistency
+    <div className="relative min-h-screen bg-slate-950 text-text-primary overflow-x-hidden selection:bg-emerald-500/30">
       <TopNav onNavigate={onNavigate} />
-      <HeroTitle />
 
-      <motion.section
-        ref={pinnedSectionRef}
-        className="relative w-full"
-        style={{ height: `${IMMERSIVE_HEIGHT}vh`, minHeight: '220vh' }}
-      >
-        <div className="sticky top-0 h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950/70 to-slate-950">
-          <div className="relative h-full w-full">
-            <Starfield density={2500} reducedMotion={prefersReducedMotion} />
+      {/* 2. Global Ambient Background - OPTIMISED */}
+      <div className="fixed inset-0 z-0 pointer-events-none transform-gpu translate-z-0">
+        {/* We reduced the blur slightly and added 'will-change-transform' to prevent repaints */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-900/10 rounded-full blur-[80px] will-change-transform" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-900/10 rounded-full blur-[80px] will-change-transform" />
+        {/* Static noise texture is cheap, this is fine */}
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
+      </div>
 
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/30 to-slate-950/85" />
+      {/* FIXED HERO SECTION */}
+      <section ref={heroRef} className="relative min-h-screen overflow-hidden bg-slate-950">
+        <div className="absolute inset-0 bg-slate-950" />
 
-            <motion.div
-              className="pointer-events-none absolute left-[10%] top-1/4 z-20 h-[2px] w-[140px] -rotate-[15deg]"
-              style={{
-                opacity: shootingStarOpacity,
-                x: shootingStarX,
-                y: shootingStarY,
-                scale: shootingStarScale,
-              }}
-            >
-              <div className="relative h-full w-full">
-                {/* Tail */}
-                <div className="absolute right-0 top-1/2 h-[1px] w-full -translate-y-1/2 bg-gradient-to-r from-transparent via-sky-100/40 to-white blur-[0.5px]" />
-                {/* Head */}
-                <span className="absolute right-0 top-1/2 h-0.5 w-6 -translate-y-1/2 rounded-full bg-gradient-to-l from-white to-transparent shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-                <span className="absolute right-0 top-1/2 h-0.5 w-2 -translate-y-1/2 bg-white blur-[0.5px]" />
-              </div>
-            </motion.div>
-
-            <div className="absolute inset-0 z-10">
-              {immersiveEnabled ? (
-                <Suspense fallback={<PosterOrnament glowHex={primaryHex} />}>
-                  <LazyNestCanvas
-                    progressValue={scrollYProgress}
-                    data={PLACEHOLDER_NEST_DATA}
-                    reducedMotion={prefersReducedMotion}
-                    starfieldConfig={IMMERSIVE_STARFIELD_CONFIG}
-                  />
-                </Suspense>
-              ) : (
-                <CanvasPoster glowHex={primaryHex} />
-              )}
-            </div>
-
-            <div className="absolute inset-0 z-20">
-              <ValuePropOverlay progressValue={scrollYProgress} sectionRef={pinnedSectionRef} reducedMotion={prefersReducedMotion} isSectionActive={isSectionInView} />
-            </div>
-          </div>
+        {/* Force shooting stars by setting reducedMotion to false */}
+        <div className="absolute inset-0 opacity-100">
+          {isHeroInView && (
+            <Starfield
+              density={900}
+              speed={0.35}
+              reducedMotion={false}
+            />
+          )}
         </div>
-      </motion.section >
 
-      <ActThreeIntro />
+        {/* Overlay Gradient: Transparent middle to see stars, fades to black at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-transparent to-slate-950" />
 
+        <div className="relative z-10">
+          <HeroTitle onNavigate={onNavigate} />
+        </div>
+
+        {/* The Bridge Gradient to next section */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none z-20" />
+      </section>
+
+      {/* NEW SECTIONS: Governance Gap & Behavioural Engine */}
+      <div className="relative z-10">
+        <PainPointsSection />
+        <div className="mt-12 md:mt-20">
+          <BehaviouralModelling />
+        </div>
+      </div>
+
+      {/* PRODUCT PREVIEW CAROUSEL */}
       <motion.section
         id="product-preview"
-        className="py-16 md:py-24"
+        className="relative z-10 min-h-[50vh] py-16 md:py-24"
         initial={{ opacity: 0, y: 60 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
-        viewport={{ once: true, amount: 0.4 }}
+        viewport={{ once: true, amount: 0.2 }}
       >
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
           <ProductPreviewCarousel />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className="flex justify-center mt-4"
+          >
+            <button
+              onClick={() => onNavigate && onNavigate('demo')}
+              className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full bg-slate-900/80 border border-white/10 hover:border-emerald-500/50 hover:bg-slate-900 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] transition-all duration-300 backdrop-blur-md"
+            >
+              <span className="text-xs font-bold uppercase tracking-widest text-slate-200 group-hover:text-white transition-colors">
+                See Our Live Preview
+              </span>
+              <ArrowRight size={14} className="text-emerald-400 transition-transform duration-300 group-hover:translate-x-1" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
+            </button>
+          </motion.div>
         </div>
       </motion.section>
 
+      {/* REGISTRATION FORM SECTION */}
       <motion.section
-        className="min-h-[100vh] bg-slate-950/90 py-24 md:py-32"
+        className="relative z-10 min-h-[100vh] py-24 md:py-32"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
         viewport={{ once: true, amount: 0.4 }}
       >
+        {/* Subtle separator line */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
+
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
           <AnimatePresence mode="wait">
             {isSubmitted ? (
@@ -2152,16 +1163,9 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
                 transition={{ duration: prefersReducedMotion ? 0.25 : 0.5, ease: 'easeInOut' }}
               >
                 <RegisterInterestForm
-                  formStep={formStep}
+                  onRegister={handleRegister}
                   loading={loading}
-                  error={error}
-                  formData={formData}
-                  onFieldChange={handleFieldChange}
-                  onStepOne={handleStepOne}
-                  onSubmit={handleSubmit}
-                  waitlistHero={waitlistHero}
-                  waitlistSubtext={waitlistSubtext}
-                  waitlistVelvetText={waitlistVelvetText}
+                  onNavigate={onNavigate}
                 />
               </motion.div>
             )}
@@ -2169,7 +1173,7 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
         </div>
       </motion.section>
 
-      <footer className="mt-12 border-t border-white/10 bg-slate-950/70 py-12">
+      <footer className="relative z-10 mt-12 border-t border-white/5 bg-slate-950 py-12">
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:items-start">
             <div className="space-y-2 text-xs leading-relaxed text-slate-400">
@@ -2213,40 +1217,32 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
             </div>
           </div>
           <div className="mt-8 flex flex-wrap items-center gap-3 text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-slate-400">
-            <button
-              type="button"
-              onClick={() => onNavigate && onNavigate('security')}
-              className="transition hover:text-white"
-            >
-              security
-            </button>
+            <button type="button" onClick={() => onNavigate && onNavigate('security')} className="transition hover:text-white">security</button>
             <span className="text-white/30">|</span>
-            <button
-              type="button"
-              onClick={() => onNavigate && onNavigate('privacy')}
-              className="transition hover:text-white"
-            >
-              privacy policy
-            </button>
+            <button type="button" onClick={() => onNavigate && onNavigate('privacy')} className="transition hover:text-white">privacy policy</button>
             <span className="text-white/30">|</span>
-            <button
-              type="button"
-              onClick={() => onNavigate && onNavigate('terms')}
-              className="transition hover:text-white"
-            >
-              terms &amp; conditions
-            </button>
+            <button type="button" onClick={() => onNavigate && onNavigate('terms')} className="transition hover:text-white">terms &amp; conditions</button>
             <span className="text-white/30">|</span>
+            <button type="button" onClick={scrollToContact} className="transition hover:text-white">contact</button>
+          </div>
+          <div className="mt-6 flex justify-center">
             <button
-              type="button"
-              onClick={scrollToContact}
-              className="transition hover:text-white"
+              onClick={() => setShowAdminLogin(true)}
+              className="text-[10px] font-bold uppercase tracking-widest text-slate-800 hover:text-slate-500 transition-colors mt-2"
             >
-              contact
+              ADMIN PORTAL
             </button>
           </div>
         </div>
       </footer>
+      <AnimatePresence>
+        {showAdminLogin && (
+          <AdminLoginModal
+            onClose={() => setShowAdminLogin(false)}
+            onLoginSuccess={() => onNavigate && onNavigate('admin_email')}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

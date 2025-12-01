@@ -203,7 +203,7 @@ export default function VisionPage({ onNavigate }) {
             </div>
             <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">Built Around You, Not the Average User</h2>
             <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
-              Most financial apps treat everyone the same. Nest rejects the one-size-fits-all template. We built our platform around <span className="text-white font-bold">Archetypes</span> — dynamic profiles that adapt your entire experience.
+              Most financial apps treat everyone the same. Nest rejects the one-size-fits-all template. We built our platform around <span className="text-white font-bold">Archetypes</span> – dynamic profiles that adapt your entire experience.
             </p>
           </div>
 
@@ -339,7 +339,7 @@ export default function VisionPage({ onNavigate }) {
           <div className="h-px w-32 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           <h2 className="text-4xl md:text-6xl font-display font-bold text-white mb-4 tracking-tight">Your Nest. Your Role.<br />Your Journey.</h2>
           <p className="text-slate-400 max-w-xl mb-8 text-lg">
-            Whether you’re building wealth, managing property, fighting debt, or running the household — Nest gives you a personalised experience that respects your starting point.
+            Whether you’re building wealth, managing property, fighting debt, or running the household – Nest gives you a personalised experience that respects your starting point.
           </p>
           <MagneticButton text="Join Our Family" onClick={() => onNavigate('register')} />
           <p className="text-xs uppercase tracking-[0.2em] text-slate-600 font-bold">

@@ -37,10 +37,10 @@ const SmartSlider = ({ value, min, max, step = 1, onChange, label, unit = '' }) 
       <div className="relative h-6 flex items-center cursor-pointer">
         {/* Track */}
         <div className="absolute w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-white/5">
-           <div
-             className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-100 ease-out"
-             style={{ width: `${percentage}%` }}
-           />
+          <div
+            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-100 ease-out"
+            style={{ width: `${percentage}%` }}
+          />
         </div>
         <input
           type="range" min={min} max={max} step={step} value={value}
@@ -77,7 +77,7 @@ const FairShareMeter = ({ userSplit, partnerSplit }) => {
           transition={{ duration: 1.2, ease: "circOut" }}
           className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 relative"
         >
-           <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-white/50 shadow-[0_0_10px_white]" />
+          <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-white/50 shadow-[0_0_10px_white]" />
         </motion.div>
 
         {/* Partner Segment (Background is already slate, but we visually distinguish if needed) */}
@@ -109,7 +109,7 @@ const BillSplitter = ({ onInteract }) => {
     <motion.div
       initial={{ height: 0, opacity: 0 }}
       animate={{ height: 'auto', opacity: 1 }}
-      className="mt-4 p-5 rounded-xl bg-slate-900/80 border border-white/10 overflow-hidden"
+      className="mt-4 p-4 sm:p-5 rounded-xl bg-slate-900/80 border border-white/10 overflow-hidden"
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2 text-indigo-300">
@@ -117,28 +117,28 @@ const BillSplitter = ({ onInteract }) => {
           <span className="text-xs font-bold uppercase tracking-wider">Split Adjustment</span>
         </div>
         <div className="text-right">
-             <span className="text-white font-bold text-lg">£{amount.toFixed(2)}</span>
-             <div className="text-[10px] text-slate-500">Total Bill</div>
+          <span className="text-white font-bold text-base sm:text-lg">£{amount.toFixed(2)}</span>
+          <div className="text-[10px] text-slate-500">Total Bill</div>
         </div>
       </div>
 
       <div className="mb-6">
-         <SmartSlider
-            label="Your Share"
-            value={split} min={0} max={100} step={5}
-            onChange={setSplit}
-         />
+        <SmartSlider
+          label="Your Share"
+          value={split} min={0} max={100} step={5}
+          onChange={setSplit}
+        />
       </div>
 
       <div className="flex justify-between items-center mb-6 px-2">
         <div className="text-center">
-             <div className="text-sm font-bold text-indigo-400">£{myShare.toFixed(2)}</div>
-             <div className="text-[10px] text-slate-500 font-bold uppercase">You Pay</div>
+          <div className="text-xs sm:text-sm font-bold text-indigo-400">£{myShare.toFixed(2)}</div>
+          <div className="text-[10px] text-slate-500 font-bold uppercase">You Pay</div>
         </div>
         <div className="h-8 w-[1px] bg-white/10" />
         <div className="text-center">
-             <div className="text-sm font-bold text-slate-300">£{partnerShare.toFixed(2)}</div>
-             <div className="text-[10px] text-slate-500 font-bold uppercase">Jamie Pays</div>
+          <div className="text-xs sm:text-sm font-bold text-slate-300">£{partnerShare.toFixed(2)}</div>
+          <div className="text-[10px] text-slate-500 font-bold uppercase">Jamie Pays</div>
         </div>
       </div>
 
@@ -173,8 +173,8 @@ const TransactionThread = ({ transaction, onClose }) => {
     >
       <div className="px-4 py-3 bg-white/5 border-b border-white/5 flex justify-between items-center">
         <div className="flex items-center gap-2">
-             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">Discussion</span>
+          <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">Discussion</span>
         </div>
         <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors"><X size={14} /></button>
       </div>
@@ -186,11 +186,10 @@ const TransactionThread = ({ transaction, onClose }) => {
             key={msg.id}
             className={`flex flex-col ${msg.isMe ? 'items-end' : 'items-start'}`}
           >
-            <div className={`px-4 py-2.5 rounded-2xl text-xs max-w-[85%] shadow-sm ${
-                msg.isMe
-                ? 'bg-indigo-600 text-white rounded-br-none'
-                : 'bg-slate-800 text-slate-200 rounded-bl-none border border-white/5'
-            }`}>
+            <div className={`px-4 py-2.5 rounded-2xl text-xs max-w-[85%] shadow-sm ${msg.isMe
+              ? 'bg-indigo-600 text-white rounded-br-none'
+              : 'bg-slate-800 text-slate-200 rounded-bl-none border border-white/5'
+              }`}>
               {msg.text}
             </div>
             <span className="text-[9px] text-slate-600 mt-1 px-1">{msg.time}</span>
@@ -223,64 +222,62 @@ const InboxItem = ({ item, onInteract }) => {
     <div className="p-1 rounded-2xl transition-all duration-300 hover:bg-white/5 group">
       <div className="p-4 rounded-xl border border-white/5 bg-slate-900/40 hover:border-white/10 transition-colors">
         <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
             <div className={`p-3 rounded-xl ${item.type === 'bill' ? 'bg-rose-500/10 text-rose-400' : 'bg-indigo-500/10 text-indigo-400'} border border-white/5`}>
-                {item.icon}
+              {item.icon}
             </div>
             <div>
-                <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-white text-sm">{item.title}</h4>
-                    <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-slate-500 bg-slate-900 border border-white/5">
-                        <Clock size={12} className="text-slate-400" />
-                        {item.timestamp}
-                    </span>
-                </div>
-                <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1.5">
-                    {isUrgent && <AlertCircle size={12} className="text-rose-400" />}
-                    {item.subtitle}
-                </p>
+              <div className="flex items-center gap-2">
+                <h4 className="font-bold text-white text-xs sm:text-sm">{item.title}</h4>
+                <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-slate-500 bg-slate-900 border border-white/5">
+                  <Clock size={12} className="text-slate-400" />
+                  {item.timestamp}
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1.5">
+                {isUrgent && <AlertCircle size={12} className="text-rose-400" />}
+                {item.subtitle}
+              </p>
             </div>
-            </div>
+          </div>
 
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <button
-                onClick={() => setShowThread(!showThread)}
-                className={`p-2 rounded-lg transition-colors border border-transparent ${
-                    showThread ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+              onClick={() => setShowThread(!showThread)}
+              className={`p-2 rounded-lg transition-colors border border-transparent ${showThread ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
                 }`}
             >
-                <MessageCircle size={16} />
+              <MessageCircle size={16} />
             </button>
 
             {item.actions && (
-                <div className="flex gap-1 pl-2 border-l border-white/10">
+              <div className="flex gap-1 pl-2 border-l border-white/10">
                 <button onClick={() => onInteract('Approve')} className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-colors border border-emerald-500/20"><Check size={16} /></button>
                 <button onClick={() => onInteract('Reject')} className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white transition-colors border border-rose-500/20"><X size={16} /></button>
-                </div>
+              </div>
             )}
 
             {item.type === 'bill' && !item.actions && (
-                <button
-                   onClick={() => setShowSplitter(!showSplitter)}
-                   className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors border ${
-                       showSplitter
-                       ? 'bg-indigo-600 text-white border-indigo-500'
-                       : 'bg-slate-800 text-slate-300 border-white/10 hover:bg-slate-700'
-                   }`}
-                >
-                    {showSplitter ? 'Cancel' : 'Split'}
-                </button>
+              <button
+                onClick={() => setShowSplitter(!showSplitter)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors border ${showSplitter
+                  ? 'bg-indigo-600 text-white border-indigo-500'
+                  : 'bg-slate-800 text-slate-300 border-white/10 hover:bg-slate-700'
+                  }`}
+              >
+                {showSplitter ? 'Cancel' : 'Split'}
+              </button>
             )}
-            </div>
+          </div>
         </div>
 
         <AnimatePresence>
-        {showSplitter && <BillSplitter onInteract={onInteract} />}
-        {showThread && <TransactionThread transaction={item} onClose={() => setShowThread(false)} />}
-      </AnimatePresence>
+          {showSplitter && <BillSplitter onInteract={onInteract} />}
+          {showThread && <TransactionThread transaction={item} onClose={() => setShowThread(false)} />}
+        </AnimatePresence>
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 const SharedInbox = ({ isExpanded, onExpandToggle, onInteract }) => {
@@ -351,7 +348,7 @@ const SharedInbox = ({ isExpanded, onExpandToggle, onInteract }) => {
 
       <motion.div
         layout
-        className={`mt-6 space-y-3 relative transition-all duration-500 ease-[0.23,1,0.32,1] ${isExpanded ? 'h-auto pb-12' : 'h-[340px] overflow-hidden'}`}
+        className={`mt-6 space-y-2 sm:space-y-3 relative transition-all duration-500 ease-[0.23,1,0.32,1] ${isExpanded ? 'h-auto pb-12' : 'h-[340px] overflow-hidden'}`}
       >
         <AnimatePresence mode="popLayout">
           {filteredItems.length > 0 ? (
@@ -440,13 +437,13 @@ const DreamBoardCard = ({ title, target, current, image, color, onInteract }) =>
 
         {/* Floating Boost Button */}
         <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
-            className="absolute top-4 right-4 z-20"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
+          className="absolute top-4 right-4 z-20"
         >
           <button
-             onClick={(e) => { e.stopPropagation(); onInteract(`Boost ${title}`); }}
-             className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:bg-white/30 transition-colors shadow-lg"
+            onClick={(e) => { e.stopPropagation(); onInteract(`Boost ${title}`); }}
+            className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 hover:bg-white/30 transition-colors shadow-lg"
           >
             <Sparkles size={12} className="text-amber-300" /> Boost
           </button>
@@ -454,22 +451,22 @@ const DreamBoardCard = ({ title, target, current, image, color, onInteract }) =>
       </div>
 
       {/* Content */}
-      <div className="p-6 relative z-20 -mt-16">
+      <div className="p-4 sm:p-6 relative z-20 -mt-16">
         {/* Icon */}
         <div className={`mb-4 inline-flex p-3 rounded-2xl ${color.replace('bg-', 'bg-').replace('500', '500/20')} ${color.replace('bg-', 'text-').replace('500', '400')} backdrop-blur-xl border border-white/10 shadow-lg`}>
           {title.includes('Bali') ? <Plane size={20} /> : <Heart size={20} />}
         </div>
 
-        <h4 className="font-display font-bold text-2xl text-white mb-2 leading-tight">{title}</h4>
+        <h4 className="font-display font-bold text-xl sm:text-2xl text-white mb-2 leading-tight">{title}</h4>
 
         <div className="flex items-end justify-between mb-4">
           <div>
             <div className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-0.5">Pot Value</div>
-            <div className="font-mono text-lg text-white">£{current.toLocaleString()}</div>
+            <div className="font-mono text-base sm:text-lg text-white">£{current.toLocaleString()}</div>
           </div>
           <div className="text-right">
             <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-0.5">Goal</div>
-            <div className="font-mono text-sm text-slate-400">£{target.toLocaleString()}</div>
+            <div className="font-mono text-xs sm:text-sm text-slate-400">£{target.toLocaleString()}</div>
           </div>
         </div>
 
@@ -484,14 +481,14 @@ const DreamBoardCard = ({ title, target, current, image, color, onInteract }) =>
         </div>
 
         <div className="mt-3 flex justify-between items-center">
-            <span className={`text-[10px] font-bold ${progress >= 100 ? 'text-emerald-400' : 'text-slate-400'}`}>
-                {progress.toFixed(0)}% Complete
+          <span className={`text-[10px] font-bold ${progress >= 100 ? 'text-emerald-400' : 'text-slate-400'}`}>
+            {progress.toFixed(0)}% Complete
+          </span>
+          {progress >= 100 && (
+            <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded-full">
+              <Check size={10} /> Ready
             </span>
-            {progress >= 100 && (
-                <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                    <Check size={10} /> Ready
-                </span>
-            )}
+          )}
         </div>
       </div>
     </motion.div>
@@ -503,11 +500,11 @@ const DreamBoardCard = ({ title, target, current, image, color, onInteract }) =>
 export default function CollaboratorView({ onInteract = () => { } }) {
   const [isInboxExpanded, setIsInboxExpanded] = useState(false);
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pb-20">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 pb-20">
 
       {/* 1. Fair Share Meter (Hero) */}
       <div className="col-span-12 md:col-span-8">
-        <DashboardCard className="relative overflow-hidden min-h-[320px] flex flex-col justify-center p-8 border-0 ring-1 ring-white/5 bg-slate-900/50 group">
+        <DashboardCard className="relative overflow-hidden min-h-[320px] flex flex-col justify-center p-6 sm:p-8 border-0 ring-1 ring-white/5 bg-slate-900/50 group">
           {/* Ambient Background */}
           <div className="absolute -top-24 -right-24 w-[450px] h-[450px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-indigo-600/20 transition-colors duration-1000" />
 
@@ -517,10 +514,10 @@ export default function CollaboratorView({ onInteract = () => { } }) {
                 <Scale size={28} />
               </div>
               <div>
-                <h2 className="text-4xl font-display font-bold text-white tracking-tight">Fair Share Ratio</h2>
+                <h2 className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight">Fair Share Ratio</h2>
                 <div className="flex items-center gap-2 mt-1">
-                     <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Auto-Adjusted</span>
-                     <p className="text-slate-400 text-sm">Based on income (55/45)</p>
+                  <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Auto-Adjusted</span>
+                  <p className="text-slate-400 text-xs sm:text-sm">Based on income (55/45)</p>
                 </div>
               </div>
             </div>
@@ -529,17 +526,17 @@ export default function CollaboratorView({ onInteract = () => { } }) {
 
             <div className="mt-8 p-4 rounded-xl bg-slate-950/40 border border-white/5 flex items-start gap-4 backdrop-blur-md">
               <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 mt-0.5">
-                  <Info size={16} />
+                <Info size={16} />
               </div>
               <div className="space-y-1">
-                  <p className="text-xs font-bold text-white uppercase tracking-wider">Adjustment Needed</p>
-                  <p className="text-sm text-slate-300 leading-relaxed">
-                    You paid the <strong>Car Insurance</strong> (£800) solo.
-                    Jamie owes you <span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">£120.00</span> to restore the 55/45 balance.
-                  </p>
+                <p className="text-xs font-bold text-white uppercase tracking-wider">Adjustment Needed</p>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  You paid the <strong>Car Insurance</strong> (£800) solo.
+                  Jamie owes you <span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">£120.00</span> to restore the 55/45 balance.
+                </p>
               </div>
               <button onClick={() => onInteract('Settle Balance')} className="ml-auto px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-900/20 whitespace-nowrap transition-colors">
-                  Settle Up
+                Settle Up
               </button>
             </div>
           </div>
@@ -558,65 +555,65 @@ export default function CollaboratorView({ onInteract = () => { } }) {
       {/* 3. Dream Board */}
       <div className="col-span-12">
         <DashboardCard className="relative overflow-hidden border-0 ring-1 ring-white/5 bg-slate-900/50">
-            {/* Gradient Mesh Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-slate-900 to-purple-900/20 opacity-50" />
+          {/* Gradient Mesh Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-slate-900 to-purple-900/20 opacity-50" />
 
-            <div className="relative z-10">
-                <div className="flex items-center justify-between mb-8 px-2">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-2xl bg-purple-500/20 text-purple-300 border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
-                        <Sparkles size={24} />
-                        </div>
-                        <div>
-                        <h3 className="text-2xl font-display font-bold text-white">Dream Board</h3>
-                        <p className="text-slate-400 text-sm mt-0.5">Visualise and fund your shared future.</p>
-                        </div>
-                    </div>
-
-                    <button onClick={() => onInteract("Add Dream")} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold uppercase tracking-wider transition-colors">
-                        <Plus size={14} /> New Goal
-                    </button>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-8 px-2">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-purple-500/20 text-purple-300 border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+                  <Sparkles size={24} />
                 </div>
-
-                <div className="flex gap-6 overflow-x-auto pb-8 pt-2 px-2 scrollbar-hide -mx-2">
-                    <DreamBoardCard
-                        title="Bali 2025"
-                        target={5000}
-                        current={2400}
-                        color="bg-emerald-500"
-                        image="https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80"
-                        onInteract={onInteract}
-                    />
-                    <DreamBoardCard
-                        title="New Kitchen"
-                        target={15000}
-                        current={4500}
-                        color="bg-amber-500"
-                        image="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=600&q=80"
-                        onInteract={onInteract}
-                    />
-                    <DreamBoardCard
-                        title="Date Night"
-                        target={500}
-                        current={120}
-                        color="bg-rose-500"
-                        image="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80"
-                        onInteract={onInteract}
-                    />
-
-                     {/* Add New Card Placeholder */}
-                    <motion.div
-                        whileHover={{ scale: 1.02, rotate: 1 }}
-                        onClick={() => onInteract("Add Dream")}
-                        className="relative h-[340px] w-64 shrink-0 rounded-[2rem] border-2 border-dashed border-white/10 hover:border-white/20 hover:bg-white/5 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all group"
-                    >
-                        <div className="h-16 w-16 rounded-full bg-white/5 group-hover:bg-white/10 flex items-center justify-center text-slate-500 group-hover:text-white transition-colors">
-                            <Plus size={32} />
-                        </div>
-                        <span className="text-xs font-bold uppercase tracking-widest text-slate-500 group-hover:text-white transition-colors">Create Goal</span>
-                    </motion.div>
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-display font-bold text-white">Dream Board</h3>
+                  <p className="text-slate-400 text-xs sm:text-sm mt-0.5">Visualise and fund your shared future.</p>
                 </div>
+              </div>
+
+              <button onClick={() => onInteract("Add Dream")} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold uppercase tracking-wider transition-colors">
+                <Plus size={14} /> New Goal
+              </button>
             </div>
+
+            <div className="flex gap-6 overflow-x-auto pb-8 pt-2 px-2 scrollbar-hide -mx-2">
+              <DreamBoardCard
+                title="Bali 2025"
+                target={5000}
+                current={2400}
+                color="bg-emerald-500"
+                image="https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80"
+                onInteract={onInteract}
+              />
+              <DreamBoardCard
+                title="New Kitchen"
+                target={15000}
+                current={4500}
+                color="bg-amber-500"
+                image="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=600&q=80"
+                onInteract={onInteract}
+              />
+              <DreamBoardCard
+                title="Date Night"
+                target={500}
+                current={120}
+                color="bg-rose-500"
+                image="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80"
+                onInteract={onInteract}
+              />
+
+              {/* Add New Card Placeholder */}
+              <motion.div
+                whileHover={{ scale: 1.02, rotate: 1 }}
+                onClick={() => onInteract("Add Dream")}
+                className="relative h-[340px] w-64 shrink-0 rounded-[2rem] border-2 border-dashed border-white/10 hover:border-white/20 hover:bg-white/5 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all group"
+              >
+                <div className="h-16 w-16 rounded-full bg-white/5 group-hover:bg-white/10 flex items-center justify-center text-slate-500 group-hover:text-white transition-colors">
+                  <Plus size={32} />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-slate-500 group-hover:text-white transition-colors">Create Goal</span>
+              </motion.div>
+            </div>
+          </div>
         </DashboardCard>
       </div>
 

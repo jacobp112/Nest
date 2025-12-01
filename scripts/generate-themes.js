@@ -1,10 +1,16 @@
 const fs = require('fs');
 const path = require('path');
+const { pathToFileURL } = require('url');
 
-const { themes } = require('../src/theme/themes');
+const THEME_MODULE_PATH = pathToFileURL(path.join(__dirname, '../src/theme/themes.js')).href;
 
 const OUTPUT_PATH = path.join(__dirname, '../src/theme/themes.css');
 const DEFAULT_THEME_KEY = 'default';
+
+const loadThemes = async () => {
+  const themesModule = await import(THEME_MODULE_PATH);
+  return themesModule.themes || themesModule.default?.themes || themesModule.default;
+};
 
 const toKebab = (value) =>
   value
@@ -47,7 +53,7 @@ const toRgbComponents = (value) => {
   return null;
 };
 
-const ensureDefaultTheme = () => {
+const ensureDefaultTheme = (themes) => {
   if (!themes[DEFAULT_THEME_KEY]) {
     throw new Error(`Missing required '${DEFAULT_THEME_KEY}' theme.`);
   }
@@ -133,7 +139,7 @@ const emitSection = (lines, theme) => {
   });
 };
 
-const buildCss = () => {
+const buildCss = (themes) => {
   const lines = [
     '/* This file is auto-generated via scripts/generate-themes.js. Do not edit manually. */',
     '',
@@ -154,12 +160,16 @@ const buildCss = () => {
   return `${output.trim()}\n`;
 };
 
-const writeCss = () => {
-  ensureDefaultTheme();
-  const css = buildCss();
+const writeCss = async () => {
+  const themes = await loadThemes();
+  ensureDefaultTheme(themes);
+  const css = buildCss(themes);
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, css, 'utf8');
   console.log(`Generated ${path.relative(process.cwd(), OUTPUT_PATH)}`);
 };
 
-writeCss();
+writeCss().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

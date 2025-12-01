@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import { NestShadowLogo } from './NestShadowLogo.jsx';
 
 const NAV_ITEMS = [
   { id: 'vision', label: 'Our Vision' },
-  { id: 'founders-message', label: "Founder's Message" },
+  { id: 'founder', label: "Founder's Message" },
   { id: 'security', label: 'Security' },
   { id: 'pricing', label: 'Pricing' },
 ];
@@ -23,10 +24,9 @@ const TopNav = ({ onNavigate }) => {
           onClick={() => handleNav('home')}
           className="flex items-center gap-2 focus:outline-none"
         >
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.4)]">
-            <span className="font-display text-lg font-bold text-slate-950">N</span>
+          <div className="scale-75 origin-left">
+            <NestShadowLogo />
           </div>
-          <span className="font-display text-xl font-bold text-white tracking-tight">Nest</span>
         </button>
 
         <div className="hidden md:flex items-center gap-8">
@@ -61,10 +61,9 @@ const TopNav = ({ onNavigate }) => {
           >
             <div className="flex items-center justify-between px-6 py-6 md:px-12">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.4)]">
-                  <span className="font-display text-lg font-bold text-slate-950">N</span>
+                <div className="scale-75 origin-left">
+                  <NestShadowLogo />
                 </div>
-                <span className="font-display text-xl font-bold text-white tracking-tight">Nest</span>
               </div>
               <button
                 onClick={() => setIsMenuOpen(false)}

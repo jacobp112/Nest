@@ -18,39 +18,39 @@ import { DashboardCard } from '../components/DashboardCard.jsx';
 // --- 1. Utility Components ---
 
 const formatCurrency = (val) => new Intl.NumberFormat('en-GB', {
-    style: 'currency', currency: 'GBP', maximumFractionDigits: 0
+  style: 'currency', currency: 'GBP', maximumFractionDigits: 0
 }).format(val);
 
 // The Premium Slider (Reused for consistency)
 const SmartSlider = ({ value, min, max, step = 1, onChange, label, unit = '' }) => {
-    const percentage = ((value - min) / (max - min)) * 100;
+  const percentage = ((value - min) / (max - min)) * 100;
 
-    return (
-      <div className="space-y-3 select-none group">
-        <div className="flex justify-between items-end">
-          <label className="text-xs font-bold text-slate-400 uppercase tracking-wider transition-colors group-hover:text-slate-300">{label}</label>
-          <span className="text-white font-mono font-bold text-sm bg-slate-800 px-2 py-0.5 rounded border border-white/5">{unit}{value.toLocaleString()}</span>
-        </div>
-        <div className="relative h-6 flex items-center cursor-pointer">
-          <div className="absolute w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-white/5">
-             <div
-               className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-100 ease-out"
-               style={{ width: `${percentage}%` }}
-             />
-          </div>
-          <input
-            type="range" min={min} max={max} step={step} value={value}
-            onChange={(e) => onChange(Number(e.target.value))}
-            className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
-          />
-          <motion.div
-            className="absolute h-4 w-4 bg-white rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)] border-2 border-emerald-500 pointer-events-none"
-            style={{ left: `calc(${percentage}% - 8px)` }}
-            layoutId={`thumb-${label}`}
-          />
-        </div>
+  return (
+    <div className="space-y-3 select-none group">
+      <div className="flex justify-between items-end">
+        <label className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider transition-colors group-hover:text-slate-300">{label}</label>
+        <span className="text-white font-mono font-bold text-xs sm:text-sm bg-slate-800 px-2 py-0.5 rounded border border-white/5">{unit}{value.toLocaleString()}</span>
       </div>
-    );
+      <div className="relative h-6 flex items-center cursor-pointer">
+        <div className="absolute w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-white/5">
+          <div
+            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-100 ease-out"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+        <input
+          type="range" min={min} max={max} step={step} value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
+        />
+        <motion.div
+          className="absolute h-4 w-4 bg-white rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)] border-2 border-emerald-500 pointer-events-none"
+          style={{ left: `calc(${percentage}% - 8px)` }}
+          layoutId={`thumb-${label}`}
+        />
+      </div>
+    </div>
+  );
 };
 
 // --- 2. Sub-Components ---
@@ -93,7 +93,7 @@ const BuildingStack = ({ label, value, debt, delay }) => {
       {/* Label */}
       <div className="text-center space-y-0.5">
         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-white transition-colors">{label}</p>
-        <p className="text-[9px] text-slate-500 font-mono">£{(value/1000).toFixed(0)}k</p>
+        <p className="text-[9px] text-slate-500 font-mono">£{(value / 1000).toFixed(0)}k</p>
       </div>
     </div>
   );
@@ -116,10 +116,10 @@ const LTVGauge = ({ ltv }) => {
 
       <svg className="w-64 h-32 overflow-visible relative z-10">
         <defs>
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
         </defs>
         {/* Track */}
         <path d="M 32 128 A 80 80 0 0 1 224 128" fill="none" stroke="#1e293b" strokeWidth="12" strokeLinecap="round" />
@@ -141,9 +141,9 @@ const LTVGauge = ({ ltv }) => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-display font-bold text-white tracking-tighter"
+          className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tighter"
         >
-          {ltv}<span className="text-xl text-slate-500">%</span>
+          {ltv}<span className="text-lg sm:text-xl text-slate-500">%</span>
         </motion.div>
         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">Portfolio LTV</p>
       </div>
@@ -164,8 +164,8 @@ const RenovationCalculator = ({ onInteract }) => {
             <Hammer size={18} />
           </div>
           <div>
-            <h4 className="font-bold text-white text-sm">Active Project</h4>
-            <p className="text-xs text-slate-400 mt-0.5">Kitchen Refurb • 88 High Road</p>
+            <h4 className="font-bold text-white text-xs sm:text-sm">Active Project</h4>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5">Kitchen Refurb • 88 High Road</p>
           </div>
         </div>
 
@@ -179,11 +179,11 @@ const RenovationCalculator = ({ onInteract }) => {
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 rounded-xl bg-slate-950/50 border border-white/5 text-center group hover:border-emerald-500/30 transition-colors">
               <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">Capital Gain</p>
-              <p className="text-lg font-bold text-emerald-400">+£{roi.toLocaleString()}</p>
+              <p className="text-base sm:text-lg font-bold text-emerald-400">+£{roi.toLocaleString()}</p>
             </div>
             <div className="p-3 rounded-xl bg-slate-950/50 border border-white/5 text-center group hover:border-white/20 transition-colors">
               <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-1">Rent Increase</p>
-              <p className="text-lg font-bold text-white">+£{rentIncrease}<span className="text-xs text-slate-500 font-normal">/mo</span></p>
+              <p className="text-base sm:text-lg font-bold text-white">+£{rentIncrease}<span className="text-[10px] sm:text-xs text-slate-500 font-normal">/mo</span></p>
             </div>
           </div>
 
@@ -227,14 +227,13 @@ const PortfolioMap = () => {
           >
             {/* Pulsing Beacon */}
             <div className="relative">
-                 {m.status === 'alert' && (
-                     <div className="absolute inset-0 rounded-full bg-rose-500 animate-ping opacity-75" />
-                 )}
-                <div className={`relative z-10 p-2 rounded-full border-2 shadow-xl transition-transform group-hover:scale-110 ${
-                    m.status === 'alert' ? 'bg-rose-500 border-rose-300' : 'bg-emerald-500 border-emerald-300'
+              {m.status === 'alert' && (
+                <div className="absolute inset-0 rounded-full bg-rose-500 animate-ping opacity-75" />
+              )}
+              <div className={`relative z-10 p-2 rounded-full border-2 shadow-xl transition-transform group-hover:scale-110 ${m.status === 'alert' ? 'bg-rose-500 border-rose-300' : 'bg-emerald-500 border-emerald-300'
                 }`}>
-                  <Home size={14} className="text-white" />
-                </div>
+                <Home size={14} className="text-white" />
+              </div>
             </div>
 
             {/* Tooltip Label */}
@@ -250,7 +249,7 @@ const PortfolioMap = () => {
 
 // --- Main View ---
 
-export default function PropertyTycoonView({ onInteract = () => {} }) {
+export default function PropertyTycoonView({ onInteract = () => { } }) {
   const [rentAdjustment, setRentAdjustment] = useState(0);
 
   const initialProperties = [
@@ -272,15 +271,15 @@ export default function PropertyTycoonView({ onInteract = () => {} }) {
     const totalValue = properties.reduce((acc, p) => acc + p.value, 0);
     const totalDebt = properties.reduce((acc, p) => acc + p.debt, 0);
     return {
-        totalValue,
-        totalDebt,
-        totalEquity: totalValue - totalDebt,
-        ltv: Math.round((totalDebt / totalValue) * 100)
+      totalValue,
+      totalDebt,
+      totalEquity: totalValue - totalDebt,
+      ltv: Math.round((totalDebt / totalValue) * 100)
     };
   }, [properties]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pb-20">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 pb-20">
 
       {/* --- 1. Capital Stack Overview --- */}
       <div className="col-span-12 md:col-span-8">
@@ -288,20 +287,20 @@ export default function PropertyTycoonView({ onInteract = () => {} }) {
           {/* Ambient Background */}
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col lg:flex-row gap-12 h-full p-8">
+          <div className="relative z-10 flex flex-col lg:flex-row gap-6 sm:gap-8 md:gap-12 h-full p-4 sm:p-6 md:p-8">
             <div className="flex-1 space-y-8">
               <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest mb-4">
                   <Building2 size={12} /> Tycoon Level 4
                 </div>
-                <h2 className="text-5xl font-display font-bold text-white tracking-tight">
+                <h2 className="text-4xl sm:text-5xl font-display font-bold text-white tracking-tight">
                   £{stats.totalValue.toLocaleString()}
                 </h2>
                 <div className="flex items-center gap-3 mt-4">
-                     <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-xs font-bold flex items-center gap-1">
-                        <TrendingUp size={12} /> +1.2%
-                     </span>
-                     <span className="text-slate-400 text-xs">Portfolio Growth (MoM)</span>
+                  <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded text-[10px] sm:text-xs font-bold flex items-center gap-1">
+                    <TrendingUp size={12} /> +1.2%
+                  </span>
+                  <span className="text-slate-400 text-[10px] sm:text-xs">Portfolio Growth (MoM)</span>
                 </div>
               </div>
 
@@ -311,14 +310,14 @@ export default function PropertyTycoonView({ onInteract = () => {} }) {
                     <Wallet size={16} className="text-emerald-500" />
                     <p className="text-[10px] uppercase tracking-wider font-bold">Net Equity</p>
                   </div>
-                  <p className="text-xl font-bold text-white">£{stats.totalEquity.toLocaleString()}</p>
+                  <p className="text-lg sm:text-xl font-bold text-white">£{stats.totalEquity.toLocaleString()}</p>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-950/40 border border-white/5 backdrop-blur-md">
                   <div className="flex items-center gap-2 mb-2 text-slate-400">
                     <PoundSterling size={16} className="text-slate-500" />
                     <p className="text-[10px] uppercase tracking-wider font-bold">Bank Debt</p>
                   </div>
-                  <p className="text-xl font-bold text-slate-300">£{stats.totalDebt.toLocaleString()}</p>
+                  <p className="text-lg sm:text-xl font-bold text-slate-300">£{stats.totalDebt.toLocaleString()}</p>
                 </div>
               </div>
             </div>
@@ -344,15 +343,15 @@ export default function PropertyTycoonView({ onInteract = () => {} }) {
         <DashboardCard className="h-full flex flex-col border-0 ring-1 ring-white/5 bg-slate-900/50">
           <div className="flex-1 flex flex-col items-center justify-center py-6">
             <div className="mb-2">
-                             </div>
+            </div>
             <LTVGauge ltv={stats.ltv} />
 
             <div className="mt-6 text-center px-6">
               <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full mb-3 border border-emerald-500/20">
                 <ShieldCheck size={12} /> Safe Zone (&lt;60%)
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                You have significant equity leverage. <br/>
+              <p className="text-[10px] sm:text-xs text-slate-400 leading-relaxed">
+                You have significant equity leverage. <br />
                 Unlock <strong className="text-white">£85,000</strong> while keeping LTV safe.
               </p>
             </div>
@@ -384,8 +383,8 @@ export default function PropertyTycoonView({ onInteract = () => {} }) {
                 <ArrowUpRight size={24} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Yield Performance</h3>
-                <p className="text-xs text-slate-400 mt-1">Net ROI across portfolio</p>
+                <h3 className="text-lg sm:text-xl font-bold text-white">Yield Performance</h3>
+                <p className="text-[10px] sm:text-xs text-slate-400 mt-1">Net ROI across portfolio</p>
               </div>
             </div>
 
@@ -395,20 +394,20 @@ export default function PropertyTycoonView({ onInteract = () => {} }) {
                 <p className="text-[10px] font-bold uppercase text-amber-500 flex items-center gap-1">
                   <AlertTriangle size={12} /> Optimization
                 </p>
-                <p className="text-xs text-slate-400">Simulate Rent on <span className="text-white">Marina Apt</span></p>
+                <p className="text-[10px] sm:text-xs text-slate-400">Simulate Rent on <span className="text-white">Marina Apt</span></p>
               </div>
               <div className="w-48">
-                  <SmartSlider
-                    label=""
-                    value={rentAdjustment} min={0} max={500} step={25}
-                    onChange={setRentAdjustment} unit="+£"
-                  />
+                <SmartSlider
+                  label=""
+                  value={rentAdjustment} min={0} max={500} step={25}
+                  onChange={setRentAdjustment} unit="+£"
+                />
               </div>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-xs sm:text-sm">
               <thead>
                 <tr className="text-slate-500 border-b border-white/10 text-[10px] font-bold uppercase tracking-widest">
                   <th className="pb-4 pl-4">Asset</th>
@@ -424,15 +423,15 @@ export default function PropertyTycoonView({ onInteract = () => {} }) {
                   <tr key={i} className="group hover:bg-white/5 transition-colors cursor-pointer" onClick={() => onInteract(`Analyze ${prop.name}`)}>
                     <td className="py-4 pl-4">
                       <div className="flex items-center gap-3">
-                          <div className={`w-1 h-8 rounded-full ${prop.alert ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                          <div>
-                              <p className="font-bold text-white group-hover:text-emerald-400 transition-colors">{prop.name}</p>
-                              {prop.alert && (
-                                <span className="text-[9px] text-amber-500 flex items-center gap-1 mt-0.5 font-bold uppercase tracking-wider">
-                                  Action Needed
-                                </span>
-                              )}
-                          </div>
+                        <div className={`w-1 h-8 rounded-full ${prop.alert ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                        <div>
+                          <p className="font-bold text-white group-hover:text-emerald-400 transition-colors">{prop.name}</p>
+                          {prop.alert && (
+                            <span className="text-[9px] text-amber-500 flex items-center gap-1 mt-0.5 font-bold uppercase tracking-wider">
+                              Action Needed
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="py-4 text-slate-400 font-mono">£{prop.value.toLocaleString()}</td>
@@ -461,11 +460,10 @@ export default function PropertyTycoonView({ onInteract = () => {} }) {
                             transition={{ duration: 1 }}
                           />
                         </div>
-                        <span className={`px-2 py-1 rounded-md font-bold text-xs w-16 text-center border ${
-                            prop.yieldPct < 4
+                        <span className={`px-2 py-1 rounded-md font-bold text-xs w-16 text-center border ${prop.yieldPct < 4
                             ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                             : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                        }`}>
+                          }`}>
                           {prop.yieldPct.toFixed(1)}%
                         </span>
                       </div>

@@ -348,7 +348,7 @@ const BudgetingHubView = ({
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.08),_transparent_55%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(59,130,246,0.06),_transparent_60%)]" />
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-10">
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 sm:gap-8 px-4 py-6 sm:py-10 sm:px-6 lg:px-10">
         <motion.header
           variants={fadeInUp}
           initial="hidden"
@@ -361,17 +361,17 @@ const BudgetingHubView = ({
           </span>
           <div className="flex flex-wrap items-baseline justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                 Monthly Budgeting Hub
               </h1>
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-xs sm:text-sm text-slate-400">
                 Align your spending with intention and stay ahead of each category.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <div className="rounded-2xl border border-slate-700/60 bg-slate-900/50 px-5 py-3 text-right shadow-lg shadow-slate-950/40">
-                <p className="text-xs uppercase tracking-wide text-slate-400">Current cycle</p>
-                <p className="text-lg font-semibold text-white">{monthLabel}</p>
+              <div className="rounded-2xl border border-slate-700/60 bg-slate-900/50 px-4 py-2 sm:px-5 sm:py-3 text-right shadow-lg shadow-slate-950/40">
+                <p className="text-[10px] sm:text-xs uppercase tracking-wide text-slate-400">Current cycle</p>
+                <p className="text-base sm:text-lg font-semibold text-white">{monthLabel}</p>
               </div>
               <button
                 type="button"
@@ -391,9 +391,9 @@ const BudgetingHubView = ({
           initial="hidden"
           animate="visible"
           transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
-          className="sticky top-6 z-20 space-y-4 rounded-3xl border border-slate-800/80 bg-slate-900/70 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur"
+          className="sticky top-6 z-20 space-y-4 rounded-3xl border border-slate-800/80 bg-slate-900/70 p-4 sm:p-6 shadow-2xl shadow-slate-950/30 backdrop-blur"
         >
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
                 id: 'income',
@@ -436,14 +436,14 @@ const BudgetingHubView = ({
                 <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full ${badgeClass} opacity-20`} />
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-                    <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+                    <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+                    <p className="mt-2 text-xl sm:text-2xl font-semibold text-white">{value}</p>
                   </div>
                   <div className="rounded-full border border-slate-700/60 bg-slate-900/80 p-2 text-slate-300">
                     <Icon className="h-5 w-5" />
                   </div>
                 </div>
-                <p className="mt-3 text-xs text-slate-500">{caption}</p>
+                <p className="mt-3 text-[10px] sm:text-xs text-slate-500">{caption}</p>
               </motion.div>
             ))}
           </div>
@@ -454,12 +454,12 @@ const BudgetingHubView = ({
           initial="hidden"
           animate="visible"
           transition={{ duration: 0.6, ease: 'easeOut', delay: 0.18 }}
-          className="space-y-6 rounded-3xl border border-slate-800/70 bg-slate-900/60 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur"
+          className="space-y-6 rounded-3xl border border-slate-800/70 bg-slate-900/60 p-4 sm:p-6 shadow-2xl shadow-slate-950/30 backdrop-blur"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-semibold text-white">Category budgets</h2>
-              <p className="text-sm text-slate-400">
+              <h2 className="text-lg sm:text-xl font-semibold text-white">Category budgets</h2>
+              <p className="text-xs sm:text-sm text-slate-400">
                 Track progress for each allocation and adjust as you respond to the month.
               </p>
             </div>
@@ -471,11 +471,10 @@ const BudgetingHubView = ({
                 type="button"
                 onClick={handleGenerateSuggestions}
                 disabled={isGeneratingSuggestions}
-                className={`inline-flex items-center gap-2 rounded-full border border-emerald-500/30 px-3 py-1.5 text-xs font-semibold transition ${
-                  isGeneratingSuggestions
-                    ? 'bg-emerald-500/10 text-emerald-200 opacity-80'
-                    : 'bg-emerald-500/10 text-emerald-200 hover:border-emerald-400 hover:text-white'
-                }`}
+                className={`inline-flex items-center gap-2 rounded-full border border-emerald-500/30 px-3 py-1.5 text-xs font-semibold transition ${isGeneratingSuggestions
+                  ? 'bg-emerald-500/10 text-emerald-200 opacity-80'
+                  : 'bg-emerald-500/10 text-emerald-200 hover:border-emerald-400 hover:text-white'
+                  }`}
               >
                 {isGeneratingSuggestions ? (
                   <>
@@ -560,10 +559,10 @@ const BudgetingHubView = ({
               >
                 <PiggyBank className="h-10 w-10 text-slate-500" />
                 <div>
-                  <p className="text-base font-semibold text-white">
+                  <p className="text-sm sm:text-base font-semibold text-white">
                     No budgets yet. Start by allocating your first category.
                   </p>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="mt-1 text-xs sm:text-sm text-slate-400">
                     Use the dashboard quick add or the controls below to create your plan.
                   </p>
                 </div>
@@ -590,24 +589,23 @@ const BudgetingHubView = ({
                   >
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="space-y-1">
-                        <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+                        <p className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-slate-400">
                           {budget.category || 'General'}
                         </p>
-                        <p className="text-lg font-semibold text-white">
+                        <p className="text-base sm:text-lg font-semibold text-white">
                           {formatCurrency(budget.amount)}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-[10px] sm:text-xs text-slate-500">
                           {formatCurrency(budget.spent)} spent /{' '}
                           {formatCurrency(budget.amount)} budgeted
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span
-                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                            overspent
-                              ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
-                              : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
-                          }`}
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${overspent
+                            ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
+                            : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+                            }`}
                         >
                           {remainingLabel}
                         </span>
@@ -624,9 +622,8 @@ const BudgetingHubView = ({
                     <div className="mt-4 space-y-3">
                       <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800/80">
                         <motion.div
-                          className={`h-full rounded-full ${
-                            overspent ? 'bg-gradient-to-r from-rose-500 to-rose-400' : 'bg-gradient-to-r from-emerald-500 to-emerald-400'
-                          }`}
+                          className={`h-full rounded-full ${overspent ? 'bg-gradient-to-r from-rose-500 to-rose-400' : 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+                            }`}
                           animate={{ width: `${budget.progress * 100}%` }}
                           transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
                         />
@@ -687,12 +684,12 @@ const BudgetingHubView = ({
             initial="hidden"
             animate="visible"
             transition={{ duration: 0.6, ease: 'easeOut', delay: 0.22 }}
-            className="space-y-4 rounded-3xl border border-amber-500/20 bg-amber-500/5 p-6 text-amber-100 shadow-2xl shadow-amber-900/10 backdrop-blur"
+            className="space-y-4 rounded-3xl border border-amber-500/20 bg-amber-500/5 p-4 sm:p-6 text-amber-100 shadow-2xl shadow-amber-900/10 backdrop-blur"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-semibold text-white">Unbudgeted activity detected</h3>
-                <p className="text-sm text-amber-200">
+                <h3 className="text-base sm:text-lg font-semibold text-white">Unbudgeted activity detected</h3>
+                <p className="text-xs sm:text-sm text-amber-200">
                   Create categories for these spends to keep allocations aligned.
                 </p>
               </div>
@@ -731,15 +728,15 @@ const BudgetingHubView = ({
           initial="hidden"
           animate="visible"
           transition={{ duration: 0.6, ease: 'easeOut', delay: 0.28 }}
-          className="rounded-3xl border border-slate-800/70 bg-slate-900/70 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur"
+          className="rounded-3xl border border-slate-800/70 bg-slate-900/70 p-4 sm:p-6 shadow-2xl shadow-slate-950/30 backdrop-blur"
         >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Premium preview
               </p>
-              <h3 className="mt-1 text-lg font-semibold text-white">Rollover budgeting</h3>
-              <p className="mt-1 text-sm text-slate-400">
+              <h3 className="mt-1 text-base sm:text-lg font-semibold text-white">Rollover budgeting</h3>
+              <p className="mt-1 text-xs sm:text-sm text-slate-400">
                 Carry forward unused allocations or overages automatically into your next cycle.
               </p>
             </div>
@@ -801,11 +798,11 @@ const BudgetingHubView = ({
         >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-violet-300/80">
+              <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-violet-300/80">
                 Premium preview
               </p>
-              <h3 className="mt-1 text-lg font-semibold text-white">Digital envelopes & jars</h3>
-              <p className="mt-1 text-sm text-violet-200/80">
+              <h3 className="mt-1 text-base sm:text-lg font-semibold text-white">Digital envelopes & jars</h3>
+              <p className="mt-1 text-xs sm:text-sm text-violet-200/80">
                 Allocate money into named jars, automate fills from income, and move leftovers with a tap.
               </p>
             </div>
@@ -817,7 +814,7 @@ const BudgetingHubView = ({
             )}
           </div>
           <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr),auto]">
-            <div className="space-y-3 rounded-2xl border border-violet-500/25 bg-violet-900/40 p-5 text-sm text-violet-100">
+            <div className="space-y-3 rounded-2xl border border-violet-500/25 bg-violet-900/40 p-4 sm:p-5 text-xs sm:text-sm text-violet-100">
               <div className="inline-flex items-center gap-2 rounded-full bg-violet-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-violet-200">
                 <Layers className="h-4 w-4" />
                 How it helps
@@ -839,7 +836,7 @@ const BudgetingHubView = ({
             </div>
             <div className="flex items-center justify-center">
               {isPremium ? (
-                <div className="flex flex-col items-start gap-2 rounded-2xl border border-violet-400/40 bg-violet-400/10 px-5 py-4 text-sm text-violet-100">
+                <div className="flex flex-col items-start gap-2 rounded-2xl border border-violet-400/40 bg-violet-400/10 px-4 py-3 sm:px-5 sm:py-4 text-xs sm:text-sm text-violet-100">
                   <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-violet-200">
                     <Wallet className="h-4 w-4" />
                     Coming to your plan soon
@@ -850,7 +847,7 @@ const BudgetingHubView = ({
                 <button
                   type="button"
                   onClick={() => onShowPricingModal?.()}
-                  className="inline-flex items-center gap-3 rounded-full bg-violet-400 px-6 py-3 text-sm font-semibold text-violet-950 shadow-lg shadow-violet-500/30 transition hover:bg-violet-300"
+                  className="inline-flex items-center gap-3 rounded-full bg-violet-400 px-5 py-2 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-violet-950 shadow-lg shadow-violet-500/30 transition hover:bg-violet-300"
                 >
                   Unlock digital envelopes
                   <ArrowRight className="h-4 w-4" />

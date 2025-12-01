@@ -1,0 +1,70 @@
+<head>
+  <style> body { margin: 0; } </style>
+
+  <script type="importmap">{ "imports": {
+    "three": "https://esm.sh/three",
+    "three/": "https://esm.sh/three/",
+    "react": "https://esm.sh/react",
+    "react/": "https://esm.sh/react/",
+    "react-dom": "https://esm.sh/react-dom/client",
+    "react-dom/": "https://esm.sh/react-dom/",
+    "@react-three/fiber": "https://esm.sh/@react-three/fiber?external=react,react-dom,three",
+    "@react-three/drei": "https://esm.sh/@react-three/drei?external=@react-three/fiber,react,react-dom,three"
+  }}</script>
+
+<!--  <script type="module">import * as THREE from 'three'; import * as React from 'react'; window.THREE = THREE; window.React = React;</script>-->
+<!--  <script src="../../dist/r3f-forcegraph.js" defer></script>-->
+</head>
+
+<body>
+  <div id="r3fScene"></div>
+
+  <script src="//unpkg.com/@babel/standalone"></script>
+  <script type="text/jsx" data-type="module">
+    import R3fForceGraph from 'https://esm.sh/r3f-forcegraph?external=three,react';
+    import React, { useRef, useEffect, useState } from 'react';
+    import ReactDOM from 'react-dom';
+    import { Canvas, useFrame } from '@react-three/fiber';
+    import { TrackballControls } from '@react-three/drei';
+    import SpriteText from 'https://esm.sh/three-spritetext?external=three';
+
+    const GraphViz = () => {
+      const fgRef = useRef();
+      useFrame(() => (fgRef.current.tickFrame()));
+
+      const [gData, setGData] = useState();
+
+      useEffect(() => {
+        fetch('../datasets/miserables.json').then(res => res.json())
+          .then(setGData);
+      }, []);
+
+      return <R3fForceGraph
+        ref={fgRef}
+        graphData={gData}
+        nodeAutoColorBy="group"
+        nodeThreeObject={node => {
+          const sprite = new SpriteText(node.id);
+          sprite.color = node.color;
+          sprite.textHeight = 8;
+          return sprite;
+        }}
+      />;
+    }
+
+    const Scene = () => {
+      return <div style={{ height: window.innerHeight }}>
+        <Canvas flat camera={{ position: [0, 0, 400], far: 4000 }}>
+          <TrackballControls />
+          <color attach="background" args={[0, 0, 0.01]}/>
+          <ambientLight color={0xcccccc} intensity={Math.PI}/>
+          <directionalLight intensity={0.6 * Math.PI}/>
+          <GraphViz />
+        </Canvas>
+      </div>;
+    };
+
+    ReactDOM.createRoot(document.getElementById('r3fScene'))
+      .render(<Scene />);
+  </script>
+</body>

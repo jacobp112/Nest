@@ -30,8 +30,8 @@ const SmartSlider = ({ value, min, max, step = 1, onChange, label, theme = 'emer
   return (
     <div className="space-y-3 select-none group">
       <div className="flex justify-between items-end">
-        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider transition-colors group-hover:text-slate-300">{label}</label>
-        <span className="text-white font-mono font-bold text-sm bg-slate-800 px-2 py-0.5 rounded border border-white/5">
+        <label className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider transition-colors group-hover:text-slate-300">{label}</label>
+        <span className="text-white font-mono font-bold text-xs sm:text-sm bg-slate-800 px-1.5 py-0.5 sm:px-2 rounded border border-white/5">
           +£{value}
         </span>
       </div>
@@ -77,7 +77,7 @@ const GoalProgressCard = ({ goal, onInteract }) => {
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 p-6 backdrop-blur-md transition-all hover:border-white/20 shadow-xl"
+      className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 p-4 sm:p-6 backdrop-blur-md transition-all hover:border-white/20 shadow-xl"
     >
       {/* Ambient Background Glow */}
       <div className={`absolute -right-10 -top-10 h-40 w-40 rounded-full ${t.bg}/10 blur-[60px] transition-opacity opacity-40 group-hover:opacity-60`} />
@@ -91,14 +91,14 @@ const GoalProgressCard = ({ goal, onInteract }) => {
               <Target size={22} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white group-hover:text-white transition-colors">{goal.name}</h3>
-              <div className="mt-1 flex items-center gap-2 text-[10px] uppercase tracking-widest text-slate-400">
+              <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-white transition-colors">{goal.name}</h3>
+              <div className="mt-1 flex items-center gap-2 text-[9px] sm:text-[10px] uppercase tracking-widest text-slate-400">
                 <span>Target: <span className="text-slate-300 font-bold">{formatCurrency(goal.target)}</span></span>
               </div>
             </div>
           </div>
           {goal.isAhead && (
-            <span className={`inline-flex items-center rounded-full border ${t.border} ${t.bg}/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider ${t.text} shadow-lg`}>
+            <span className={`inline-flex items-center rounded-full border ${t.border} ${t.bg}/10 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider ${t.text} shadow-lg`}>
               On Track
             </span>
           )}
@@ -107,10 +107,10 @@ const GoalProgressCard = ({ goal, onInteract }) => {
         {/* Progress Visualization */}
         <div className="space-y-3">
           <div className="flex justify-between items-end">
-            <span className="text-3xl font-display font-bold text-white tracking-tight">
+            <span className="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight">
               {formatCurrency(goal.current)}
             </span>
-            <span className={`text-sm font-bold ${t.text}`}>{Math.round(progress)}%</span>
+            <span className={`text-xs sm:text-sm font-bold ${t.text}`}>{Math.round(progress)}%</span>
           </div>
 
           {/* Liquid Bar */}
@@ -125,7 +125,7 @@ const GoalProgressCard = ({ goal, onInteract }) => {
             <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')]" />
           </div>
 
-          <div className="flex justify-between text-[10px] text-slate-500 font-medium uppercase tracking-wider">
+          <div className="flex justify-between text-[9px] sm:text-[10px] text-slate-500 font-medium uppercase tracking-wider">
             <span>Start</span>
             <span>{new Date(goal.deadline).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
           </div>
@@ -138,7 +138,7 @@ const GoalProgressCard = ({ goal, onInteract }) => {
               onClick={() => setBoostAmount(50)}
               className="flex items-center justify-between cursor-pointer group/boost p-2 -mx-2 rounded-lg hover:bg-white/5 transition-colors"
             >
-              <span className="text-xs text-slate-400 group-hover/boost:text-white transition-colors">Add one-off boost</span>
+              <span className="text-[10px] sm:text-xs text-slate-400 group-hover/boost:text-white transition-colors">Add one-off boost</span>
               <div className={`h-6 w-6 rounded-full ${t.bg}/20 flex items-center justify-center ${t.text}`}>
                 <Plus size={14} />
               </div>
@@ -154,7 +154,7 @@ const GoalProgressCard = ({ goal, onInteract }) => {
               />
               <button
                 onClick={() => { onInteract(`Boosted ${goal.name} by £${boostAmount}`); setBoostAmount(0); }}
-                className={`mt-3 w-full py-2 rounded-lg ${t.bg} hover:brightness-110 text-white text-xs font-bold uppercase tracking-wider shadow-lg transition-all`}
+                className={`mt-3 w-full py-1.5 sm:py-2 rounded-lg ${t.bg} hover:brightness-110 text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg transition-all`}
               >
                 Confirm Boost
               </button>
@@ -190,7 +190,7 @@ const GoalsCenterView = ({
 
       {/* 1. Hero: Wealth Velocity */}
       <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
-        <DashboardCard className="relative overflow-hidden flex flex-col justify-center min-h-[240px] border-0 ring-1 ring-white/5 bg-slate-900/50 group">
+        <DashboardCard className="relative overflow-hidden flex flex-col justify-center min-h-[200px] sm:min-h-[240px] border-0 ring-1 ring-white/5 bg-slate-900/50 group">
           {/* Dynamic Background */}
           <div className="absolute right-0 top-0 -mt-10 -mr-10 h-80 w-80 rounded-full bg-emerald-500/10 blur-[100px] group-hover:bg-emerald-500/20 transition-colors duration-1000" />
           <div className="absolute left-0 bottom-0 -mb-10 -ml-10 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px]" />
@@ -200,19 +200,19 @@ const GoalsCenterView = ({
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-lg shadow-emerald-500/10">
                 <Rocket size={24} />
               </div>
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-400">Total Momentum</p>
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-emerald-400">Total Momentum</p>
             </div>
 
             <div className="flex items-baseline gap-2 mb-2">
-              <h2 className="text-6xl font-display font-bold text-white tracking-tight">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold text-white tracking-tight">
                 {formatCurrency(totalSaved)}
               </h2>
-              <span className="text-xl text-slate-500 font-medium">/ {formatCurrency(totalTarget)}</span>
+              <span className="text-lg sm:text-xl text-slate-500 font-medium">/ {formatCurrency(totalTarget)}</span>
             </div>
 
             {/* Global Progress Bar */}
             <div className="mt-6">
-              <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+              <div className="flex justify-between text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
                 <span>Overall Completion</span>
                 <span className="text-white">{totalProgress.toFixed(1)}%</span>
               </div>
@@ -223,7 +223,7 @@ const GoalsCenterView = ({
                   className="h-full bg-gradient-to-r from-emerald-500 to-blue-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]"
                 />
               </div>
-              <p className="mt-3 text-sm text-slate-400">
+              <p className="mt-3 text-xs sm:text-sm text-slate-400">
                 You are saving <span className="text-white font-bold">£1,250/mo</span>. At this rate, you will hit your targets <strong>2 months early</strong>.
               </p>
             </div>
@@ -241,11 +241,11 @@ const GoalsCenterView = ({
             <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20 group-hover:scale-110 transition-transform shadow-lg shadow-amber-500/10">
               <Calendar size={28} />
             </div>
-            <h4 className="text-lg font-bold text-white mb-2">Life Events</h4>
-            <p className="text-xs text-slate-400 leading-relaxed mb-6 max-w-[180px] mx-auto">
+            <h4 className="text-base sm:text-lg font-bold text-white mb-2">Life Events</h4>
+            <p className="text-[10px] sm:text-xs text-slate-400 leading-relaxed mb-6 max-w-[180px] mx-auto">
               Planning a wedding, sabbatical, or baby? Create a complex timeline.
             </p>
-            <span className="inline-flex items-center gap-2 text-[10px] font-bold text-amber-400 uppercase tracking-widest group-hover:gap-3 transition-all">
+            <span className="inline-flex items-center gap-2 text-[9px] sm:text-[10px] font-bold text-amber-400 uppercase tracking-widest group-hover:gap-3 transition-all">
               Open Planner <ArrowRight size={12} />
             </span>
           </div>
@@ -257,9 +257,9 @@ const GoalsCenterView = ({
         <div className="flex items-center justify-between px-2 mb-6">
           <div className="flex items-center gap-3">
             <div className="h-8 w-1 bg-emerald-500 rounded-full" />
-            <h3 className="text-2xl font-bold text-white font-display">Active Goals</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-white font-display">Active Goals</h3>
           </div>
-          <button onClick={() => onInteract("Create New Goal")} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-bold uppercase tracking-wider transition-colors">
+          <button onClick={() => onInteract("Create New Goal")} className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-colors">
             <Plus size={14} /> New Goal
           </button>
         </div>
@@ -273,13 +273,13 @@ const GoalsCenterView = ({
           <motion.div
             whileHover={{ scale: 1.02 }}
             onClick={() => onInteract("Create New Goal")}
-            className="group relative flex min-h-[320px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-800 bg-slate-900/30 p-6 text-center transition-all hover:border-emerald-500/30 hover:bg-emerald-500/5 cursor-pointer"
+            className="group relative flex min-h-[320px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-800 bg-slate-900/30 p-4 sm:p-6 text-center transition-all hover:border-emerald-500/30 hover:bg-emerald-500/5 cursor-pointer"
           >
             <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-slate-800 shadow-xl transition-all group-hover:scale-110 group-hover:bg-emerald-500/20 border border-white/5 group-hover:border-emerald-500/30">
               <Plus size={32} className="text-slate-500 transition-colors group-hover:text-emerald-400" />
             </div>
-            <h3 className="mb-2 text-xl font-bold text-slate-300 group-hover:text-white transition-colors">Create New Goal</h3>
-            <p className="max-w-[200px] text-xs text-slate-500 uppercase tracking-wider">
+            <h3 className="mb-2 text-lg sm:text-xl font-bold text-slate-300 group-hover:text-white transition-colors">Create New Goal</h3>
+            <p className="max-w-[200px] text-[10px] sm:text-xs text-slate-500 uppercase tracking-wider">
               Set a target and start saving
             </p>
           </motion.div>

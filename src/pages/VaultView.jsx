@@ -61,31 +61,30 @@ const BiometricLock = ({ onUnlock }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleScan}
-            className={`h-24 w-24 rounded-full flex items-center justify-center border-2 transition-all duration-500 relative overflow-hidden ${
-                scanning
+            className={`h-24 w-24 rounded-full flex items-center justify-center border-2 transition-all duration-500 relative overflow-hidden ${scanning
                 ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)]'
                 : 'border-white/10 bg-white/5 text-slate-400 hover:border-emerald-500/50 hover:text-emerald-400'
-            }`}
+              }`}
           >
             <Fingerprint size={48} />
 
             {/* Scanning Beam */}
             {scanning && (
-                <motion.div
-                    initial={{ top: "-100%" }}
-                    animate={{ top: "100%" }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                    className="absolute left-0 right-0 h-1/2 bg-gradient-to-b from-transparent to-emerald-500/50 border-b border-emerald-400"
-                />
+              <motion.div
+                initial={{ top: "-100%" }}
+                animate={{ top: "100%" }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                className="absolute left-0 right-0 h-1/2 bg-gradient-to-b from-transparent to-emerald-500/50 border-b border-emerald-400"
+              />
             )}
           </motion.button>
         </div>
 
         <div className="mt-8 text-center space-y-2">
-          <h2 className="text-2xl font-display font-bold text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-display font-bold text-white tracking-tight">
             {scanning ? 'Authenticating...' : 'Vault Locked'}
           </h2>
-          <p className="text-sm text-slate-400 max-w-[200px] mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-400 max-w-[200px] mx-auto leading-relaxed">
             {scanning ? 'Verifying biometric signature...' : 'Touch fingerprint sensor to decrypt sensitive data.'}
           </p>
         </div>
@@ -108,7 +107,7 @@ const DecryptText = ({ text, revealed }) => {
           }).join('')
         );
         if (iterations >= text.length) clearInterval(interval);
-        iterations += 1/2;
+        iterations += 1 / 2;
       }, 30);
       return () => clearInterval(interval);
     } else {
@@ -134,35 +133,32 @@ const SecureItem = ({ icon: Icon, title, value, type, onInteract }) => {
     <motion.div
       layout
       onClick={() => setRevealed(!revealed)}
-      className={`group flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${
-          revealed
+      className={`group flex items-center justify-between p-3 sm:p-4 rounded-2xl border transition-all cursor-pointer ${revealed
           ? 'bg-slate-800/50 border-emerald-500/30 shadow-lg'
           : 'bg-slate-900/30 border-white/5 hover:bg-slate-800/50 hover:border-white/10'
-      }`}
+        }`}
     >
       <div className="flex items-center gap-4">
-        <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-colors ${
-            revealed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'
-        }`}>
+        <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-colors ${revealed ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'
+          }`}>
           <Icon size={18} />
         </div>
         <div>
-          <p className={`text-sm font-bold transition-colors ${revealed ? 'text-white' : 'text-slate-300'}`}>{title}</p>
+          <p className={`text-xs sm:text-sm font-bold transition-colors ${revealed ? 'text-white' : 'text-slate-300'}`}>{title}</p>
           <p className="text-[10px] text-slate-500 uppercase tracking-wider">{type}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-4">
-        <div className={`text-sm font-mono transition-colors ${revealed ? 'text-emerald-400' : 'text-slate-600'}`}>
-            <DecryptText text={value} revealed={revealed} />
+        <div className={`text-xs sm:text-sm font-mono transition-colors ${revealed ? 'text-emerald-400' : 'text-slate-600'}`}>
+          <DecryptText text={value} revealed={revealed} />
         </div>
         <button
           onClick={handleCopy}
-          className={`p-2 rounded-lg transition-colors ${
-              copied
+          className={`p-2 rounded-lg transition-colors ${copied
               ? 'bg-emerald-500 text-white'
               : 'hover:bg-white/10 text-slate-500 hover:text-white'
-          }`}
+            }`}
         >
           {copied ? <Check size={14} /> : (revealed ? <Copy size={14} /> : <EyeOff size={14} />)}
         </button>
@@ -173,7 +169,7 @@ const SecureItem = ({ icon: Icon, title, value, type, onInteract }) => {
 
 // --- Main View ---
 
-const VaultView = ({ onInteract = () => {}, className = '' }) => {
+const VaultView = ({ onInteract = () => { }, className = '' }) => {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
 
@@ -204,13 +200,13 @@ const VaultView = ({ onInteract = () => {}, className = '' }) => {
   }
 
   return (
-    <div className={`mx-auto w-full max-w-6xl space-y-8 pb-20 ${className}`}>
+    <div className={`mx-auto w-full max-w-6xl space-y-6 sm:space-y-8 pb-20 ${className}`}>
 
       {/* Header Status */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between p-6 rounded-3xl bg-emerald-900/10 border border-emerald-500/20 relative overflow-hidden"
+        className="flex items-center justify-between p-4 sm:p-6 rounded-3xl bg-emerald-900/10 border border-emerald-500/20 relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5" />
 
@@ -219,12 +215,12 @@ const VaultView = ({ onInteract = () => {}, className = '' }) => {
             <Unlock size={24} />
           </div>
           <div>
-            <h2 className="text-xl font-display font-bold text-white">Vault Decrypted</h2>
+            <h2 className="text-lg sm:text-xl font-display font-bold text-white">Vault Decrypted</h2>
             <div className="flex items-center gap-2 mt-0.5">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <p className="text-xs text-emerald-200/70 font-mono">
-                    Session expires in {formatTime(timeLeft)}
-                </p>
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-xs text-emerald-200/70 font-mono">
+                Session expires in {formatTime(timeLeft)}
+              </p>
             </div>
           </div>
         </div>
@@ -236,13 +232,13 @@ const VaultView = ({ onInteract = () => {}, className = '' }) => {
         </button>
       </motion.div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
 
         {/* Secrets Column */}
         <div className="space-y-4">
           <div className="flex items-center justify-between px-2">
-             <h3 className="text-lg font-bold text-white">Shared Secrets</h3>
-             <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">AES-256 Encrypted</span>
+            <h3 className="text-base sm:text-lg font-bold text-white">Shared Secrets</h3>
+            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">AES-256 Encrypted</span>
           </div>
 
           <DashboardCard className="border-0 ring-1 ring-white/5 bg-slate-900/50 space-y-2">
@@ -282,42 +278,42 @@ const VaultView = ({ onInteract = () => {}, className = '' }) => {
 
           {/* Critical Docs */}
           <div>
-            <h3 className="text-lg font-bold text-white px-2 mb-4">Critical Documents</h3>
+            <h3 className="text-base sm:text-lg font-bold text-white px-2 mb-4">Critical Documents</h3>
             <DashboardCard className="space-y-3 border-0 ring-1 ring-white/5 bg-slate-900/50">
-                <div
+              <div
                 className="group flex items-center gap-4 p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10 cursor-pointer hover:bg-indigo-500/10 transition-all"
                 onClick={() => onInteract('Viewing Will')}
-                >
+              >
                 <div className="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition-transform">
-                    <FileText size={18} />
+                  <FileText size={18} />
                 </div>
                 <div className="flex-1">
-                    <p className="text-sm font-bold text-indigo-100">Last Will & Testament.pdf</p>
-                    <p className="text-[10px] text-indigo-300/60 mt-0.5">Updated 6 months ago • 2.4MB</p>
+                  <p className="text-xs sm:text-sm font-bold text-indigo-100">Last Will & Testament.pdf</p>
+                  <p className="text-[10px] text-indigo-300/60 mt-0.5">Updated 6 months ago • 2.4MB</p>
                 </div>
                 <ChevronRight size={16} className="text-indigo-400/50 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
-                </div>
+              </div>
 
-                <div
+              <div
                 className="group flex items-center gap-4 p-3 rounded-xl bg-slate-800/30 border border-white/5 cursor-pointer hover:bg-slate-800/50 transition-all"
                 onClick={() => onInteract('Viewing Policy')}
-                >
+              >
                 <div className="p-2.5 rounded-lg bg-slate-800 text-slate-400 group-hover:text-white transition-colors">
-                    <FileText size={18} />
+                  <FileText size={18} />
                 </div>
                 <div className="flex-1">
-                    <p className="text-sm font-bold text-slate-200">Life_Insurance_Policy.pdf</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">Aviva • #99283811</p>
+                  <p className="text-xs sm:text-sm font-bold text-slate-200">Life_Insurance_Policy.pdf</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Aviva • #99283811</p>
                 </div>
                 <ChevronRight size={16} className="text-slate-600 group-hover:text-white transition-colors" />
-                </div>
+              </div>
             </DashboardCard>
           </div>
 
           {/* Legacy Protocol */}
           <DashboardCard className="bg-gradient-to-br from-rose-900/20 to-slate-900/50 border-rose-500/20 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <AlertTriangle size={80} className="text-rose-500" />
+              <AlertTriangle size={80} className="text-rose-500" />
             </div>
 
             <div className="flex items-start gap-4 relative z-10">
@@ -326,8 +322,8 @@ const VaultView = ({ onInteract = () => {}, className = '' }) => {
               </div>
               <div>
                 <h4 className="font-bold text-rose-100 flex items-center gap-2">
-                    Legacy Protocol
-                    <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-[9px] border border-rose-500/20 text-rose-400 font-mono">ACTIVE</span>
+                  Legacy Protocol
+                  <span className="px-1.5 py-0.5 rounded bg-rose-500/10 text-[9px] border border-rose-500/20 text-rose-400 font-mono">ACTIVE</span>
                 </h4>
                 <p className="text-xs text-rose-200/70 mt-2 leading-relaxed max-w-[260px]">
                   If you are inactive for <strong>30 days</strong>, access to this vault will be securely transferred to <strong>Sarah (Partner)</strong>.

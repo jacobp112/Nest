@@ -1,0 +1,20 @@
+          </div>
+
+          {/* Animated Area Chart */}
+          <div className="relative w-full opacity-60 mt-auto -mb-6 -ml-6" style={{ width: 'calc(100% + 48px)' }}>
+             <SmoothAreaChart />
+          </div>
+        </DashboardCard>
+
+        {/* Quick Export Card */}
+        <DashboardCard className="flex flex-col justify-center items-center text-center border-dashed border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors group cursor-pointer h-full" onClick={() => onInteract("Exporting PDF")}>
+          <div className="mb-4 h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-white group-hover:scale-110 transition-all shadow-2xl border border-white/5">
+            <FileText size={28} />
+          </div>
+          <h3 className="font-bold text-white mb-1">Export Report</h3>
+          <p className="text-xs text-slate-500 mb-4 max-w-[140px] leading-relaxed">Download a compliant PDF summary for your accountant.</p>
+          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Download PDF</span>
+        </DashboardCard>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-8">

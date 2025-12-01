@@ -41,7 +41,7 @@ export default function PrototypeRouter() {
     <div style={{ minHeight: '100vh' }}>
       <div style={{ padding: 8, background: '#fff', borderBottom: '1px solid #eee', display: 'flex', gap: 8, alignItems: 'center' }}>
         <button onClick={goBack} style={{ padding: 8 }}>Back</button>
-        <div style={{ fontWeight: 700 }}>Prototype Router — {route.name}</div>
+        <div style={{ fontWeight: 700 }}>Prototype Router – {route.name}</div>
         <div style={{ marginLeft: 'auto', fontSize: 12, color: '#666' }}>Open with ?prototype=1 to view</div>
       </div>
       {render()}

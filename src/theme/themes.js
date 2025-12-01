@@ -14,7 +14,7 @@ const sharedSpacing = {
   '3xl': '4rem',
 };
 
-const themes = {
+export const themes = {
   default: {
     label: 'Default',
     colors: {
@@ -465,5 +465,3 @@ const themes = {
     },
   },
 };
-
-module.exports = { themes };

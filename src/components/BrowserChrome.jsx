@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { ChevronLeft, ChevronRight, RotateCw, Lock, Share, Plus, MoreHorizontal } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -11,49 +11,9 @@ const TRAFFIC_LIGHTS = [
 ];
 
 export default function BrowserChrome({ url = 'nest.finance', faviconColor = '#34d399', reducedMotion = false }) {
-  const [displayUrl, setDisplayUrl] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const timeoutsRef = useRef([]);
-
-  // --- Typing Simulation Logic ---
-  useEffect(() => {
-    // Clear existing timers
-    timeoutsRef.current.forEach(clearTimeout);
-    timeoutsRef.current = [];
-
-    if (!url) {
-      setDisplayUrl('');
-      return;
-    }
-
-    // Instant render for reduced motion
-    if (reducedMotion) {
-      setDisplayUrl(url);
-      setIsTyping(false);
-      return;
-    }
-
-    // Start typing sequence
-    setIsTyping(true);
-    setDisplayUrl('');
-
-    const chars = url.split('');
-    const baseDelay = 400; // Wait a bit before starting
-
-    chars.forEach((char, index) => {
-      const timeout = setTimeout(() => {
-        setDisplayUrl((prev) => prev + char);
-        // If it's the last character, stop the cursor blinking shortly after
-        if (index === chars.length - 1) {
-          setTimeout(() => setIsTyping(false), 800);
-        }
-      }, baseDelay + index * (30 + Math.random() * 20)); // Random typing speed variance
-
-      timeoutsRef.current.push(timeout);
-    });
-
-    return () => timeoutsRef.current.forEach(clearTimeout);
-  }, [url, reducedMotion]);
+  // Hardcode the URL display – no typing simulation or generated characters
+  const displayUrl = url || '';
+  const isTyping = false;
 
   return (
     <div className="relative flex w-full items-center gap-4 border-b border-white/5 bg-slate-900/80 px-5 py-3.5 backdrop-blur-xl">

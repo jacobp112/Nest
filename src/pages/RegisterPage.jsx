@@ -66,6 +66,7 @@ export default function RegisterPage({ onNavigate, planContext = {} }) {
     name: '',
     email: '',
     partnerName: '',
+    partnerEmail: '',
   });
 
   const planKey = planContext?.planKey ?? 'solo-paid';
@@ -78,8 +79,13 @@ export default function RegisterPage({ onNavigate, planContext = {} }) {
     setFormValues((prev) => ({ ...prev, [field]: event.target.value }));
   };
 
+  const requiresPartner = ['partners', 'family'].includes(planKey);
   const isFormValid =
-    agreedTerms && agreedVault && Boolean(formValues.name.trim()) && Boolean(formValues.email.trim());
+    agreedTerms &&
+    agreedVault &&
+    Boolean(formValues.name.trim()) &&
+    Boolean(formValues.email.trim()) &&
+    (!requiresPartner || (Boolean(formValues.partnerName.trim()) && Boolean(formValues.partnerEmail.trim())));
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -152,13 +158,22 @@ export default function RegisterPage({ onNavigate, planContext = {} }) {
                       value={formValues.email}
                       onChange={handleChange('email')}
                     />
-                    {planKey === 'partners' && (
-                      <InputGroup
-                        label="Partner's name"
-                        placeholder="Jamie"
-                        value={formValues.partnerName}
-                        onChange={handleChange('partnerName')}
-                      />
+                    {['partners', 'family'].includes(planKey) && (
+                      <>
+                        <InputGroup
+                          label="Partner's name"
+                          placeholder="Jamie"
+                          value={formValues.partnerName}
+                          onChange={handleChange('partnerName')}
+                        />
+                        <InputGroup
+                          label="Partner's email"
+                          type="email"
+                          placeholder="jamie@example.com"
+                          value={formValues.partnerEmail}
+                          onChange={handleChange('partnerEmail')}
+                        />
+                      </>
                     )}
 
                     <div className="space-y-3 pt-2">

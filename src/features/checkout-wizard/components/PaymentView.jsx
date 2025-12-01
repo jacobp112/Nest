@@ -130,25 +130,25 @@ export default function PaymentView() {
   const reviewEntries = useMemo(() => {
     const lastFourDigits = formData.cardNumber?.replace(/\D/g, '').slice(-4) || '';
     return [
-      { label: 'Cardholder', value: formData.cardholderName || '—' },
-      { label: 'Card ending in', value: lastFourDigits ? lastFourDigits.padStart(4, '•') : '—' },
-      { label: 'Expiry', value: formData.expiry || '—' },
+      { label: 'Cardholder', value: formData.cardholderName || '–' },
+      { label: 'Card ending in', value: lastFourDigits ? lastFourDigits.padStart(4, '•') : '–' },
+      { label: 'Expiry', value: formData.expiry || '–' },
       {
         label: 'Billing address',
         value: [formData.addressLine1, formData.addressLine2, `${formData.city} ${formData.region} ${formData.postalCode}`, formData.country]
           .filter(Boolean)
-          .join(', ') || '—',
+          .join(', ') || '–',
       },
     ];
   }, [formData]);
 
   return (
     <div className="relative min-h-screen bg-background pb-36 pt-6">
-      <div className="mx-auto flex w-full max-w-screen-sm flex-col gap-8 px-4 pb-6 sm:px-6">
+      <div className="mx-auto flex w-full max-w-screen-sm flex-col gap-6 sm:gap-8 px-4 pb-6 sm:px-6">
         <header className="space-y-2">
           <p className="font-sans text-xs font-semibold uppercase tracking-[0.4em] text-emerald-200/70">Checkout</p>
-          <h1 className="font-display text-3xl text-text-primary sm:text-4xl">Payment</h1>
-          <p className="font-sans text-sm text-text-secondary">Designed for thumbs: stay focused on one step at a time and finish with a single tap.</p>
+          <h1 className="font-display text-2xl sm:text-3xl text-text-primary sm:text-4xl">Payment</h1>
+          <p className="font-sans text-xs sm:text-sm text-text-secondary">Designed for thumbs: stay focused on one step at a time and finish with a single tap.</p>
         </header>
         <ol className="flex flex-wrap items-center gap-3">
           {wizardSteps.map((step, index) => (
@@ -173,195 +173,158 @@ export default function PaymentView() {
             </li>
           ))}
         </ol>
-      </div>
 
-      <form className="mx-auto w-full max-w-screen-sm px-4 pb-32 sm:px-6" onSubmit={handleSubmit}>
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-8">
+          {/* Step 0: Card Details */}
           {stepIndex === 0 && (
-          <section className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-            <div className="space-y-1">
-              <h2 className="font-display text-2xl text-text-primary">Card details</h2>
-              <p className="font-sans text-sm text-text-secondary">We tokenize your card with bank-level controls.</p>
-            </div>
-            <div className="mt-6 space-y-4">
-              <label className="font-sans text-sm text-text-secondary">
-                Name on card
+            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Cardholder Name</label>
                 <input
                   type="text"
-                  autoComplete="cc-name"
-                  className="font-sans mt-2 w-full rounded-2xl border border-white/10 bg-background/60 px-4 py-3 text-text-primary focus:border-emerald-300/60 focus:outline-none"
                   value={formData.cardholderName}
-                  onChange={(event) => handleFieldChange('cardholderName', event.target.value)}
-                  placeholder="Jordan Smith"
+                  onChange={(e) => handleFieldChange('cardholderName', e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  placeholder="Jane Doe"
                 />
-              </label>
-              <label className="font-sans text-sm text-text-secondary">
-                Card number
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Card Number</label>
                 <input
-                  type="tel"
-                  inputMode="numeric"
-                  autoComplete="cc-number"
-                  pattern="[0-9 ]*"
-                  maxLength={23}
-                  className="font-sans mt-2 w-full rounded-2xl border border-white/10 bg-background/60 px-4 py-3 text-text-primary focus:border-emerald-300/60 focus:outline-none"
+                  type="text"
                   value={formData.cardNumber}
-                  onChange={(event) => handleFieldChange('cardNumber', event.target.value)}
-                  placeholder="4242 4242 4242 4242"
+                  onChange={(e) => handleFieldChange('cardNumber', e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  placeholder="0000 0000 0000 0000"
                 />
-              </label>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="font-sans text-sm text-text-secondary">
-                  Expiration date
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Expiry</label>
                   <input
-                    type="tel"
-                    inputMode="numeric"
-                    autoComplete="cc-exp"
-                    placeholder="MM/YY"
-                    maxLength={5}
-                    className="font-sans mt-2 w-full rounded-2xl border border-white/10 bg-background/60 px-4 py-3 text-text-primary focus:border-emerald-300/60 focus:outline-none"
+                    type="text"
                     value={formData.expiry}
-                    onChange={(event) => handleFieldChange('expiry', event.target.value)}
+                    onChange={(e) => handleFieldChange('expiry', e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    placeholder="MM/YY"
                   />
-                </label>
-                <label className="font-sans text-sm text-text-secondary">
-                  Security code
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    autoComplete="cc-csc"
-                    maxLength={4}
-                    placeholder="123"
-                    className="font-sans mt-2 w-full rounded-2xl border border-white/10 bg-background/60 px-4 py-3 text-text-primary focus:border-emerald-300/60 focus:outline-none"
-                    value={formData.cvv}
-                    onChange={(event) => handleFieldChange('cvv', event.target.value)}
-                  />
-                </label>
-              </div>
-            </div>
-          </section>
-          )}
-
-          {stepIndex === 1 && (
-          <section className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-            <div className="space-y-1">
-              <h2 className="font-display text-2xl text-text-primary">Billing address</h2>
-              <p className="font-sans text-sm text-text-secondary">Match the details that your card issuer has on file.</p>
-            </div>
-            <div className="mt-6 space-y-4">
-              <label className="font-sans text-sm text-text-secondary">
-                Street address
-                <input
-                  type="text"
-                  autoComplete="address-line1"
-                  className="font-sans mt-2 w-full rounded-2xl border border-white/10 bg-background/60 px-4 py-3 text-text-primary focus:border-emerald-300/60 focus:outline-none"
-                  value={formData.addressLine1}
-                  onChange={(event) => handleFieldChange('addressLine1', event.target.value)}
-                  placeholder="123 Coastal Way"
-                />
-              </label>
-              <label className="font-sans text-sm text-text-secondary">
-                Apartment, suite, etc. (optional)
-                <input
-                  type="text"
-                  autoComplete="address-line2"
-                  className="font-sans mt-2 w-full rounded-2xl border border-white/10 bg-background/60 px-4 py-3 text-text-primary focus:border-emerald-300/60 focus:outline-none"
-                  value={formData.addressLine2}
-                  onChange={(event) => handleFieldChange('addressLine2', event.target.value)}
-                  placeholder="Unit 5B"
-                />
-              </label>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="font-sans text-sm text-text-secondary">
-                  City
-                  <input
-                    type="text"
-                    autoComplete="address-level2"
-                    className="font-sans mt-2 w-full rounded-2xl border border-white/10 bg-background/60 px-4 py-3 text-text-primary focus:border-emerald-300/60 focus:outline-none"
-                    value={formData.city}
-                    onChange={(event) => handleFieldChange('city', event.target.value)}
-                  />
-                </label>
-                <label className="font-sans text-sm text-text-secondary">
-                  State / Region
-                  <input
-                    type="text"
-                    autoComplete="address-level1"
-                    className="font-sans mt-2 w-full rounded-2xl border border-white/10 bg-background/60 px-4 py-3 text-text-primary focus:border-emerald-300/60 focus:outline-none"
-                    value={formData.region}
-                    onChange={(event) => handleFieldChange('region', event.target.value)}
-                  />
-                </label>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="font-sans text-sm text-text-secondary">
-                  Postal code
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="postal-code"
-                    className="font-sans mt-2 w-full rounded-2xl border border-white/10 bg-background/60 px-4 py-3 text-text-primary focus:border-emerald-300/60 focus:outline-none"
-                    value={formData.postalCode}
-                    onChange={(event) => handleFieldChange('postalCode', event.target.value)}
-                  />
-                </label>
-                <label className="font-sans text-sm text-text-secondary">
-                  Country
-                  <select
-                    autoComplete="country"
-                    className="font-sans mt-2 w-full rounded-2xl border border-white/10 bg-background/60 px-4 py-3 text-text-primary focus:border-emerald-300/60 focus:outline-none"
-                    value={formData.country}
-                    onChange={(event) => handleFieldChange('country', event.target.value)}
-                  >
-                    <option>United States</option>
-                    <option>Canada</option>
-                    <option>United Kingdom</option>
-                    <option>Australia</option>
-                    <option>Other</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          </section>
-          )}
-
-          {stepIndex === 2 && (
-          <section className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-            <div className="space-y-1">
-              <h2 className="font-display text-2xl text-text-primary">Review payment</h2>
-              <p className="font-sans text-sm text-text-secondary">Double-check everything before pay-off.</p>
-            </div>
-            <dl className="mt-6 space-y-4">
-              {reviewEntries.map((entry) => (
-                <div key={entry.label} className="flex items-start justify-between gap-4 rounded-2xl border border-white/10 bg-background/50 p-4">
-                  <dt className="font-sans text-sm text-text-secondary">{entry.label}</dt>
-                  <dd className="font-display text-base text-text-primary">{entry.value}</dd>
                 </div>
-              ))}
-            </dl>
-            <div className="mt-6 rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4">
-              <p className="font-sans text-xs uppercase tracking-[0.3em] text-emerald-200/80">Cart total</p>
-              <p className="font-display text-3xl text-emerald-100">{currencyFormatter.format(cartTotal)}</p>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">CVV</label>
+                  <input
+                    type="text"
+                    value={formData.cvv}
+                    onChange={(e) => handleFieldChange('cvv', e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    placeholder="123"
+                  />
+                </div>
+              </div>
             </div>
-          </section>
           )}
-        </div>
 
-        <div className="fixed inset-x-0 bottom-0 border-t border-white/10 bg-background/95 px-4 py-4 shadow-[0_-16px_40px_rgba(2,6,23,0.65)] backdrop-blur">
-          <div className="mx-auto flex w-full max-w-screen-sm items-center gap-3">
-            <div>
-              <p className="font-sans text-xs uppercase tracking-[0.35em] text-text-secondary">Total due</p>
-              <p className="font-display text-2xl text-text-primary">{currencyFormatter.format(cartTotal)}</p>
+          {/* Step 1: Billing Address */}
+          {stepIndex === 1 && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Address Line 1</label>
+                <input
+                  type="text"
+                  value={formData.addressLine1}
+                  onChange={(e) => handleFieldChange('addressLine1', e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  placeholder="123 Main St"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Address Line 2</label>
+                <input
+                  type="text"
+                  value={formData.addressLine2}
+                  onChange={(e) => handleFieldChange('addressLine2', e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  placeholder="Apt 4B"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">City</label>
+                  <input
+                    type="text"
+                    value={formData.city}
+                    onChange={(e) => handleFieldChange('city', e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    placeholder="London"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Region</label>
+                  <input
+                    type="text"
+                    value={formData.region}
+                    onChange={(e) => handleFieldChange('region', e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    placeholder="Greater London"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Postal Code</label>
+                  <input
+                    type="text"
+                    value={formData.postalCode}
+                    onChange={(e) => handleFieldChange('postalCode', e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    placeholder="SW1A 1AA"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Country</label>
+                  <input
+                    type="text"
+                    value={formData.country}
+                    onChange={(e) => handleFieldChange('country', e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    placeholder="United Kingdom"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="ml-auto flex items-center gap-3">
-              {stepIndex > 0 && (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="font-sans rounded-2xl border border-white/15 px-5 py-3 text-sm font-semibold text-text-secondary"
-                >
-                  Back
-                </button>
-              )}
+          )}
+
+          {/* Step 2: Review */}
+          {stepIndex === 2 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
+                <h3 className="text-lg font-bold text-white">Summary</h3>
+                <div className="space-y-3">
+                  {reviewEntries.map((entry, i) => (
+                    <div key={i} className="flex justify-between text-sm">
+                      <span className="text-slate-400">{entry.label}</span>
+                      <span className="text-white font-medium text-right max-w-[60%]">{entry.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-between items-center p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <span className="text-emerald-200 font-bold">Total to Pay</span>
+                <span className="text-xl font-bold text-emerald-400">{currencyFormatter.format(cartTotal)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Footer Buttons */}
+          <div className="fixed bottom-0 left-0 right-0 border-t border-white/10 bg-background/80 p-4 backdrop-blur-xl sm:static sm:border-0 sm:bg-transparent sm:p-0">
+            <div className="mx-auto flex max-w-screen-sm items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={handleBack}
+                disabled={stepIndex === 0}
+                className="font-sans rounded-2xl border border-white/15 px-5 py-3 text-sm font-semibold text-text-secondary disabled:opacity-50 hover:bg-white/5 transition-colors"
+              >
+                Back
+              </button>
               <button
                 type="submit"
                 className={clsx(
@@ -376,8 +339,8 @@ export default function PaymentView() {
               </button>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

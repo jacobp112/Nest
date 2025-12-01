@@ -74,13 +74,13 @@ const ActionModal = ({ isOpen, onClose, title, children }) => (
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900 shadow-2xl"
         >
-          <div className="flex items-center justify-between border-b border-white/5 px-6 py-4 bg-white/5">
-            <h3 className="text-lg font-bold text-white">{title}</h3>
+          <div className="flex items-center justify-between border-b border-white/5 px-4 py-3 sm:px-6 sm:py-4 bg-white/5">
+            <h3 className="text-base sm:text-lg font-bold text-white">{title}</h3>
             <button onClick={onClose} className="rounded-full p-2 hover:bg-white/10 transition-colors">
               <X size={20} className="text-slate-400" />
             </button>
           </div>
-          <div className="p-6">{children}</div>
+          <div className="p-4 sm:p-6">{children}</div>
         </motion.div>
       </div>
     )}
@@ -109,14 +109,14 @@ const AddAssetWizard = ({ onClose }) => {
       <AnimatePresence mode="wait">
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-3">
-            <p className="text-sm text-slate-400 mb-4">Select asset type to track:</p>
+            <p className="text-xs sm:text-sm text-slate-400 mb-4">Select asset type to track:</p>
             {assets.map((opt, i) => (
               <button key={i} onClick={() => setStep(2)} className="w-full flex items-center gap-4 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-emerald-500/30 transition-all group text-left">
                 <div className="h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-emerald-400 group-hover:bg-emerald-500/10 transition-colors">
                   <opt.icon size={20} />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-200 group-hover:text-white text-sm">{opt.label}</p>
+                  <p className="font-bold text-slate-200 group-hover:text-white text-xs sm:text-sm">{opt.label}</p>
                   <p className="text-[11px] text-slate-500">{opt.desc}</p>
                 </div>
                 <ChevronRight className="ml-auto text-slate-600 group-hover:text-emerald-500" size={16} />
@@ -128,7 +128,7 @@ const AddAssetWizard = ({ onClose }) => {
         {step === 2 && (
           <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
             <button onClick={() => setStep(1)} className="text-xs text-slate-500 hover:text-white mb-2 flex items-center gap-1">← Back</button>
-            <p className="text-sm text-slate-400 mb-4">Select provider (Secure Open Banking)</p>
+            <p className="text-xs sm:text-sm text-slate-400 mb-4">Select provider (Secure Open Banking)</p>
             <div className="grid grid-cols-3 gap-3">
               {['Monzo', 'Revolut', 'Starling', 'Barclays', 'HSBC', 'Amex'].map((bank) => (
                 <button key={bank} onClick={handleConnect} className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-emerald-500/30 transition-all active:scale-95">
@@ -151,7 +151,7 @@ const AddAssetWizard = ({ onClose }) => {
               </div>
             </div>
             <div>
-              <h4 className="text-lg font-bold text-white">Establishing Secure Link</h4>
+              <h4 className="text-base sm:text-lg font-bold text-white">Establishing Secure Link</h4>
               <p className="text-xs text-slate-500 mt-1">Encrypting credentials...</p>
             </div>
           </motion.div>
@@ -163,8 +163,8 @@ const AddAssetWizard = ({ onClose }) => {
               <CheckCircle2 size={40} />
             </div>
             <div>
-              <h4 className="text-xl font-bold text-white">Asset Connected</h4>
-              <p className="text-sm text-slate-400 mt-1">Your balances are syncing now.</p>
+              <h4 className="text-lg sm:text-xl font-bold text-white">Asset Connected</h4>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1">Your balances are syncing now.</p>
             </div>
           </motion.div>
         )}
@@ -186,10 +186,10 @@ const ScenarioPlannerModal = () => {
     <div className="space-y-8 py-4">
       <div className="text-center space-y-2">
         <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Projected Wealth</p>
-        <h3 className="text-4xl font-bold text-white tracking-tight">
+        <h3 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
           {formatCurrency(futureValue)}
         </h3>
-        <p className="text-sm text-emerald-400 font-medium">in {years} years @ 6% growth</p>
+        <p className="text-xs sm:text-sm text-emerald-400 font-medium">in {years} years @ 6% growth</p>
       </div>
 
       <div className="space-y-6">
@@ -198,7 +198,7 @@ const ScenarioPlannerModal = () => {
           { label: 'Time Horizon', val: years, set: setYears, min: 1, max: 40, step: 1, fmt: (v) => `${v} Years` }
         ].map((control, i) => (
           <div key={i} className="space-y-3">
-            <div className="flex justify-between text-sm text-slate-300">
+            <div className="flex justify-between text-xs sm:text-sm text-slate-300">
               <span>{control.label}</span>
               <span className="font-mono text-white bg-slate-800 px-2 py-1 rounded">{control.fmt(control.val)}</span>
             </div>
@@ -362,11 +362,11 @@ const TransactionRow = ({ tx, onInteract }) => {
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-slate-200 truncate group-hover:text-white transition-colors">{tx.description}</p>
+          <p className="text-xs sm:text-sm font-medium text-slate-200 truncate group-hover:text-white transition-colors">{tx.description}</p>
           <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Today • {tx.category || 'General'}</p>
         </div>
 
-        <div className={`font-mono text-sm font-medium ${isDebit ? 'text-white' : 'text-emerald-400'}`}>
+        <div className={`font-mono text-xs sm:text-sm font-medium ${isDebit ? 'text-white' : 'text-emerald-400'}`}>
           <PrivacyBlur>
             {isDebit ? '-' : '+'}{formatCurrency(Math.abs(tx.amount))}
           </PrivacyBlur>
@@ -407,7 +407,7 @@ const TransactionRow = ({ tx, onInteract }) => {
 const QuickAction = ({ icon: Icon, label, color, onClick }) => (
   <button
     onClick={onClick}
-    className="group flex flex-col items-center gap-3 p-4 rounded-2xl transition-all hover:bg-white/5 active:scale-[0.98] w-24 shrink-0 snap-start"
+    className="group flex flex-col items-center gap-3 p-3 sm:p-4 rounded-2xl transition-all hover:bg-white/5 active:scale-[0.98] w-24 shrink-0 snap-start"
   >
     <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${color} text-white shadow-lg ring-1 ring-white/10 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
       <Icon size={20} />
@@ -485,7 +485,7 @@ const DashboardContent = ({ accounts, transactions, onInteract, onChangeTab }) =
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 pb-20">
+    <div className="mx-auto w-full max-w-6xl space-y-6 sm:space-y-8 pb-20">
 
       {/* Modals */}
       <ActionModal isOpen={activeModal === 'asset'} onClose={() => setActiveModal(null)} title="Add New Asset">
@@ -507,7 +507,7 @@ const DashboardContent = ({ accounts, transactions, onInteract, onChangeTab }) =
         <QuickAction icon={Calculator} label="Forecast" color="bg-gradient-to-br from-amber-500 to-orange-600" onClick={() => setActiveModal('scenario')} />
       </motion.div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.5fr_1fr]">
 
         {/* Main Column */}
         <div className="space-y-6">
@@ -558,22 +558,22 @@ const DashboardContent = ({ accounts, transactions, onInteract, onChangeTab }) =
 
               <LiveWealthChart range={chartRange} />
 
-              <div className="mt-8 grid grid-cols-2 gap-4">
-                <div className="rounded-2xl bg-emerald-500/5 border border-emerald-500/10 p-5 relative overflow-hidden group">
+              <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="rounded-2xl bg-emerald-500/5 border border-emerald-500/10 p-4 sm:p-5 relative overflow-hidden group">
                   <div className="absolute right-0 top-0 p-4 opacity-0 group-hover:opacity-10 transition-opacity">
                     <PiggyBank size={64} />
                   </div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 mb-1">Assets</p>
-                  <p className="text-2xl font-semibold text-emerald-100">
+                  <p className="text-xl sm:text-2xl font-semibold text-emerald-100">
                     <PrivacyBlur>{formatCurrency(netWorthMetrics.assets)}</PrivacyBlur>
                   </p>
                 </div>
-                <div className="rounded-2xl bg-rose-500/5 border border-rose-500/10 p-5 relative overflow-hidden group">
+                <div className="rounded-2xl bg-rose-500/5 border border-rose-500/10 p-4 sm:p-5 relative overflow-hidden group">
                   <div className="absolute right-0 top-0 p-4 opacity-0 group-hover:opacity-10 transition-opacity">
                     <CreditCard size={64} />
                   </div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-rose-400 mb-1">Liabilities</p>
-                  <p className="text-2xl font-semibold text-rose-100">
+                  <p className="text-xl sm:text-2xl font-semibold text-rose-100">
                     <PrivacyBlur>{formatCurrency(netWorthMetrics.liabilities)}</PrivacyBlur>
                   </p>
                 </div>
@@ -583,7 +583,7 @@ const DashboardContent = ({ accounts, transactions, onInteract, onChangeTab }) =
 
           <DashboardCard delay={0.2} className="h-full">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-white">Accounts</h3>
+              <h3 className="text-base sm:text-lg font-bold text-white">Accounts</h3>
               <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-[10px] font-bold uppercase tracking-wider text-emerald-400 border border-emerald-500/20">
                 {normalisedAccounts.length} Total
               </span>
@@ -596,18 +596,18 @@ const DashboardContent = ({ accounts, transactions, onInteract, onChangeTab }) =
                     key={idx}
                     whileHover={{ scale: 1.01, backgroundColor: 'rgba(255,255,255,0.03)' }}
                     onClick={() => onInteract(`${account.name} details`)}
-                    className="group flex items-center justify-between p-4 rounded-2xl border border-transparent hover:border-white/5 transition-all cursor-pointer bg-white/[0.01]"
+                    className="group flex items-center justify-between p-3 sm:p-4 rounded-2xl border border-transparent hover:border-white/5 transition-all cursor-pointer bg-white/[0.01]"
                   >
                     <div className="flex items-center gap-4">
                       <div className={`h-10 w-10 rounded-full flex items-center justify-center border border-white/5 ${isLiability ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
                         {account.provider ? <Building2 size={16} /> : <Wallet size={16} />}
                       </div>
                       <div>
-                        <p className="font-semibold text-sm text-slate-200 group-hover:text-white transition-colors">{account?.name}</p>
+                        <p className="font-semibold text-xs sm:text-sm text-slate-200 group-hover:text-white transition-colors">{account?.name}</p>
                         <p className="text-[11px] text-slate-500">{account?.provider || 'Manual Entry'}</p>
                       </div>
                     </div>
-                    <p className={`font-mono text-sm font-medium ${isLiability ? 'text-rose-300' : 'text-emerald-300'}`}>
+                    <p className={`font-mono text-xs sm:text-sm font-medium ${isLiability ? 'text-rose-300' : 'text-emerald-300'}`}>
                       <PrivacyBlur>{formatCurrency(account.balance)}</PrivacyBlur>
                     </p>
                   </motion.div>
@@ -621,7 +621,7 @@ const DashboardContent = ({ accounts, transactions, onInteract, onChangeTab }) =
         <div className="space-y-6">
           <DashboardCard delay={0.3} className="h-full flex flex-col min-h-[400px]">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-white">Recent Activity</h3>
+              <h3 className="text-base sm:text-lg font-bold text-white">Recent Activity</h3>
               <button onClick={() => onInteract('Transaction history')} className="text-xs font-bold text-slate-500 hover:text-white transition-colors">
                 View All
               </button>
@@ -641,7 +641,7 @@ const DashboardContent = ({ accounts, transactions, onInteract, onChangeTab }) =
                   <TrendingUp size={18} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-indigo-100 text-sm">Wealth Forecast</h4>
+                  <h4 className="font-bold text-indigo-100 text-xs sm:text-sm">Wealth Forecast</h4>
                   <p className="text-[10px] text-indigo-300/70">Compound Growth Model</p>
                 </div>
               </div>
@@ -668,7 +668,7 @@ const DashboardContent = ({ accounts, transactions, onInteract, onChangeTab }) =
 // --- Root Wrapper ---
 
 const AccountsNetWorthView = (props) => {
-  // Use state with function initializer for lazy localStorage access
+  // Use state with function initialiser for lazy localStorage access
   const [privacyMode, setPrivacyMode] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('nest_privacy_mode')) || false;
