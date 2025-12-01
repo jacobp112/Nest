@@ -571,342 +571,93 @@ function ProductPreviewCarousel() {
             initial={{ opacity: 0, rotateY: 5, x: 20 }}
             animate={{ opacity: 1, rotateY: 0, x: 0 }}
             transition={{ duration: 0.6, ease: "circOut" }}
-            className="h-full w-full"
-            style={{ willChange: "transform, opacity" }} // CPU Optimization hint
-          >
-            {/* MOBILE VIEW */}
-            <div className="block md:hidden h-full">
-              <MobileSafariFrame url={productSlides[activeIndex].url}>
-                <div className="h-full w-full overflow-hidden relative bg-[#0B0F19]">
-                  <div
-                    className="absolute inset-0 origin-top-left scale-[0.35] w-[285%] h-[285%] pointer-events-none select-none"
-                    style={{
-                      contain: 'content', // Tells browser this content is isolated
-                      contentVisibility: 'auto'
-                    }}
-                  >
-                    <Suspense fallback={<DashboardSkeleton />}>
-                      <DemoDashboard
-                        key={currentSlideId} // Force remount on tab change to reset dashboard state
-                        initialTab={config.tab}
-                        initialPersona={config.persona}
-                        isPreviewMode={true}
-                      />
-                    </Suspense>
-                  </div>
-                </div>
-              </MobileSafariFrame>
-            </div>
-
-            {/* DESKTOP VIEW */}
-            <div className="hidden md:block h-full rounded-[2.5rem] border border-white/10 bg-slate-950/80 backdrop-blur-xl overflow-hidden shadow-2xl">
-              <BrowserChrome url={productSlides[activeIndex].url} />
-
-              <div className="h-full w-full overflow-hidden relative bg-[#0B0F19]">
-                <Suspense fallback={<DashboardSkeleton />}>
-                  {/* Container for Scaling */}
-                  <div
-                    className="absolute inset-0 origin-top-left scale-[0.6] w-[166.6%] h-[166.6%]"
-                    style={{
-                      isolation: 'isolate',
-                      // PERFORMANCE MAGIC:
-                      // 1. content-visibility: auto -> Don't calculate layout if off-screen
-                      // 2. contain: strict -> Don't let inner layout changes affect the outer page
-                      contentVisibility: 'auto',
-                      contain: 'strict',
-                    }}
-                  >
-                    <div className="w-full h-full overflow-y-auto no-scrollbar bg-[#0B0F19]">
-                      {/* Added memoization key to force clean unmount/remount */}
-                      <DemoDashboard
-                        key={currentSlideId}
-                        initialTab={config.tab}
-                        initialPersona={config.persona}
-                        isPreviewMode={true}
-                      />
-                    </div>
-                  </div>
-                </Suspense>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RegisterInterestForm({ onRegister, loading, onNavigate }) {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-
-  return (
-    <div id="register-form" className="relative w-full max-w-5xl mx-auto px-4 md:px-6 pb-20 pt-10">
-      <div className="relative rounded-[2.5rem] md:rounded-[4rem] border border-white/10 bg-[#0B0F19] p-6 md:p-24 overflow-hidden text-center shadow-2xl">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-70 blur-[1px]" />
-        <div className="absolute -top-[200px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px]" />
-
-        <div className="relative z-10 max-w-2xl mx-auto space-y-8 md:space-y-10">
-          <div className="space-y-2 md:space-y-4">
-            <h2 className="text-3xl md:text-7xl font-display font-bold text-white tracking-tighter">
-              Secure your spot.
-            </h2>
-            <p className="text-base md:text-xl text-slate-400 leading-relaxed px-2">
-              We are onboarding families in curated waves to ensure the highest quality of service.
-            </p>
-          </div>
-
-          <form
-            onSubmit={(e) => { e.preventDefault(); onRegister(email, name); }}
-            className="space-y-4 text-left bg-slate-900/50 p-5 md:p-8 rounded-3xl border border-white/5 backdrop-blur-sm"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-              <div className="space-y-2">
-                <label className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500 ml-2">Full Name</label>
-                <input
-                  value={name} onChange={e => setName(e.target.value)}
-                  className="w-full px-5 py-3 rounded-xl bg-slate-950 border border-white/10 text-white text-sm placeholder:text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all"
-                  placeholder="Jane Doe"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500 ml-2">Email Address</label>
-                <input
-                  type="email"
-                  value={email} onChange={e => setEmail(e.target.value)}
-                  className="w-full px-5 py-3 rounded-xl bg-slate-950 border border-white/10 text-white text-sm placeholder:text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all"
-                  placeholder="jane@example.com"
-                  required
-                />
-              </div>
-            </div>
-
-            <button
-              disabled={loading}
-              className="w-full py-4 md:py-6 rounded-2xl bg-white text-slate-950 font-bold text-xs md:text-sm uppercase tracking-widest hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-            >
-              {loading ? 'Processing...' : 'Join Waitlist'}
-            </button>
-          </form>
-
-          <div className="pt-2">
-            <button
-              onClick={() => onNavigate && onNavigate('demo')}
-              className="group text-xs md:text-sm text-slate-500 hover:text-white transition-colors inline-flex items-center gap-2"
-            >
-              Not ready to join?
-              <span className="text-emerald-400 group-hover:underline decoration-emerald-500/50 underline-offset-4">
-                Enter Live Demo
-              </span>
-              <ArrowRight size={12} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-
-          <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 uppercase tracking-widest pt-2 md:pt-4 border-t border-white/5">
-            <Lock size={12} className="text-emerald-500" />
-            <span>Bank-Level Encryption</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ThankYouPanel({ referralCopied, onCopy, forceMotion = false }) {
-  const systemPrefersReducedMotion = useReducedMotion();
-  const prefersReducedMotion = forceMotion ? false : systemPrefersReducedMotion;
-  const [burstId, setBurstId] = useState(0);
-  const [buttonBurstId, setButtonBurstId] = useState(0);
-  const celebrationCompleteRef = useRef(false);
-
-  const handleCelebrationComplete = useCallback(() => {
-    if (celebrationCompleteRef.current) return;
-    celebrationCompleteRef.current = true;
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent?.(new CustomEvent('nest:registration-celebration-complete'));
-      window?.analytics?.track?.('registration_celebration_complete');
-    }
-  }, []);
-
-  useEffect(() => {
-    if (prefersReducedMotion) return;
-    const timeout = setTimeout(() => setBurstId((prev) => prev + 1), 200);
-    return () => clearTimeout(timeout);
-  }, [prefersReducedMotion]);
-
-  useEffect(() => {
-    if (!referralCopied || prefersReducedMotion) return;
-    setButtonBurstId((prev) => prev + 1);
-  }, [referralCopied, prefersReducedMotion]);
-
-  const containerVariants = useMemo(
-    () => ({
-      hidden: { opacity: 1 },
-      visible: {
-        opacity: 1,
-        transition: prefersReducedMotion
-          ? { duration: 0.2 }
-          : { delayChildren: 0.45, staggerChildren: 0.12 },
-      },
-    }),
-    [prefersReducedMotion],
-  );
-
-  const itemVariants = useMemo(
-    () => ({
-      hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 16 },
-      visible: {
-        opacity: 1,
-        y: 0,
-        transition: {
-          type: prefersReducedMotion ? 'tween' : 'spring',
-          stiffness: 220,
-          damping: 18,
-          duration: prefersReducedMotion ? 0.3 : 0.7,
-        },
-      },
-    }),
-    [prefersReducedMotion],
-  );
-
-  return (
-    <div className="relative">
-      {!prefersReducedMotion ? (
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute -inset-1 rounded-[34px] bg-gradient-to-r from-emerald-400/20 via-teal-300/10 to-cyan-300/20 blur-2xl"
-          animate={{ opacity: [0.25, 0.55, 0.25], scale: [0.96, 1.05, 0.96] }}
-          transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      ) : null}
-      <motion.div
-        role="status"
-        aria-live="polite"
-        className="relative overflow-hidden rounded-3xl border border-emerald-300/25 bg-gradient-to-b from-emerald-900/40 via-emerald-900/30 to-emerald-900/10 p-6 shadow-[0_35px_80px_rgba(16,185,129,0.35)] backdrop-blur-xl md:p-10"
-        initial={
-          prefersReducedMotion
-            ? { opacity: 0 }
-            : { opacity: 0, scale: 0.85, filter: 'blur(8px)', backdropFilter: 'blur(8px)' }
-        }
-        animate={
-          prefersReducedMotion
-            ? { opacity: 1, scale: 1, y: 0, backdropFilter: 'blur(12px)' }
-            : { opacity: 1, scale: 1, filter: 'blur(0px)', y: [0, -4, 0, -6, 0], backdropFilter: 'blur(18px)' }
-        }
-        exit={
-          prefersReducedMotion
-            ? { opacity: 0 }
-            : { opacity: 0, scale: 0.9, filter: 'blur(6px)', backdropFilter: 'blur(6px)' }
-        }
-        onAnimationComplete={handleCelebrationComplete}
-        transition={{
-          default: prefersReducedMotion
-            ? { duration: 0.35, ease: 'easeOut' }
-            : { type: 'spring', stiffness: 160, damping: 18 },
-          y: prefersReducedMotion
-            ? { duration: 0 }
-            : { duration: 10, repeat: Infinity, ease: 'easeInOut' },
-        }}
-      >
-        {!prefersReducedMotion ? <ConfettiBurst burstId={burstId} disabled={prefersReducedMotion} /> : null}
-        <motion.div
-          className="relative z-20 space-y-4 text-text-primary"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.p
-            className="font-sans text-xs font-semibold uppercase tracking-[0.4em] text-emerald-200/80"
-            variants={itemVariants}
-          >
             Post-conversion · Viral loop
-          </motion.p>
-          <motion.h3 className="font-display text-3xl font-semibold text-white" variants={itemVariants}>
-            You&apos;re on the manifest.
-          </motion.h3>
-          <motion.p className="font-sans text-base text-emerald-50/80" variants={itemVariants}>
-            Your Nest needs a partner. Invite them to join the waitlist with you?
-          </motion.p>
-          <motion.div className="flex flex-col gap-3 md:flex-row md:items-center" variants={itemVariants}>
-            <div className="relative md:w-auto">
-              <motion.button
-                type="button"
-                onClick={onCopy}
-                className="relative flex items-center justify-center gap-2 rounded-2xl px-6 py-3 font-sans text-base font-semibold focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
-                whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
-                animate={
-                  referralCopied
-                    ? {
-                      backgroundColor: 'rgba(16,185,129,1)',
-                      color: '#ecfdf5',
-                      scale: prefersReducedMotion ? 1 : [1, 1.05, 1],
-                      boxShadow: '0 25px 60px rgba(16,185,129,0.35)',
-                    }
-                    : {
-                      backgroundColor: '#ffffff',
-                      color: '#065f46',
-                      scale: 1,
-                      boxShadow: '0 20px 45px rgba(15,118,110,0.25)',
-                    }
-                }
-                transition={{
-                  type: prefersReducedMotion ? 'tween' : 'spring',
-                  stiffness: 320,
-                  damping: 20,
-                  duration: prefersReducedMotion ? 0.2 : 0.6,
-                  scale: prefersReducedMotion
-                    ? { duration: 0.2, ease: 'easeOut' }
-                    : { type: 'tween', duration: 0.5, ease: 'easeOut' },
-                }}
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  {referralCopied ? (
+        </motion.p>
+        <motion.h3 className="font-display text-3xl font-semibold text-white" variants={itemVariants}>
+          You&apos;re on the manifest.
+        </motion.h3>
+        <motion.p className="font-sans text-base text-emerald-50/80" variants={itemVariants}>
+          Your Nest needs a partner. Invite them to join the waitlist with you?
+        </motion.p>
+        <motion.div className="flex flex-col gap-3 md:flex-row md:items-center" variants={itemVariants}>
+          <div className="relative md:w-auto">
+            <motion.button
+              type="button"
+              onClick={onCopy}
+              className="relative flex items-center justify-center gap-2 rounded-2xl px-6 py-3 font-sans text-base font-semibold focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
+              animate={
+                referralCopied
+                  ? {
+                    backgroundColor: 'rgba(16,185,129,1)',
+                    color: '#ecfdf5',
+                    scale: prefersReducedMotion ? 1 : [1, 1.05, 1],
+                    boxShadow: '0 25px 60px rgba(16,185,129,0.35)',
+                  }
+                  : {
+                    backgroundColor: '#ffffff',
+                    color: '#065f46',
+                    scale: 1,
+                    boxShadow: '0 20px 45px rgba(15,118,110,0.25)',
+                  }
+              }
+              transition={{
+                type: prefersReducedMotion ? 'tween' : 'spring',
+                stiffness: 320,
+                damping: 20,
+                duration: prefersReducedMotion ? 0.2 : 0.6,
+                scale: prefersReducedMotion
+                  ? { duration: 0.2, ease: 'easeOut' }
+                  : { type: 'tween', duration: 0.5, ease: 'easeOut' },
+              }}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {referralCopied ? (
+                  <motion.span
+                    key="copied"
+                    className="flex items-center gap-2"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                  >
                     <motion.span
-                      key="copied"
-                      className="flex items-center gap-2"
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600/40"
+                      initial={{ scale: 0.4, rotate: -20 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      exit={{ scale: 0.4, rotate: 20 }}
                       transition={{ duration: 0.25, ease: 'easeOut' }}
                     >
-                      <motion.span
-                        className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600/40"
-                        initial={{ scale: 0.4, rotate: -20 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        exit={{ scale: 0.4, rotate: 20 }}
-                        transition={{ duration: 0.25, ease: 'easeOut' }}
-                      >
-                        <Check size={16} className="text-emerald-50" strokeWidth={3} />
-                      </motion.span>
-                      <span>Referral link copied</span>
+                      <Check size={16} className="text-emerald-50" strokeWidth={3} />
                     </motion.span>
-                  ) : (
-                    <motion.span
-                      key="copy"
-                      className="flex items-center gap-2"
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      transition={{ duration: 0.25, ease: 'easeOut' }}
-                    >
-                      <span>Copy referral link</span>
-                      <ArrowRight size={16} />
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-                {!prefersReducedMotion ? (
-                  <ButtonSuccessParticles trigger={buttonBurstId} disabled={prefersReducedMotion} />
-                ) : null}
-              </motion.button>
-            </div>
-            <p className="font-sans text-xs text-emerald-50/70">
-              Partners who join from your link skip the next waitlist wave.
-            </p>
-          </motion.div>
+                    <span>Referral link copied</span>
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="copy"
+                    className="flex items-center gap-2"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                  >
+                    <span>Copy referral link</span>
+                    <ArrowRight size={16} />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              {!prefersReducedMotion ? (
+                <ButtonSuccessParticles trigger={buttonBurstId} disabled={prefersReducedMotion} />
+              ) : null}
+            </motion.button>
+          </div>
+          <p className="font-sans text-xs text-emerald-50/70">
+            Partners who join from your link skip the next waitlist wave.
+          </p>
         </motion.div>
       </motion.div>
-    </div>
+    </motion.div>
+    </div >
   );
 }
 
