@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
-import { db } from '../services/firebase';
+import { db } from '../firebase/firebase-config';
 import {
   addTransaction,
   updateTransaction,
@@ -120,7 +120,7 @@ export const useDataStore = create((set, get) => ({
         unsubscribers.forEach((unsub) => {
           try {
             unsub?.();
-          } catch (_) {}
+          } catch (_) { }
         });
       },
     });

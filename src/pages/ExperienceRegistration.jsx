@@ -16,19 +16,12 @@ import 'swiper/css/pagination';
 import Starfield from '../components/experience/Starfield.jsx';
 import AdminLoginModal from '../components/AdminLoginModal.jsx';
 import TopNav from '../components/TopNav.jsx';
+import WaitlistWizard from './WaitlistWizard.jsx';
 
-const DemoDashboard = lazy(() => import('../components/demo/DemoDashboard.jsx'));
-const AccountsNetWorthView = lazy(() => import('./AccountsNetWorthView'));
 const GoalsCenterView = lazy(() => import('./GoalsCenterView'));
 const ReportingHubView = lazy(() => import('./ReportingHubView'));
-
-const POSTER_NOISE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAACoWZ8PAAAAF0lEQVQYV2NkYGD4z0AEYBxVSFUBAwBnGQHhX9nuSAAAAABJRU5ErkJggg==';
-const CONFETTI_COLORS = ['#34d399', '#2dd4bf', '#0d9488', '#6ee7b7', '#5eead4', '#a7f3d0'];
-const CONFETTI_PIECES = 48;
-
-const DEFAULT_WAITLIST_MESSAGE = 'Join 5,000+ families already on the waitlist.';
-const DEFAULT_WAITLIST_SUBTEXT = 'We only send one welcome email plus launch-day priority instructions.';
-const DEFAULT_VELVET_TEXT = 'Secure your Founding Member rate.';
+const ArchitectView = lazy(() => import('./ArchitectView'));
+const CollaboratorView = lazy(() => import('./CollaboratorView'));
 
 const productSlides = [
   {
@@ -65,7 +58,6 @@ const productSlides = [
   },
 ];
 
-// Lighter configuration object (just data, no heavy components)
 const SLIDE_CONFIG = {
   architect: { tab: 'overview', persona: 'architect' },
   rituals: { tab: 'rituals', persona: 'collaborator' },
@@ -76,12 +68,9 @@ const SLIDE_CONFIG = {
 // --- ANIMATED TEXT COMPONENT ---
 const AuroraText = ({ text = "reimagined.", className = "" }) => (
   <span className={`relative inline-flex flex-col ${className}`}>
-    {/* Invisible HTML text ensures correct layout size */}
     <span className="invisible opacity-0" aria-hidden="true">
       {text}
     </span>
-
-    {/* SVG Overlay for the Gradient Animation */}
     <svg
       className="absolute inset-0 w-full h-full overflow-visible select-none"
       xmlns="http://www.w3.org/2000/svg"
@@ -101,14 +90,12 @@ const AuroraText = ({ text = "reimagined.", className = "" }) => (
             .stop-text-c { animation: auroraFlowText 6s infinite linear; animation-delay: -3s; }
           `}
         </style>
-
         <linearGradient id="textAuroraGradient" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" className="stop-text-a" />
           <stop offset="50%" className="stop-text-b" />
           <stop offset="100%" className="stop-text-c" />
         </linearGradient>
       </defs>
-
       <text
         x="50%"
         y="55%"
@@ -124,7 +111,7 @@ const AuroraText = ({ text = "reimagined.", className = "" }) => (
   </span>
 );
 
-const HeroTitle = ({ onNavigate }) => (
+const HeroTitle = ({ onNavigate, onRequestAccess }) => (
   <div className="relative z-10 text-center space-y-8 max-w-5xl mx-auto pt-32 pb-24 px-6">
     <motion.h1
       initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
@@ -146,14 +133,14 @@ const HeroTitle = ({ onNavigate }) => (
       className="pt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
     >
       <button
-        onClick={() => document.getElementById('register-form')?.scrollIntoView({ behavior: 'smooth' })}
+        onClick={onRequestAccess}
         className="group relative px-8 py-4 rounded-full bg-white text-slate-950 font-bold text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] overflow-hidden w-full sm:w-auto"
       >
         <span className="relative z-10">Request Access</span>
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-300 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
       </button>
       <button
-        onClick={() => onNavigate && onNavigate('demo')}
+        onClick={() => onNavigate && onNavigate('demo', { showIntro: true })}
         className="group px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
       >
         <span>Live Demo</span>
@@ -163,14 +150,10 @@ const HeroTitle = ({ onNavigate }) => (
   </div>
 );
 
-// --- PAIN POINTS SECTION ---
 const PainPointsSection = () => {
   return (
     <section className="relative py-24 md:py-32 px-4 md:px-6 overflow-hidden">
-      {/* Dynamic Background Noise */}
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay pointer-events-none" />
-
-      {/* Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[50%] bg-indigo-900/10 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="max-w-screen-xl mx-auto relative z-10">
@@ -208,8 +191,6 @@ const PainPointsSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* Card 1: The Solo CFO Burden */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -218,7 +199,6 @@ const PainPointsSection = () => {
             className="md:col-span-2 relative group rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-8 md:p-12 overflow-hidden hover:border-indigo-500/30 transition-colors duration-500"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
             <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-12">
               <div className="shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-3xl bg-slate-800 flex items-center justify-center border border-white/5 group-hover:scale-105 transition-transform duration-500">
                 <Users className="w-8 h-8 md:w-10 md:h-10 text-indigo-400" />
@@ -233,7 +213,6 @@ const PainPointsSection = () => {
             </div>
           </motion.div>
 
-          {/* Card 2: Reactive vs Proactive */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -242,7 +221,6 @@ const PainPointsSection = () => {
             className="relative group rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-8 md:p-10 overflow-hidden hover:border-emerald-500/30 transition-colors duration-500"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
             <div className="relative z-10 space-y-6">
               <div className="flex items-center justify-between">
                 <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/5">
@@ -253,7 +231,6 @@ const PainPointsSection = () => {
                   <ArrowUpRight size={14} className="text-emerald-400" />
                 </div>
               </div>
-
               <div>
                 <h3 className="text-xl md:text-2xl font-bold text-white font-display mb-3">Rear-view Mirror Management</h3>
                 <p className="text-sm md:text-base text-slate-400 leading-relaxed">
@@ -263,7 +240,6 @@ const PainPointsSection = () => {
             </div>
           </motion.div>
 
-          {/* Card 3: Fragmentation */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -272,14 +248,12 @@ const PainPointsSection = () => {
             className="relative group rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-8 md:p-10 overflow-hidden hover:border-blue-500/30 transition-colors duration-500"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
             <div className="relative z-10 space-y-6">
               <div className="flex items-center justify-between">
                 <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/5">
                   <Layers className="w-7 h-7 text-blue-400" />
                 </div>
               </div>
-
               <div>
                 <h3 className="text-xl md:text-2xl font-bold text-white font-display mb-3">The Fragmentation Tax</h3>
                 <p className="text-sm md:text-base text-slate-400 leading-relaxed">
@@ -288,16 +262,14 @@ const PainPointsSection = () => {
               </div>
             </div>
           </motion.div>
-
         </div>
       </div>
     </section>
   );
 };
 
-// --- BEHAVIOURAL MODELLING SECTION ---
 const BehaviouralModelling = () => {
-  const [activeTab, setActiveTab] = React.useState('architect');
+  const [activeTab, setActiveTab] = useState('architect');
 
   const tabs = [
     {
@@ -342,7 +314,6 @@ const BehaviouralModelling = () => {
 
   return (
     <div className="w-full max-w-7xl mx-auto mb-40 px-4">
-
       <div className="mb-16 text-center max-w-3xl mx-auto">
         <h2 className="text-3xl md:text-5xl font-display font-bold text-white mb-6">
           The Behavioural Engine
@@ -353,8 +324,6 @@ const BehaviouralModelling = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-
-        {/* Left: Navigation */}
         <div className="lg:col-span-4 flex flex-col gap-3">
           {tabs.map((tab) => (
             <button
@@ -383,7 +352,6 @@ const BehaviouralModelling = () => {
           ))}
         </div>
 
-        {/* Right: Dynamic Preview */}
         <div className="lg:col-span-8 min-h-[400px]">
           <AnimatePresence mode="wait">
             <motion.div
@@ -394,22 +362,16 @@ const BehaviouralModelling = () => {
               transition={{ duration: 0.3 }}
               className="relative h-full rounded-[32px] border border-white/10 bg-slate-900/60 backdrop-blur-md overflow-hidden p-8 flex flex-col"
             >
-              {/* Background Glow */}
               <div className={`absolute top-0 right-0 w-96 h-96 ${activeContent.bg} opacity-10 blur-[100px] pointer-events-none`} />
-
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-6">
                   <activeContent.icon className={activeContent.color} size={32} />
                   <h3 className="text-2xl font-display font-bold text-white">{activeContent.label} Mode</h3>
                 </div>
-
                 <p className="text-lg text-slate-300 mb-8 max-w-2xl">
                   {activeContent.description}
                 </p>
-
-                {/* Abstract UI Mockup */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Feature List */}
                   <div className="space-y-4">
                     <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Activated Modules</p>
                     {activeContent.features.map((feat, i) => (
@@ -425,50 +387,6 @@ const BehaviouralModelling = () => {
                       </motion.div>
                     ))}
                   </div>
-
-                  {/* Visual Abstraction of Dashboard */}
-                  <div className="relative rounded-2xl bg-slate-950 border border-white/5 p-4 flex flex-col justify-between min-h-[180px]">
-                    <div className="flex gap-2 mb-4">
-                      <div className="w-8 h-8 rounded-full bg-white/10" />
-                      <div className="h-2 w-24 bg-white/10 rounded my-auto" />
-                    </div>
-
-                    <div className="flex-1 flex items-center justify-center p-4">
-                      {activeTab === 'architect' && (
-                        <div className="grid grid-cols-4 gap-1 w-full h-16 items-end">
-                          <div className="bg-indigo-500/30 w-full h-[40%]" />
-                          <div className="bg-indigo-500/50 w-full h-[70%]" />
-                          <div className="bg-indigo-500/20 w-full h-[30%]" />
-                          <div className="bg-indigo-500 w-full h-[90%]" />
-                        </div>
-                      )}
-                      {activeTab === 'steward' && (
-                        <div className="relative w-24 h-24 rounded-full border-4 border-emerald-500/30 flex items-center justify-center">
-                          <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                            <ShieldCheck className="text-emerald-500" />
-                          </div>
-                        </div>
-                      )}
-                      {activeTab === 'collaborator' && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/50" />
-                          <div className="h-1 w-8 bg-white/20" />
-                          <div className="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/50" />
-                        </div>
-                      )}
-                      {activeTab === 'ascender' && (
-                        <div className="w-full space-y-2">
-                          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                            <div className="h-full w-[85%] bg-rose-500" />
-                          </div>
-                          <div className="flex justify-between text-[10px] text-rose-400 font-mono">
-                            <span>VELOCITY</span>
-                            <span>85%</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 </div>
               </div>
             </motion.div>
@@ -476,22 +394,13 @@ const BehaviouralModelling = () => {
         </div>
       </div>
     </div>
-
   );
 };
-
-
-
-// --- SUPPORT COMPONENTS FOR PREVIEW & REGISTRATION ---
 
 const MobileSafariFrame = ({ children, url }) => (
   <div
     className="relative w-full h-full bg-black rounded-[3rem] border-[8px] border-slate-900 overflow-hidden shadow-2xl ring-1 ring-white/10"
-    style={{
-      // Hint to browser: This container has its own paint layer
-      willChange: 'transform',
-      transform: 'translateZ(0)'
-    }}
+    style={{ willChange: 'transform', transform: 'translateZ(0)' }}
   >
     <div className="absolute top-0 left-1/2 -translate-x-1/2 h-7 w-32 bg-black rounded-b-xl z-50 flex items-center justify-center">
       <div className="w-16 h-1 bg-slate-900 rounded-full" />
@@ -501,8 +410,7 @@ const MobileSafariFrame = ({ children, url }) => (
       <div className="w-4 h-2.5 border border-white/30 rounded-sm" />
     </div>
     <div className="absolute inset-0 pt-10 pb-20 bg-[#0B0F19] overflow-hidden">
-      {/* WRAP CHILDREN IN OPTIMISED CONTAINER */}
-      <div className="w-full h-full" style={{ contain: 'strict' }}>
+      <div className="w-full h-full overflow-y-auto no-scrollbar" style={{ contain: 'strict' }}>
         {children}
       </div>
     </div>
@@ -518,12 +426,6 @@ const MobileSafariFrame = ({ children, url }) => (
 
 function ProductPreviewCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
-
-  // Get the config for the current slide (fallback to first if missing)
-  const currentSlideId = productSlides[activeIndex]?.id || 'architect';
-  const config = SLIDE_CONFIG[currentSlideId] || SLIDE_CONFIG.architect;
-
-  // Loading Skeleton (Lightweight placeholder)
   const DashboardSkeleton = () => (
     <div className="w-full h-full bg-[#0B0F19] flex items-center justify-center flex-col gap-4 animate-pulse">
       <div className="w-12 h-12 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
@@ -536,13 +438,11 @@ function ProductPreviewCarousel() {
   return (
     <div className="relative w-full max-w-[1400px] mx-auto px-4 md:px-6 py-16 md:py-32">
       <div className="flex flex-col lg:grid lg:grid-cols-[1fr_1.5fr] gap-12 items-center">
-        {/* Tabs */}
         <div className="w-full space-y-8">
           <div className="space-y-2 text-center lg:text-left">
             <h2 className="text-3xl md:text-6xl font-display font-bold text-white tracking-tight">Inside the OS</h2>
             <div className="h-1 md:h-1.5 w-16 md:w-24 bg-emerald-500 rounded-full mx-auto lg:mx-0" />
           </div>
-
           <div className="flex lg:flex-col gap-3 overflow-x-auto pb-4 lg:pb-0 no-scrollbar snap-x">
             {productSlides.map((slide, idx) => (
               <button
@@ -563,221 +463,64 @@ function ProductPreviewCarousel() {
             ))}
           </div>
         </div>
-
-        {/* Preview Area */}
         <div className="relative h-[500px] md:h-[700px] w-full perspective-[2000px]">
           <motion.div
             key={activeIndex}
             initial={{ opacity: 0, rotateY: 5, x: 20 }}
             animate={{ opacity: 1, rotateY: 0, x: 0 }}
             transition={{ duration: 0.6, ease: "circOut" }}
-            Post-conversion · Viral loop
-        </motion.p>
-        <motion.h3 className="font-display text-3xl font-semibold text-white" variants={itemVariants}>
-          You&apos;re on the manifest.
-        </motion.h3>
-        <motion.p className="font-sans text-base text-emerald-50/80" variants={itemVariants}>
-          Your Nest needs a partner. Invite them to join the waitlist with you?
-        </motion.p>
-        <motion.div className="flex flex-col gap-3 md:flex-row md:items-center" variants={itemVariants}>
-          <div className="relative md:w-auto">
-            <motion.button
-              type="button"
-              onClick={onCopy}
-              className="relative flex items-center justify-center gap-2 rounded-2xl px-6 py-3 font-sans text-base font-semibold focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
-              whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
-              animate={
-                referralCopied
-                  ? {
-                    backgroundColor: 'rgba(16,185,129,1)',
-                    color: '#ecfdf5',
-                    scale: prefersReducedMotion ? 1 : [1, 1.05, 1],
-                    boxShadow: '0 25px 60px rgba(16,185,129,0.35)',
-                  }
-                  : {
-                    backgroundColor: '#ffffff',
-                    color: '#065f46',
-                    scale: 1,
-                    boxShadow: '0 20px 45px rgba(15,118,110,0.25)',
-                  }
-              }
-              transition={{
-                type: prefersReducedMotion ? 'tween' : 'spring',
-                stiffness: 320,
-                damping: 20,
-                duration: prefersReducedMotion ? 0.2 : 0.6,
-                scale: prefersReducedMotion
-                  ? { duration: 0.2, ease: 'easeOut' }
-                  : { type: 'tween', duration: 0.5, ease: 'easeOut' },
-              }}
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {referralCopied ? (
-                  <motion.span
-                    key="copied"
-                    className="flex items-center gap-2"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.25, ease: 'easeOut' }}
-                  >
-                    <motion.span
-                      className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600/40"
-                      initial={{ scale: 0.4, rotate: -20 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      exit={{ scale: 0.4, rotate: 20 }}
-                      transition={{ duration: 0.25, ease: 'easeOut' }}
-                    >
-                      <Check size={16} className="text-emerald-50" strokeWidth={3} />
-                    </motion.span>
-                    <span>Referral link copied</span>
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="copy"
-                    className="flex items-center gap-2"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.25, ease: 'easeOut' }}
-                  >
-                    <span>Copy referral link</span>
-                    <ArrowRight size={16} />
-                  </motion.span>
-                )}
-              </AnimatePresence>
-              {!prefersReducedMotion ? (
-                <ButtonSuccessParticles trigger={buttonBurstId} disabled={prefersReducedMotion} />
-              ) : null}
-            </motion.button>
-          </div>
-          <p className="font-sans text-xs text-emerald-50/70">
-            Partners who join from your link skip the next waitlist wave.
-          </p>
-        </motion.div>
-      </motion.div>
-    </motion.div>
-    </div >
-  );
-}
-
-function ConfettiBurst({ burstId, disabled }) {
-  const [pieces, setPieces] = useState([]);
-
-  useEffect(() => {
-    if (!burstId || disabled) return;
-    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1440;
-    const horizontalSpread = viewportWidth * 0.9;
-    const newPieces = Array.from({ length: CONFETTI_PIECES }, (_, index) => ({
-      id: `${burstId}-${index}`,
-      startX: (Math.random() - 0.5) * horizontalSpread,
-      driftX: (Math.random() - 0.5) * 160,
-      startYOffset: -(40 + Math.random() * 80),
-      fallDistance: 280 + Math.random() * 320,
-      width: 4 + Math.random() * 5,
-      height: 8 + Math.random() * 10,
-      color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
-      delay: Math.random() * 0.15,
-      rotate: (Math.random() - 0.5) * 360,
-      duration: 2.2 + Math.random() * 0.4,
-    }));
-    setPieces(newPieces);
-    const timeout = setTimeout(() => setPieces([]), 2600);
-    return () => clearTimeout(timeout);
-  }, [burstId, disabled]);
-
-  if (!pieces.length || disabled) return null;
-
-  return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-[80] h-0 overflow-visible">
-      <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2" style={{ width: '100vw' }}>
-        <AnimatePresence>
-          {pieces.map((piece) => (
-            <motion.span
-              key={piece.id}
-              className="absolute block rounded-full shadow-[0_6px_18px_rgba(16,185,129,0.2)]"
-              style={{ width: piece.width, height: piece.height, backgroundColor: piece.color }}
-              initial={{ opacity: 0, scale: 0.6, x: piece.startX, y: piece.startYOffset, rotate: 0 }}
-              animate={{
-                opacity: [0, 1, 1, 0],
-                x: [piece.startX, piece.startX + piece.driftX],
-                y: [piece.startYOffset, piece.fallDistance * 0.65, piece.fallDistance],
-                rotate: piece.rotate,
-                scale: [0.6, 1, 0.85],
-              }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: piece.duration, ease: 'easeOut', delay: piece.delay }}
-            />
-          ))}
-        </AnimatePresence>
+            className="w-full h-full"
+          >
+            <MobileSafariFrame url={productSlides[activeIndex]?.url}>
+              <Suspense fallback={<DashboardSkeleton />}>
+                {activeIndex === 0 && <ArchitectView />}
+                {activeIndex === 1 && <ReportingHubView />}
+                {activeIndex === 2 && <GoalsCenterView />}
+                {activeIndex === 3 && <CollaboratorView />}
+              </Suspense>
+            </MobileSafariFrame>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
 }
 
-function ButtonSuccessParticles({ trigger, disabled }) {
-  const [particles, setParticles] = useState([]);
-
-  useEffect(() => {
-    if (!trigger || disabled) return;
-    const newParticles = Array.from({ length: 6 }, (_, index) => ({
-      id: `${trigger}-${index}`,
-      x: (Math.random() - 0.5) * 36,
-      y: -18 - Math.random() * 16,
-      size: 4 + Math.random() * 4,
-      delay: index * 0.04,
-    }));
-    setParticles(newParticles);
-    const timeout = setTimeout(() => setParticles([]), 600);
-    return () => clearTimeout(timeout);
-  }, [trigger, disabled]);
-
-  if (!particles.length || disabled) return null;
-
-  return (
-    <div className="pointer-events-none absolute inset-0">
-      <AnimatePresence>
-        {particles.map((particle) => (
-          <motion.span
-            key={particle.id}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-50 shadow-[0_0_14px_rgba(16,185,129,0.4)]"
-            style={{ width: particle.size, height: particle.size }}
-            initial={{ opacity: 0, scale: 0.4, x: 0, y: 0 }}
-            animate={{ opacity: [0, 1, 0], scale: [0.4, 1, 0.6], x: particle.x, y: particle.y }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.55, ease: 'easeOut', delay: particle.delay }}
-          />
-        ))}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// --- MAIN PAGE COMPONENT ---
-export default function ExperienceRegistration({ onRegister, loading = false, error, onNavigate, planContext }) {
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState('');
-  const [referralCopied, setReferralCopied] = useState(false);
+export default function ExperienceRegistration({ onNavigate, planContext }) {
+  const [showWizard, setShowWizard] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [contactSubject, setContactSubject] = useState('');
   const [contactMessage, setContactMessage] = useState('');
   const contactFormRef = useRef(null);
-  const canSendContact = Boolean(contactSubject.trim() && contactMessage.trim());
-  const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef(null);
   const isHeroInView = useInView(heroRef, { margin: "0px 0px 200px 0px" });
+  const canSendContact = Boolean(contactSubject.trim() && contactMessage.trim());
 
-  const handleRegister = useCallback(
-    async (email, name) => {
-      if (!email) return;
-      if (typeof onRegister === 'function') {
-        await onRegister(email, '', name);
+  useEffect(() => {
+    // Check context first
+    if (planContext?.showWizard === false) {
+      setShowWizard(false);
+      return;
+    }
+    if (planContext?.plan) {
+      setShowWizard(true);
+      return;
+    }
+    if (planContext?.showWizard) {
+      setShowWizard(true);
+      return;
+    }
+    // Check URL params
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('plan')) {
+        setShowWizard(true);
+      } else {
+        // Explicitly reset if no plan in context or URL
+        setShowWizard(false);
       }
-      setRegisteredEmail(email);
-      setIsSubmitted(true);
-    },
-    [onRegister],
-  );
+    }
+  }, [planContext]);
 
   const handleContactSubmit = (event) => {
     event.preventDefault();
@@ -790,58 +533,34 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
     contactFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  const handleCopyReferral = async () => {
-    const link = `https://nest.finance/waitlist?ref=${encodeURIComponent(registeredEmail || 'nest')}`;
-    try {
-      await navigator.clipboard?.writeText(link);
-      setReferralCopied(true);
-      setTimeout(() => setReferralCopied(false), 3000);
-    } catch (_) {
-      setReferralCopied(false);
-    }
-  };
+  if (showWizard) {
+    return <WaitlistWizard onNavigate={onNavigate} planContext={planContext} />;
+  }
 
   return (
-    // 1. Change bg-background to bg-slate-950 for global consistency
     <div className="relative min-h-screen bg-slate-950 text-text-primary overflow-x-hidden selection:bg-emerald-500/30">
       <TopNav onNavigate={onNavigate} />
 
-      {/* 2. Global Ambient Background - OPTIMISED */}
       <div className="fixed inset-0 z-0 pointer-events-none transform-gpu translate-z-0">
-        {/* We reduced the blur slightly and added 'will-change-transform' to prevent repaints */}
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-900/10 rounded-full blur-[80px] will-change-transform" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-900/10 rounded-full blur-[80px] will-change-transform" />
-        {/* Static noise texture is cheap, this is fine */}
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
       </div>
 
-      {/* FIXED HERO SECTION */}
       <section ref={heroRef} className="relative min-h-screen overflow-hidden bg-slate-950">
         <div className="absolute inset-0 bg-slate-950" />
-
-        {/* Force shooting stars by setting reducedMotion to false */}
         <div className="absolute inset-0 opacity-100">
           {isHeroInView && (
-            <Starfield
-              density={900}
-              speed={0.35}
-              reducedMotion={false}
-            />
+            <Starfield density={900} speed={0.35} reducedMotion={false} />
           )}
         </div>
-
-        {/* Overlay Gradient: Transparent middle to see stars, fades to black at bottom */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-transparent to-slate-950" />
-
         <div className="relative z-10">
-          <HeroTitle onNavigate={onNavigate} />
+          <HeroTitle onNavigate={onNavigate} onRequestAccess={() => setShowWizard(true)} />
         </div>
-
-        {/* The Bridge Gradient to next section */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none z-20" />
       </section>
 
-      {/* NEW SECTIONS: Governance Gap & Behavioural Engine */}
       <div className="relative z-10">
         <PainPointsSection />
         <div className="mt-12 md:mt-20">
@@ -849,7 +568,6 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
         </div>
       </div>
 
-      {/* PRODUCT PREVIEW CAROUSEL */}
       <motion.section
         id="product-preview"
         className="relative z-10 min-h-[50vh] py-16 md:py-24"
@@ -860,7 +578,6 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
       >
         <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
           <ProductPreviewCarousel />
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -869,7 +586,7 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
             className="flex justify-center mt-4"
           >
             <button
-              onClick={() => onNavigate && onNavigate('demo')}
+              onClick={() => onNavigate && onNavigate('demo', { showIntro: true })}
               className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full bg-slate-900/80 border border-white/10 hover:border-emerald-500/50 hover:bg-slate-900 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] transition-all duration-300 backdrop-blur-md"
             >
               <span className="text-xs font-bold uppercase tracking-widest text-slate-200 group-hover:text-white transition-colors">
@@ -879,48 +596,6 @@ export default function ExperienceRegistration({ onRegister, loading = false, er
               <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
             </button>
           </motion.div>
-        </div>
-      </motion.section>
-
-      {/* REGISTRATION FORM SECTION */}
-      <motion.section
-        className="relative z-10 min-h-[100vh] py-24 md:py-32"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
-        viewport={{ once: true, amount: 0.4 }}
-      >
-        {/* Subtle separator line */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
-
-        <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
-          <AnimatePresence mode="wait">
-            {isSubmitted ? (
-              <motion.div
-                key="registration-success"
-                initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 40 }}
-                animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
-                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -40 }}
-                transition={{ duration: prefersReducedMotion ? 0.25 : 0.6, ease: 'easeOut' }}
-              >
-                <ThankYouPanel referralCopied={referralCopied} onCopy={handleCopyReferral} forceMotion />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="registration-form"
-                initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 40 }}
-                animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ duration: prefersReducedMotion ? 0.25 : 0.5, ease: 'easeInOut' }}
-              >
-                <RegisterInterestForm
-                  onRegister={handleRegister}
-                  loading={loading}
-                  onNavigate={onNavigate}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </motion.section>
 

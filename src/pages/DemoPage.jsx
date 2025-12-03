@@ -10,7 +10,7 @@ export default function DemoPage({ onNavigate }) {
   const [step, setStep] = useState('choice');
 
   if (step === 'dashboard') {
-    return <DemoDashboard onExit={() => onNavigate('home')} />;
+    return <DemoDashboard onExit={() => onNavigate('home')} showIntro={false} />;
   }
 
   return (

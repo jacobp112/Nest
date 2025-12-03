@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
 
-import { db } from '../../../services/firebase';
+import { db } from '../../../firebase/firebase-config';
 
 const mapSnapshot = (snapshot) =>
   snapshot.docs.map((docSnap) => ({

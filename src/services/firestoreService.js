@@ -7,7 +7,7 @@ import {
   deleteDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db } from '../firebase/firebase-config';
 
 export const addTransaction = (userId, transaction) => {
   return addDoc(collection(db, 'users', userId, 'transactions'), {
@@ -36,17 +36,17 @@ export const contributeToGoal = (userId, goalId, amount) => {
 };
 
 export const upsertBudget = (userId, budget) => {
-    if (budget.id) {
-        return updateDoc(doc(db, 'users', userId, 'budgets', budget.id), budget);
-    }
-    return addDoc(collection(db, 'users', userId, 'budgets'), budget);
+  if (budget.id) {
+    return updateDoc(doc(db, 'users', userId, 'budgets', budget.id), budget);
+  }
+  return addDoc(collection(db, 'users', userId, 'budgets'), budget);
 };
 
 export const upsertAccount = (userId, account) => {
-    if (account.id) {
-        return updateDoc(doc(db, 'users', userId, 'accounts', account.id), account);
-    }
-    return addDoc(collection(db, 'users', userId, 'accounts'), account);
+  if (account.id) {
+    return updateDoc(doc(db, 'users', userId, 'accounts', account.id), account);
+  }
+  return addDoc(collection(db, 'users', userId, 'accounts'), account);
 };
 
 

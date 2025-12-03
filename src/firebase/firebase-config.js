@@ -1,18 +1,24 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.REACT_APP_FIREBASE_APP_ID,
-    measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
+    apiKey: "AIzaSyAFX7HJQRfAoq2BOANC13xk7dSg9UmsVrw",
+    authDomain: "nest-finance-94034.firebaseapp.com",
+    projectId: "nest-finance-94034",
+    storageBucket: "nest-finance-94034.firebasestorage.app",
+    messagingSenderId: "108149121073",
+    appId: "1:108149121073:web:8bd415b207eab874e03510",
+    measurementId: "G-EE0154TKBX"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// FIX: Check if an app is already initialized
+// If getApps() has a length, use the existing one (getApp()).
+// Otherwise, initialize a new one.
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+
+export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const analytics = getAnalytics(app);
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+export default app;

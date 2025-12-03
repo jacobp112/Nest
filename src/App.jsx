@@ -3,7 +3,6 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import ExperienceRegistration from './pages/ExperienceRegistration.jsx';
-import DashboardView from './pages/DashboardView.jsx';
 import { useAuth } from './hooks/useAuth.js';
 import { formatMonthYear } from './utils/helpers';
 import LazyInView from './components/LazyInView.jsx';
@@ -40,7 +39,32 @@ export default function App() {
   // CHANGE: Default view is now 'bento' instead of 'home'
   const [currentView, setCurrentView] = useState('bento');
   const [planContext, setPlanContext] = useState(null);
-  const [demoConfig, setDemoConfig] = useState({ tab: 'overview', persona: 'architect' });
+  const [demoConfig, setDemoConfig] = useState({ tab: 'overview', persona: 'architect', showIntro: false });
+  const [showDemoAfterAuth, setShowDemoAfterAuth] = useState(false);
+
+  const isNewlyRegistered = useMemo(() => {
+    const creation = user?.metadata?.creationTime;
+    const lastSignIn = user?.metadata?.lastSignInTime;
+
+    if (!creation || !lastSignIn) return false;
+
+    // Check if creation time is within the last 2 minutes
+    const creationDate = new Date(creation);
+    const now = new Date();
+    const diffInMinutes = (now - creationDate) / 1000 / 60;
+
+    return diffInMinutes < 2;
+  }, [user?.metadata?.creationTime, user?.metadata?.lastSignInTime]);
+
+  useEffect(() => {
+    if (isAuthenticated && isNewlyRegistered) {
+      setDemoConfig((prev) => ({ ...prev, showIntro: true }));
+      setShowDemoAfterAuth(true);
+    }
+    if (!isAuthenticated) {
+      setShowDemoAfterAuth(false);
+    }
+  }, [isAuthenticated, isNewlyRegistered]);
 
   const navigate = useCallback((view, context = null) => {
     if (view === 'demo' && context) {
@@ -48,7 +72,7 @@ export default function App() {
     }
     setCurrentView(view);
     // Adjust plan context logic if needed, usually mostly for registration flows
-    const isRegistrationView = view === 'register' || view === 'home';
+    const isRegistrationView = view === 'register' || view === 'home' || view === 'experience';
     setPlanContext(isRegistrationView ? context : null);
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -96,11 +120,12 @@ export default function App() {
     };
   }, [connectData, disconnectData, isAuthenticated, user?.uid]);
 
+  // 1. Loading State (Prevent Flicker) - Moved here to respect Hook rules
+  if (authLoading) return <LoadingScreen />;
+
   if (currentView === 'share') {
     return <SocialAssetsPage />;
   }
-
-  if (authLoading && isAuthenticated) return <LoadingScreen />;
 
   if (!isAuthenticated) {
     // 1. New Default Landing Page
@@ -140,9 +165,10 @@ export default function App() {
               className="fixed inset-0 z-50 bg-[#020617]"
             >
               <DemoDashboard
+                showIntro={!!demoConfig.showIntro}
                 initialTab={demoConfig.tab}
                 initialPersona={demoConfig.persona}
-                onExit={() => navigate('bento')} // Return to Bento, not Home
+                onExit={() => { setDemoConfig((prev) => ({ ...prev, showIntro: false })); navigate('bento'); }} // Return to Bento, not Home
               />
             </motion.div>
           </AnimatePresence>
@@ -187,28 +213,21 @@ export default function App() {
     return <BentoLandingPage onNavigate={navigate} />;
   }
 
+  const handleLogout = async () => {
+    await logout();
+    setCurrentView('bento');
+  };
+
   // AUTHENTICATED VIEW
   return (
-    <AppShell>
-      <div className="relative min-h-screen">
-        <LazyInView className="absolute inset-0 -z-10">
-          <React.Suspense fallback={null}>
-            <PointsBackgroundLazy className="absolute inset-0" />
-          </React.Suspense>
-        </LazyInView>
-        <div className="relative z-10">
-          <DashboardView
-            userDoc={userDoc}
-            onLogout={logout}
-            selectedMonth={selectedMonth}
-            dateRange={dateRange}
-            onPrevMonth={handlePrevMonth}
-            onNextMonth={handleNextMonth}
-            onDateRangeChange={handleDateRangeChange}
-          />
-        </div>
-      </div>
+    <div className="bg-[#020617] min-h-screen text-slate-200 overflow-hidden">
+      <DemoDashboard
+        showIntro={!!demoConfig.showIntro}
+        initialTab={demoConfig.tab}
+        initialPersona={demoConfig.persona}
+        onExit={handleLogout}
+      />
       <SpeedInsights />
-    </AppShell>
+    </div>
   );
 }

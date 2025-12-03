@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { monitorAuthState, login as loginService, register as registerService, logout as logoutService } from '../services/authService';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../services/firebase';
+import { db } from '../firebase/firebase-config';
 
 export const AuthContext = createContext();
 
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-      await logoutService();
+    await logoutService();
   }
 
   const value = {

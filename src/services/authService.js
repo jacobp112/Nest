@@ -5,7 +5,7 @@ import {
   updateProfile,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { auth, db } from './firebase';
+import { auth, db } from '../firebase/firebase-config';
 import { doc, setDoc } from 'firebase/firestore';
 
 export const register = async (email, password, displayName) => {

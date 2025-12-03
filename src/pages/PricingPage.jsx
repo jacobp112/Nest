@@ -103,12 +103,7 @@ const PLANS = [
 export default function PricingPage({ onNavigate }) {
 
   const handlePlanSelection = (planKey) => {
-    const baseContext = PLAN_CONTEXT_MAP[planKey] ?? {
-      heroText: 'Reserving your spot.',
-      subtext: WAITLIST_SUBTEXT,
-      velvetText: 'Secure your Founding Member rate.',
-    };
-    onNavigate('register', { planKey, ...baseContext });
+    onNavigate('experience', { plan: planKey });
   };
 
   return (
