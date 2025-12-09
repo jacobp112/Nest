@@ -173,14 +173,8 @@ You can then deploy the `build` directory to any static hosting provider (Fireba
 
 ## Contributing
 
-We welcome contributions! To get started:
+This project is a private, closed-source initiative and does not accept external contributions at this time. For any questions or to discuss potential collaboration in the future, please contact the maintainers directly..
 
-1. **Fork** the repository and create a new branch from `main` for your feature or fix.
-2. Write meaningful commit messages and keep changes focused on one feature or bug.
-3. **Add tests** for any new functionality and ensure all existing tests pass.
-4. Create a pull request and fill out the PR template describing your changes and referencing any related issues.
-
-Please also review the [Code of Conduct](CODE_OF_CONDUCT.md) and [contributing guidelines](CONTRIBUTING.md) (if available) before submitting changes.
 
 ## Roadmap
 
@@ -192,7 +186,7 @@ This project follows an agile workflow. Planned enhancements include:
 - 🔗 **Bank connection** (optional) – secure bank integration via Plaid for users who prefer automated imports.
 - 🌍 **Internationalization (i18n)** – support for multiple languages and currencies.
 
-You can track progress and suggest new features in the [Issues](../../issues) and [Projects](../../projects) sections.
+The internal team tracks progress using the Issues and Projects boards.
 
 ## License
 
