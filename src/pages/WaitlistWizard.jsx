@@ -8,9 +8,15 @@ import {
 
 import TopNav from '../components/TopNav.jsx';
 import Starfield from '../components/experience/Starfield.jsx';
-import { db, auth } from '../firebase/firebase-config'; // Import auth
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'; // use setDoc instead of addDoc
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'; // Import Auth functions
+import { db, auth } from '../firebase/firebase-config';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+// ADDED: GoogleAuthProvider and signInWithPopup
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  GoogleAuthProvider,
+  signInWithPopup
+} from 'firebase/auth';
 
 // --- CONSTANTS & DATA ---
 
@@ -165,12 +171,51 @@ const Step2Registration = ({ selectedPlanKey, onChangePlan, onComplete }) => {
   // Form State
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); // Added Password State
+  const [password, setPassword] = useState('');
   const [partnerName, setPartnerName] = useState('');
   const [partnerEmail, setPartnerEmail] = useState('');
 
   const plan = PLANS.find(p => p.key === selectedPlanKey) || PLANS[0];
   const showPartnerFields = ['partners', 'family'].includes(selectedPlanKey);
+
+  // NEW: Handle Google Sign Up
+  const handleGoogleSignUp = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+
+      // Prepare Firestore Data
+      const waitlistRef = doc(db, 'waitlist_users', user.uid);
+
+      const docData = {
+        uid: user.uid,
+        name: user.displayName || name, // Prefer Google name, fallback to form input
+        email: user.email,
+        plan: selectedPlanKey,
+        timestamp: serverTimestamp(),
+        source: 'google',
+        emailVerified: user.emailVerified // Usually true for Google
+      };
+
+      // MERGE PARTNER DETAILS: If user filled these out before clicking Google, save them!
+      if (showPartnerFields) {
+        if (partnerName) docData.partnerName = partnerName;
+        if (partnerEmail) docData.partnerEmail = partnerEmail;
+      }
+
+      await setDoc(waitlistRef, docData);
+      onComplete();
+
+    } catch (err) {
+      console.error("Google Sign In Error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -188,7 +233,6 @@ const Step2Registration = ({ selectedPlanKey, onChangePlan, onComplete }) => {
       await sendEmailVerification(user);
 
       // 3. Save Data to Firestore (Waitlist Collection)
-      // Use setDoc with user.uid to link data to the auth account
       const waitlistRef = doc(db, 'waitlist_users', user.uid);
 
       const docData = {
@@ -198,7 +242,7 @@ const Step2Registration = ({ selectedPlanKey, onChangePlan, onComplete }) => {
         plan: selectedPlanKey,
         timestamp: serverTimestamp(),
         source: 'web',
-        emailVerified: false // Track that they haven't verified yet
+        emailVerified: false
       };
 
       if (showPartnerFields) {
@@ -230,7 +274,7 @@ const Step2Registration = ({ selectedPlanKey, onChangePlan, onComplete }) => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-slate-900/80 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl"
       >
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-display font-bold text-white">Create Account</h2>
             <p className="text-slate-400 text-sm mt-1">
@@ -243,6 +287,48 @@ const Step2Registration = ({ selectedPlanKey, onChangePlan, onComplete }) => {
           >
             Change Plan
           </button>
+        </div>
+
+        {/* GOOGLE SIGN UP BUTTON */}
+        <div className="space-y-4 mb-6">
+          <button
+            type="button"
+            onClick={handleGoogleSignUp}
+            disabled={loading}
+            className="w-full py-3 px-4 rounded-xl bg-white text-slate-950 font-bold text-sm hover:bg-slate-100 transition-colors flex items-center justify-center gap-3 disabled:opacity-70"
+          >
+            {/* Google Icon SVG */}
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
+            </svg>
+            Continue with Google
+          </button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-white/10" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-[#0f1522] px-2 text-slate-500 font-bold tracking-widest">
+                Or continue with email
+              </span>
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -301,6 +387,9 @@ const Step2Registration = ({ selectedPlanKey, onChangePlan, onComplete }) => {
                   Partner Details (Optional)
                 </span>
               </div>
+              <p className="text-[10px] text-slate-500 mb-2">
+                If you sign up with Google, please enter these details <strong>before</strong> clicking the Google button.
+              </p>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">
                   Partner Name
@@ -338,7 +427,7 @@ const Step2Registration = ({ selectedPlanKey, onChangePlan, onComplete }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-xl bg-white text-slate-950 font-bold text-sm uppercase tracking-widest hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-4 rounded-xl bg-emerald-500 text-slate-950 font-bold text-sm uppercase tracking-widest hover:bg-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : 'Secure Your Spot'}
           </button>
@@ -415,7 +504,6 @@ export default function WaitlistWizard({ onNavigate, planContext }) {
   const handleSelectPlan = (planKey) => {
     setSelectedPlan(planKey);
     setStep(2);
-    // Optional: Update URL without reload to reflect selection
     const url = new URL(window.location);
     url.searchParams.set('plan', planKey);
     window.history.pushState({}, '', url);
@@ -424,7 +512,6 @@ export default function WaitlistWizard({ onNavigate, planContext }) {
   const handleChangePlan = () => {
     setStep(1);
     setSelectedPlan(null);
-    // Clear URL param
     const url = new URL(window.location);
     url.searchParams.delete('plan');
     window.history.pushState({}, '', url);
@@ -432,7 +519,6 @@ export default function WaitlistWizard({ onNavigate, planContext }) {
 
   const handleComplete = () => {
     setStep(3);
-    // Clear URL params after successful registration
     if (typeof window !== 'undefined') {
       const url = new URL(window.location);
       url.searchParams.delete('plan');

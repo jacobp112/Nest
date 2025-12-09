@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
-
+old/
+node_modules_OLD/
 # Build outputs
 build/
 dist/
