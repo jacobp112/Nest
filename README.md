@@ -1,136 +1,201 @@
-# Nest Finance - Core Application
+# Nest Finance – Manual-Entry Financial Dashboard
 
-**A secure, manual-entry financial dashboard for individuals, couples, and families. Built with React and Firebase.**
+**A secure, privacy‑first finance app built with React, Firebase and modern UX patterns.**  
+Nest Finance helps individuals and families take control of their finances without connecting their bank accounts.  Users manually enter income and expenses, set savings goals and visualize progress through clear charts and projections.
 
-This repository contains the core application for Nest Finance. It is a secure, single-page application (SPA) designed to help users manually track their finances, set goals, and project their financial future. This version is built around a manual-entry system in place of automated bank linking, focusing on user control and a seamless data-entry experience.
+## Table of contents
 
----
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Project structure](#project-structure)
+- [Getting started](#getting-started)
+- [Configuration](#configuration)
+- [Running locally](#running-locally)
+- [Testing & linting](#testing--linting)
+- [Contributing](#contributing)
+- [Roadmap](#roadmap)
+- [License](#license)
+- [Contact](#contact)
 
-## Core Features
+## Features
 
-* **Secure User Authentication:** Full login, registration, and logout functionality powered by Firebase Authentication.
-* **One-Time User Onboarding:** A simple, guided setup for new users to enter their baseline monthly income and recurring expenses.
-* **Financial Dashboard:** A visually stunning and information-rich dashboard serving as the user's homepage.
-* **Analytics Module:** A primary donut chart (via Recharts) visualizing the user's core financial breakdown: Income vs. Expenses vs. Potential Savings.
-* **Quick-Add Forms:** Intuitive, quick-access forms for manually adding one-off expenses and income, which update the dashboard in real-time.
-* **Savings Goal Tracking:** A module for users to create and track progress against their financial goals (e.g., "Vacation Fund," "New Car").
-* **Investment Projections:** A line chart that projects the user's savings growth over time, with adjustable risk profiles ("Conservative," "Balanced," "Growth").
-* **Monthly Transaction List:** A clean, scrollable list of all manually entered income and expenses for the current period.
+- **Secure authentication** – Email/password sign‑up and sign‑in with Firebase Auth.
+- **Guided onboarding** – New users enter baseline income and recurring expenses once; the app remembers these values.
+- **Manual transaction entry** – Quick‑add forms for income and expenses update the dashboard in real time.
+- **Analytics dashboard** – Visualize income vs. expenses vs. savings with a donut chart, plus a line graph projecting savings over time.
+- **Goal tracking** – Create named savings goals (e.g. *Vacation Fund*) and monitor progress toward them.
+- **Transaction history** – Scrollable list of manually entered transactions for the current month.
+- **Configurable projections** – Select risk profiles (conservative, balanced, growth) to project savings at different rates.
 
----
+## Tech stack
 
-## Tech Stack
+| Layer             | Technology         |
+|-------------------|--------------------|
+| **Frontend**      | [React](https://react.dev/) with Hooks and functional components |
+| **State/data**    | [Firebase Firestore](https://firebase.google.com/products/firestore) for persistent storage, [React Query](https://tanstack.com/query/) for client caching |
+| **Authentication**| [Firebase Auth](https://firebase.google.com/docs/auth) (email/password) |
+| **Styling**       | [Tailwind CSS](https://tailwindcss.com/) for utility‑first styling |
+| **Charts**        | [Recharts](https://recharts.org/) for donut and line charts |
+| **Animations**    | [Framer Motion](https://www.framer.com/motion/) for transitions |
+| **Icons**         | [Lucide React](https://github.com/lucide-icons/lucide/tree/main/packages/lucide-react) |
+| **3D Graph**      | [@react-three/fiber](https://docs.pmnd.rs/react-three-fiber) & [r3f‑forcegraph](https://github.com/vasturiano/react-force-graph/tree/master/packages/react-force-graph-three) |
 
-This project uses a modern, robust, and scalable tech stack:
+## Project structure
 
-* **Frontend:** **React** (Functional Components, Hooks)
-* **Backend & Authentication:** **Firebase** (Firestore & Authentication)
-* **Styling:** **Tailwind CSS** (Utility-first CSS)
-* **Data Visualization:** **Recharts** (Declarative charting library)
-* **Animation:** **Framer Motion** (Production-ready animations)
-* **Icons:** **Lucide React** (Beautiful and consistent icon set)
+```
+Nest/
+├── api/                    # serverless functions (Firebase functions or Vercel API)
+├── nest-finance/           # React application source code
+│   ├── src/
+│   │   ├── components/     # Reusable UI components
+│   │   ├── pages/          # Route components (home, dashboard, etc.)
+│   │   ├── hooks/          # Custom React hooks
+│   │   ├── context/        # Zustand/React context providers
+│   │   ├── utils/          # Helpers and utilities
+│   │   └── App.tsx         # Main app component
+│   ├── public/             # Static assets
+│   └── package.json        # Frontend dependencies and scripts
+├── scripts/                # Helper scripts (e.g. generate themes)
+├── .github/                # GitHub templates (issues, pull requests, workflows)
+└── README.md               # Project overview (this file)
+```
 
----
+> **Note**: The folder layout above is simplified. See the repository tree for the full structure.
 
-## Getting Started
-
-To get a local copy up and running, please follow these steps.
+## Getting started
 
 ### Prerequisites
 
-You must have [Node.js](https://nodejs.org/) (which includes `npm`) installed on your machine.
+- Node.js **20.x** and npm/yarn installed. Check your version:
+
+  ```sh
+  node --version
+  npm --version
+  # or
+  yarn --version
+  ```
 
 ### Installation
 
-1.  **Clone the repository:**
-    ```sh
-    git clone [https://github.com/your-username/nest-finance.git](https://github.com/your-username/nest-finance.git)
-    cd nest-finance
-    ```
+1. **Clone the repository**:
 
-2.  **Install NPM packages:**
-    ```sh
-    npm install
-    ```
+   ```sh
+   git clone https://github.com/jacobp112/Nest.git
+   cd Nest/nest-finance
+   ```
 
-### Firebase Setup (Crucial)
+2. **Install dependencies**:
 
-This project is built on Firebase. You **must** create your own Firebase project to run it.
+   ```sh
+   npm install
+   # or
+   yarn
+   ```
 
-1.  **Create a Firebase Project:**
-    * Go to the [Firebase Console](https://console.firebase.google.com/).
-    * Click "Add project" and follow the on-screen instructions.
+3. **Initialize Firebase** (see [Configuration](#configuration)).
 
-2.  **Enable Authentication:**
-    * In your new project's console, go to **Authentication**.
-    * Click "Get started."
-    * Under **Sign-in method**, enable the **Email/Password** provider.
+### Configuration
 
-3.  **Enable Firestore:**
-    * Go to **Firestore Database**.
-    * Click "Create database."
-    * Start in **Test mode** (we will secure it in the next step). Choose a location closest to you.
+Nest Finance relies on Firebase for authentication and data storage. You need to create your own Firebase project to run the app:
 
-4.  **Set Up Security Rules:**
-    * This is the most important step for security. Go to the **Rules** tab within Firestore.
-    * Replace the default rules with the following secure rules:
-    ```rules
-    rules_version = '2';
+1. Go to the [Firebase Console](https://console.firebase.google.com/) and add a new project.
+2. Enable **Email/Password** authentication under **Authentication → Sign‑in method**.
+3. Create a **Firestore Database** and start in *Test Mode* during development.
+4. Set up **security rules** so that each user can only access their own documents. The recommended rules are:
 
-    service cloud.firestore {
-      match /databases/{database}/documents {
+   ```js
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /users/{userId} {
+         allow read, update: if request.auth != null && request.auth.uid == userId;
+         allow create: if request.auth != null;
+       }
+       match /users/{userId}/transactions/{txId} {
+         allow read, write: if request.auth != null && request.auth.uid == userId;
+       }
+       match /users/{userId}/goals/{goalId} {
+         allow read, write: if request.auth != null && request.auth.uid == userId;
+       }
+     }
+   }
+   ```
 
-        // Users can only read and update their own user document
-        match /users/{userId} {
-          allow read, update: if request.auth != null && request.auth.uid == userId;
-          allow create: if request.auth != null;
-        }
+5. In the Firebase project settings (**Project settings → General → Your apps**), register a new **Web** app and copy the `firebaseConfig` object.
+6. Create a `.env.local` file at the root of `nest-finance` and populate it with your Firebase keys:
 
-        // Users can create, read, update, and delete transactions
-        // only if they are the authenticated owner.
-        match /users/{userId}/transactions/{txId} {
-          allow read, write: if request.auth != null && request.auth.uid == userId;
-        }
+   ```ini
+   REACT_APP_FIREBASE_API_KEY="YOUR_API_KEY"
+   REACT_APP_FIREBASE_AUTH_DOMAIN="YOUR_AUTH_DOMAIN"
+   REACT_APP_FIREBASE_PROJECT_ID="YOUR_PROJECT_ID"
+   REACT_APP_FIREBASE_STORAGE_BUCKET="YOUR_STORAGE_BUCKET"
+   REACT_APP_FIREBASE_MESSAGING_SENDER_ID="YOUR_MESSAGING_SENDER_ID"
+   REACT_APP_FIREBASE_APP_ID="YOUR_APP_ID"
+   ```
 
-        // Users can create, read, update, and delete goals
-        // only if they are the authenticated owner.
-        match /users/{userId}/goals/{goalId} {
-          allow read, write: if request.auth != null && request.auth.uid == userId;
-        }
-      }
-    }
-    ```
-    * Click **Publish** to save your rules.
+   React apps automatically load environment variables prefixed with `REACT_APP_`.
 
-5.  **Get Firebase Config:**
-    * In your Firebase project, go to **Project Settings** (the gear icon).
-    * Under the **General** tab, scroll down to "Your apps."
-    * Click the **Web** icon (`</>`).
-    * Give your app a nickname (e.g., "Nest Finance Web") and click "Register app."
-    * Firebase will give you a `firebaseConfig` object. Copy this object.
+## Running locally
 
-6.  **Create Environment File:**
-    * In the root of your cloned project, create a new file named `.env.local`
-    * Paste your `firebaseConfig` object into this file, formatting it as follows:
-
-    ```.env
-    REACT_APP_FIREBASE_API_KEY="YOUR_API_KEY"
-    REACT_APP_FIREBASE_AUTH_DOMAIN="YOUR_AUTH_DOMAIN"
-    REACT_APP_FIREBASE_PROJECT_ID="YOUR_PROJECT_ID"
-    REACT_APP_FIREBASE_STORAGE_BUCKET="YOUR_STORAGE_BUCKET"
-    REACT_APP_FIREBASE_MESSAGING_SENDER_ID="YOUR_MESSAGING_SENDER_ID"
-    REACT_APP_FIREBASE_APP_ID="YOUR_APP_ID"
-    ```
-    *(Note: React projects (using Create React App) automatically load environment variables prefixed with `REACT_APP_`)*
-
-### Run the Application
-
-With your `.env.local` file saved, you can now start the application:
+To run a development server with hot reload:
 
 ```sh
 npm start
+# or
+yarn start
+```
+
+The app will be available at <http://localhost:3000>. Any changes you make in the `src` directory will reload the page automatically.
+
+### Building for production
+
+To build a production‑ready bundle in the `build` directory:
+
+```sh
+npm run build
+# or
+yarn build
+```
+
+You can then deploy the `build` directory to any static hosting provider (Firebase Hosting, Vercel, Netlify, etc.).
+
+## Testing & linting
+
+- **Unit tests** are written with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) and can be run via:
+
+  ```sh
+  npm test
+  # or
+  yarn test
+  ```
+
+- **Linting** uses ESLint with the `react-app` and `jest` presets. Run `npm run lint` or integrate linting into your editor.
+
+## Contributing
+
+This project is a private, closed-source initiative and does not accept external contributions at this time. For any questions or to discuss potential collaboration in the future, please contact the maintainers directly..
 
 
-This will run the app in development mode. Open http://localhost:3000 to view it in your browser.
+## Roadmap
 
-```eof
+This project follows an agile workflow. Planned enhancements include:
+
+- 🔒 **Enhanced security** – optional multi‑factor authentication and automated vulnerability scanning.
+- 📱 **Mobile support** – responsive design improvements and a React Native companion app.
+- 📊 **Advanced analytics** – custom date ranges and category grouping for transactions.
+- 🔗 **Bank connection** (optional) – secure bank integration via Plaid for users who prefer automated imports.
+- 🌍 **Internationalization (i18n)** – support for multiple languages and currencies.
+
+The internal team tracks progress using the Issues and Projects boards.
+
+## License
+
+Distributed under the MIT License. See the [LICENSE](LICENSE) file for full details.
+
+## Contact
+
+For support or questions, please open an issue on GitHub. You can also reach the maintainer via email at **jacobp112@example.com**.
+
+---
+
+*This README was generated to provide a clean and professional overview of the Nest Finance project. Feel free to modify it to suit your needs.*
